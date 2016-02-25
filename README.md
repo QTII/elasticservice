@@ -4,30 +4,30 @@ Elastic Service is coded in Scala, Play Framework. Developers save SQL statement
 
 ### Folders
 
-- elasticservice - Elastic Service source
-- elasticservice-sample-play-dev - Sample source in Play
-- elasticservice-sample-play-prod - Sample binary in Play on production mode
-- elasticservice-sample-servlet - Sample servlet
+- framework - Elastic Service source
+- sample-play-dev - Sample source in Play
+- sample-play-prod - Sample binary in Play on production mode
+- sample-servlet - Sample servlet
 - esConfig - Configuration file and SQL XML files
 
-### elasticservice
+### framework
 
 ```
-$ cd elasticservice
+$ cd framework
 $ sbt
 > compile   -> generates target\scala-2.11\classes
 > package   -> generates target\scala-2.11\elasticservice_2.11-0.1.1.jar
 ```
 
-### elasticservice-sample-play-dev
+### sample-play-dev
 
-Copy elasticservice\generates target\scala-2.11\elasticservice_2.11-0.1.1.jar to elasticservice-sample-play-dev\lib
+Copy framework\generates target\scala-2.11\elasticservice_2.11-0.1.1.jar to sample-play-dev\lib
 
 ```
-$ cd elasticservice-sample-play-dev
+$ cd sample-play-dev
 $ activator
-[elasticservice-sample-play-dev] $ compile
-[elasticservice-sample-play-dev] $ ~ run
+[sample-play-dev] $ compile
+[sample-play-dev] $ ~ run
 ```
 
 To test, connect with http://localhost:9000/assets/index.html
@@ -37,14 +37,14 @@ To shutdown, press Ctrl+D
 ### Making stage mode files
 
 ```
-$ cd elasticservice-sample-play-dev
+$ cd sample-play-dev
 $ activator
 ```
 
 To generate secret
 
 ```
-[elasticservice-sample-play-dev] $ playGenerateSecret
+[sample-play-dev] $ playGenerateSecret
 [info] Generated new secret: QCYtAnfkaZiwrNwnxIlR6CTfG3gf90Latabg5241ABR5W1uDFNIkn
 ```
 
@@ -60,36 +60,36 @@ $ activator clean stage
 
 Command above generates target/universal/stage directory.
 
-### elasticservice-sample-play-prod
+### sample-play-prod
 
-Copy all files in target/universal/stage directory to in ..\elasticservice-sample-play-prod
+Copy all files in target/universal/stage directory to in ..\sample-play-prod
 
 ```
-$ cd elasticservice-sample-play-prod
-$ bin\elasticservice-sample.bat -Dconfig.resource=production.conf
+$ cd sample-play-prod
+$ bin\sample.bat -Dconfig.resource=production.conf
 ```
 
 To assign certain port and IP address. Default port is 9000.
 
 ```
-$ bin\elasticservice-sample.bat -Dconfig.resource=production.conf -Dhttp.port=9090 -Dhttp.address=127.0.0.1
+$ bin\sample.bat -Dconfig.resource=production.conf -Dhttp.port=9090 -Dhttp.address=127.0.0.1
 ```
 
 To test, connect with http://localhost:9090/assets/index.html
 
 To shutdown, press Ctrl+C
 
-### elasticservice-sample-servlet
+### sample-servlet
 
-Copy all files in elasticservice-sample-play-dev\public into elasticservice-sample-servlet\WebContent\assets.
+Copy all files in sample-play-dev\public into sample-servlet\WebContent\assets.
 
-Copy elasticservice-sample-play-dev\target\scala-2.11\classes into elasticservice-sample-servlet\WebContent\WEB-INF.
+Copy sample-play-dev\target\scala-2.11\classes into sample-servlet\WebContent\WEB-INF.
 
-Copy all files in elasticservice-sample-play-prod\lib into elasticservice-sample-servlet\WebContent\WEB-INF\lib.
+Copy all files in sample-play-prod\lib into sample-servlet\WebContent\WEB-INF\lib.
 
-Delete elasticservice-sample.elasticservice-sample-0.1-SNAPSHOT-assets.jar, elasticservice-sample.elasticservice-sample-0.1-SNAPSHOT-sans-externalized.jar files from elasticservice-sample-servlet\WebContent\WEB-INF\lib.
+Delete sample.sample-0.1-SNAPSHOT-assets.jar, sample.sample-0.1-SNAPSHOT-sans-externalized.jar files from sample-servlet\WebContent\WEB-INF\lib.
 
-Deploy elasticservice-sample-servlet\WebContent directory in any Web Application Server.
+Deploy sample-servlet\WebContent directory in any Web Application Server.
 
 ### License
 
