@@ -1,0 +1,58 @@
+package elasticservice
+
+import java.io.File
+
+import scala.util.Failure
+import scala.util.Success
+import scala.xml.Elem
+
+import com.typesafe.scalalogging.LazyLogging
+
+import elasticservice.util.DataValid
+import elasticservice.util.ExceptionDetail
+import elasticservice.util.FilePathUtil
+import elasticservice.util.GenXML
+import elasticservice.util.XmlEnv
+import elasticservice.util.sqlrepo.SqlRepo
+
+object ElasticConfigurator extends LazyLogging {
+  private var _xml: Elem = <Config></Config>
+  private var rootPath: Option[String] = None
+  private var xmlDirOpt: Option[String] = None
+  private var charsetOpt: Option[String] = None
+
+  def init(rootDir: File, xmlFile: File) {
+    logger.info("************** elasticservice config file: " + xmlFile.getAbsolutePath)
+
+    rootPath = Some(rootDir.getAbsolutePath)
+    xmlDirOpt = Some(FilePathUtil.getBasePath(xmlFile))
+
+    GenXML.loadFile(xmlFile, None) match {
+      case Success(xml) =>
+        _xml = xml
+
+        (_xml \\ "xmlEnv" \ "variable").foreach { node =>
+          XmlEnv += (node \ "@name").text -> (node \ "@value").text.replace("&", "&amp;")
+        }
+
+        (_xml \\ "charset").foreach { node =>
+          if (DataValid.isNotEmpty(node.text))
+            charsetOpt = Some(node.text)
+        }
+
+        XmlEnv.iterator.foreach { kv => logger.trace("XmlEnv(" + kv._1 + "): " + kv._2) }
+        logger.trace("charsetOpt: " + charsetOpt)
+
+        (_xml \\ "sqlRepo").foreach { node =>
+          SqlRepo.init(xmlDirOpt.get + File.separatorChar + node.text)
+        }
+      case Failure(e) => logger.error("file: " + xmlFile.getAbsolutePath + "\n" + ExceptionDetail.getDetail(e))
+    }
+  }
+
+  def RootPath = rootPath
+
+  def Charset = charsetOpt
+
+  def getXml: Elem = _xml
+}

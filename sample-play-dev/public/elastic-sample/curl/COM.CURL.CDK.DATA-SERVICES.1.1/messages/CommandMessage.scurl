@@ -1,0 +1,175 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{define-class public CommandMessage {inherits AsyncMessage}
+
+  def public traits =
+      {DataObjectTraits
+        "flex.messaging.messages.CommandMessage", ||""
+        dynamic? = false,
+        {StringArray
+            ||""((
+            "timestamp",
+            "headers",
+            "operation",
+            "body",
+            "correlationId",
+            "messageId",
+            "timeToLive",
+            "clientId",
+            "destination"
+            ||""))
+        }
+      }
+
+  field public operation:uint
+
+  ||""((
+  let public constant AUTHENTICATION_MESSAGE_REF_TYPE:String =
+      "flex.messaging.message.AuthenticationMessage"
+
+  let public constant MESSAGING_VERSION:String = "DSMessagingVersion"
+  let public constant NEEDS_CONFIG_HEADER:String = "DSNeedsConfig"
+  let public constant SELECTOR_HEADER:String = "DSSelector"
+  let public constant CREDENTIALS_CHARSET_HEADER:String =
+      "DSCredentialsCharset"
+  let public constant PRESERVE_DURABLE_HEADER:String = "DSPreserveDurable"
+  let public constant NO_OP_POLL_HEADER:String = "DSNoOpPoll"
+  let public constant POLL_WAIT_HEADER:String = "DSPollWait"
+  let public constant MAX_FREQUENCY_HEADER:String = "DSMaxFrequency"
+  let public constant SUBTOPIC_SEPARATOR:String = "_;_"
+  let public constant ADD_SUBSCRIPTIONS:String = "DSAddSub"
+  let public constant REMOVE_SUBSCRIPTIONS:String = "DSRemSub"
+  ||""))
+
+  let public constant SUBSCRIBE_OPERATION:uint = 0
+  let public constant UNSUBSCRIBE_OPERATION:uint = 1
+  let public constant POLL_OPERATION:uint = 2
+  let public constant CLIENT_SYNC_OPERATION:uint = 4
+  let public constant CLIENT_PING_OPERATION:uint = 5
+  let public constant CLUSTER_REQUEST_OPERATION:uint = 7
+  let public constant LOGIN_OPERATION:uint = 8
+  let public constant LOGOUT_OPERATION:uint = 9
+  let public constant SUBSCRIPTION_INVALIDATE_OPERATION:uint = 10
+  let public constant MULTI_SUBSCRIBE_OPERATION:uint = 11
+  let public constant DISCONNECT_OPERATION:uint = 12
+  let public constant TRIGGER_CONNECT_OPERATION:uint = 13
+  let public constant UNKNOWN_OPERATION:uint = 10000
+  
+  let public constant OPERATION_FLAG:int = 1
+
+  let constant operation-names:StringArray =
+      {new StringArray,
+        ||""((
+        "subscribe",
+        "unsubscribe",
+        "poll",
+        "unused3",
+        "client_sync",
+        "client_ping", 
+        "unused6",
+        "cluster_request",
+        "login",
+        "logout",
+        "subscription_invalidate",
+        "multi_subscribe",
+        "disconnect"
+        ||""))
+    }
+
+  || A CommandMessage has the following general form:
+  ||
+  ||   1. A URI describing the target.
+  ||      o For a RemoteObject CommandMessage, this is typically the string
+  ||        "null".
+  ||   2. A URI identifying a correlated response.
+  ||      o Typically strings like "/1" or "/2" sent from the client and
+  ||        "/1/onResult", "/2/onStatus", etc. from the server.
+  ||   3. The byte length of the message body.
+  ||   4. The message body.
+  ||      o The first byte is a type marker.
+  ||
+  || Some bytes are inserted along the way, such as the length of the target URI
+  || preceding the target URI, and the length of the response URI preceding the
+  || response URI.
+  {constructor public {default}
+    {construct-super}
+    set self.timestamp = {DateTimeData}.epoch-second
+    set self.operation = CommandMessage.UNKNOWN_OPERATION
+  }
+
+  {define-proc public {get-operation-as-String op:int}:String
+    {if (op < 0 or op >= CommandMessage.operation-names.size) then
+        {return {lmessage Invalid operation '{value op}'.}}
+    }
+    {return CommandMessage.operation-names[op]}
+  }
+
+  {method public {to-String}:String
+    {return {CommandMessage.get-operation-as-String self.operation asa int}}
+  }
+
+  || A convenience method for deserializing externalizable AsyncMessages.
+  {method public {read-external deserializer:AMFDeserializer}:void
+    {super.read-external deserializer}
+
+    def flags-array = {AbstractMessage.read-flags deserializer.input}
+    {for flags key i in flags-array do
+        let reserved-position:uint8 = 0
+        {switch i
+         case 0 do
+            {if {bit-and flags, CommandMessage.OPERATION_FLAG} != 0 then
+                set self.operation = {deserializer.read-one} asa uint
+            }
+            set reserved-position = 1
+        }
+        {if {bit-srl flags, reserved-position} != 0 then
+            {for j = reserved-position below 6 do
+                {if {bit-and {bit-srl flags, j}, 1} != 0 then
+                    {deserializer.read-one}
+                }
+            }
+        }
+    }
+
+  }
+
+  {method public {write-external serializer:AMFSerializer}:void
+    {super.write-external serializer}
+
+    let flags:uint = 0
+    def operation = self.operation
+
+    {if operation != 0 then
+        set flags = {bit-or flags, CommandMessage.OPERATION_FLAG}
+    }
+    {serializer.output.write-one flags asa uint8}
+
+    {if operation != 0 then
+        {serializer.write-one operation}
+    }
+  }
+
+  {method public {get-small-message}:#IMessage
+    || We shouldn't use small messages for PING or LOGIN operations as the
+    || messaging version handshake would not yet be complete... for now just
+    || optimize POLL operations.
+    {if self.operation == CommandMessage.POLL_OPERATION then
+        {return {CommandMessageExt message = self}}
+    }
+    {return null}
+  }
+}

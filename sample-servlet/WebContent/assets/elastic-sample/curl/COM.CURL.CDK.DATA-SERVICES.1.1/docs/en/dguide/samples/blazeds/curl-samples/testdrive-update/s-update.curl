@@ -1,0 +1,228 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{curl 8.0 applet}
+
+{applet manifest = "../manifest.mcurl"}
+
+{import * from CURL.LANGUAGE.FORMAT}
+{import * from COM.CURL.CDK.RPC}
+{import * from COM.CURL.CDK.AMF}
+{import * from COM.CURL.CDK.DATA-OBJECT}
+{import * from COM.CURL.CDK.RECORDSET-FOR}
+{import * from COM.CURL.CDK.SAMPLES-SUPPORT}
+{include "Panel.scurl"}
+{include "Product.scurl"}
+{include "ProductForm.scurl"}
+
+{document-style PlainDocument}
+
+{set-document-properties
+    hstretch? = true,
+    vstretch? = true,
+    color = "#0b333c"
+}
+
+{do
+    set {prefs}["selected-ui-background"] = "#7fceff"
+    set {prefs}["selected-ui-color"] = "black"
+    {{get-the-applet}.set-title "Testdrive - Update"}
+    || extend standard adpeters
+    def adapters = AMFObjectAdapters.standard
+    || all classes (with traits) in package
+    {adapters.register-package {this-package}}
+}
+
+{define-proc {build-record-grid}:RecordGrid
+    def rg =
+        {RecordGrid
+            width = {add-stretch},
+            height = {add-stretch},
+            cell-spec = PointerHandlerRecordGridCell,
+            header-options =
+                {RecordGridRowOptions
+                    color = "#0b333c",
+                    background =
+                        {LinearGradientFillPattern
+                            {Fraction2d 1, 1},
+                            {Fraction2d 1, 0},
+                            {Spectrum.from-endpoints
+                                "#eaeaea",
+                                "white"
+                            }
+                        }
+                },
+            {RecordGridColumn
+                "category",
+                width = {make-elastic preferred-size = 1m}
+            },
+            {RecordGridColumn
+                "description",
+                width = {make-elastic preferred-size = 1m}
+            },
+            {RecordGridColumn
+                "image",
+                width = {make-elastic preferred-size = 1m}
+            },
+            {RecordGridColumn
+                "name",
+                width = {make-elastic preferred-size = 1m}
+            },
+            {RecordGridColumn
+                "price",
+                format-spec = "%0.2f",
+                width = {make-elastic preferred-size = 1m}
+            },
+            {RecordGridColumn
+                "product-id",
+                width = {make-elastic preferred-size = 1m}
+            },
+            {RecordGridColumn
+                "qty-in-stock",
+                width = {make-elastic preferred-size = 1m}
+            }
+        }
+    {return rg}
+}
+{def fields =
+    {RecordFields
+        {RecordField "category", domain = any, caption = "category"},
+        {RecordField "description", domain = String, caption = "description"},
+        {RecordField "image", domain = String, caption = "image",
+            nullable? = true},
+        {RecordField "name", domain = String, caption = "name"},
+        {RecordField "price", domain = double, caption = "price"},
+        {RecordField "product-id", domain = int, caption = "productId"},
+        {RecordField "qty-in-stock", domain = int, caption = "qtyInStock"}
+    }
+}
+{define-proc {present-result items:ArrayCollection, rg:RecordGrid}:void
+    def rs = {{RecordSet-for Product} fields = fields}
+    {for item in items do
+        {rs.append item}
+    }
+    {rs.commit}
+    || refresh display
+    set rg.record-source = rs
+    {after 0s do
+        {rg.select-nothing}
+    }
+}
+|| This applet replicates the functionality found in the BlazeDS
+|| testdrive-update sample.
+{value
+    {install-style-sheet {manifest-url "file", "CDK-DS-SAMPLES-STYLE-SHEET"}}
+
+    def base = {url "http://localhost:8400/samples/"}
+    def endpoint = {base.merge "messagebroker/amf"}
+    def destination = "product"
+    
+    def service =
+        {RemoteObject
+            endpoint,
+            destination,
+            {on e:FaultEvent do
+                def f = e.fault
+                def msg = {message Fault Code: {value f.fault-code}
+                              '{value f.fault-string}'}
+                {popup-message msg}
+            }
+        }
+    def get-products = {service.get-operation "getProducts"}
+    def update = {service.get-operation "update"}
+
+    def rg = {build-record-grid}
+    def grid-frame =
+        {Frame
+            style-class = "grid-frame",
+            rg
+        }
+
+    def product-form = {ProductForm}
+
+    def main =
+        {HBox
+            valign = "top",
+            style-class = "main",
+            {Panel
+                style-class = "update",
+                title = {message Catalog},
+                content = grid-frame
+            },
+            {Panel
+                style-class = "update",
+                title = {message Product Details},
+                product-panel? = true,
+                update-proc =
+                    {proc {}:void
+                        || Get the current product.
+                        || - NOTE: It looks like only the current record gets
+                        ||   updated in the Flex sample.
+                        def product = product-form.product
+                        {if-non-null product then
+                            || Call the update operation passing the product as
+                            || an argument.
+                            {update.send product}
+                        }
+                    },
+                content = product-form
+            }
+        }
+
+    {get-products.add-event-handler
+        || populate tiles when products change
+        {on e:ResultEvent do
+            {type-switch e.result
+             case ac:ArrayCollection do
+                {present-result ac, rg}
+            }
+        }
+    }
+    || NOTE: The update operation returns a boolean. There's no need to handle
+    ||       the update result.
+    let initialized?:bool = false
+    {rg.add-event-handler
+        || populate detail when selection changes
+        {on e:SelectionChanged at rg:RecordGrid do
+            {if not initialized? then
+                set initialized? = true
+                {return}
+            }
+            {if not rg.selection.empty? then
+                set product-form.record-source = rg.record-source
+                {for index in rg.selection.records do
+                    def rec = rg.records[index]
+                    set product-form.current-index = index
+                    || Single selection
+                    {break}
+                }
+             else
+                || Depopulate when selection is cleared.
+                set product-form.record-source = null
+            }
+        }
+    }
+    {main.add-event-handler
+        || request products when loaded
+        {on AttachEvent do
+            {get-products.send}
+        }
+    }
+    {SkinnableFrame
+        style-class = "main-update",
+        main
+    }
+}

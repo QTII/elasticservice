@@ -1,0 +1,6 @@
+<select>
+   	<![CDATA[
+select * from T_CLN_CLN_M
+where CLN_ID=#{CLN_ID}
+   	]]>
+</select>

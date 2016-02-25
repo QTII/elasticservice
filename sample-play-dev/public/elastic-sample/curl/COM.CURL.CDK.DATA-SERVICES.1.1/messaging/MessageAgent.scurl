@@ -1,0 +1,636 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{doc-next
+  {purpose
+    Base class for classes that send and receive messages on a
+    {docref ChannelSet}.
+  }
+}
+{define-class public MessageAgent {inherits EventTarget}
+  field private _id:String = {AbstractMessage.create-uid}
+  field private _channel-set:#ChannelSet
+  field private _endpoint:#Url
+  field private _destination:String
+  {doc-next
+    {purpose
+        Timeout for a request.
+    }
+    {notes
+        This is sent to the server, but is not implemented on the client
+        side yet.
+    }
+  }
+  field protected _client-id:#String
+  field protected _connected?:bool = false
+  field protected disconnect-barrier?:bool = false
+  field protected _needs-config?:bool = false
+  field protected config-requested?:bool = false
+  field protected ignore-fault?:bool = false
+  field protected agent-type:#String
+  field protected channel-set-mode:int = MessageAgent.AUTO_CONFIGURED_CHANNELSET
+  field private _authenticated?:bool = false
+  field private send-remote-credentials?:bool = false
+  field protected credentials:#String
+  field private credentials-character-encoding:#CharEncoding
+  field private remote-credentials:#String
+  field private remote-credentials-character-encoding:#CharEncoding
+  field private pending-connect-event:#ChannelConnectEvent
+  field private client-id-wait-queue:#{Array-of IMessage}
+  field private _request-timeout:Time = -1s
+
+  let public constant AUTO_CONFIGURED_CHANNELSET:int = 0
+  let public constant MANUALLY_ASSIGNED_CHANNELSET:int = 1
+
+  {doc-next
+    {purpose
+        Create a {docref MessageAgent} with some server information.
+    }
+    {parameter endpoint,
+        The {docref Url} of the server that this object is
+        going to communicate with.  Also if no {docref channel-set} is
+        provided, this will be used to make a {docref ChannelSet} wrapped
+        around a {docref AMFChannel}.
+    }
+    {parameter destination,
+        The destination at the {param endpoint} for all messages being sent.
+    }
+    {parameter channel-set,
+        A {docref ChannelSet} to use to send messages, this will be
+        implicitly created from the {param endpoint} if it is not supplied.
+    }
+    {parameter ...,
+        {docref EventHandler}s to receive events on this object.
+    }
+  }
+  {constructor public {default
+                          endpoint:#Url = null,
+                          destination:String = "",
+                          channel-set:#ChannelSet = null,
+                          ...:EventHandler
+                      }
+    {construct-super ...}
+    set self.channel-set = channel-set
+    set self._destination = destination
+    set self._endpoint = endpoint
+  }
+
+  {getter public {id}:String
+    {return self._id}
+  }
+
+  {setter public {id s:String}:void
+    {if self._id != s then
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "id", self._id, s
+                    }
+        set self._id = s
+        {self.enqueue-event event}
+    }
+  }
+
+  {doc-next
+    {purpose
+        The destination at the {param endpoint} for all messages being sent.
+    }
+  }
+  {getter public {destination}:String
+    {return self._destination}
+  }
+
+  {setter public {destination d:String}:void
+    {if d.empty? then
+        {error {lmessage Invalid destination.}}
+    }
+    {if self._destination != d then
+        {if self.channel-set-mode == MessageAgent.AUTO_CONFIGURED_CHANNELSET and
+            self.channel-set != null
+         then
+            {self.channel-set.disconnect self}
+            set self.channel-set = null
+        }
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "destination", self._destination, d
+                    }
+        set self._destination = d
+        {self.enqueue-event event}
+    }
+  }
+
+  {getter public {client-id}:#String
+    {return self._client-id}
+  }
+
+  {setter protected {client-id id:#String}:void
+    {if self.client-id != id then
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "client-id", self._client-id, id}
+        set self._client-id = id
+        {self.flush-client-id-wait-queue}
+        {self.enqueue-event event}
+    }
+  }
+
+  {doc-next
+    {purpose
+        Is this object connected to a server.
+    }
+  }
+  {getter public {connected?}:bool
+    {return self._connected?}
+  }
+
+  {setter protected {connected? b?:bool}:void
+    {if self._connected? != b? then
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "connected?", self._connected?, b?
+                    }
+        set self._connected? = b?
+        {self.enqueue-event event}
+
+        {if-non-null self.channel-set then
+            {self.set-authenticated?
+                b? and self.channel-set.authenticated?,
+                credentials = self.credentials
+            }
+        }
+    }
+  }
+
+  {getter protected {needs-config?}:bool
+    {return self._needs-config?}
+  }
+
+  {setter protected {needs-config? b?:bool}:void
+    {if self._needs-config? != b? then
+        set self._needs-config? = b?
+        {if self._needs-config? then
+            let channel-set:#ChannelSet
+            {try
+                {self.disconnect}
+             finally
+                {self.internal-set-channel-set channel-set}
+            }
+        }
+    }
+  }
+
+  {doc-next
+    {purpose
+        A {docref ChannelSet} to use to send messages, this will be
+        implicitly created from the {param endpoint} if it is not supplied.
+    }
+  }
+  {getter public {channel-set}:#ChannelSet
+    {if self._channel-set == null then
+        {if-non-null endpoint = self._endpoint then
+            def cs =
+                {ChannelSet
+                    channel = {AMFChannel id = self.destination, uri = endpoint}
+                }
+            set cs.initial-destination-id = self.destination
+            {self.internal-set-channel-set cs}
+            set self.channel-set-mode = MessageAgent.AUTO_CONFIGURED_CHANNELSET
+        }
+    }
+    {return self._channel-set}
+  }
+
+  {setter public {channel-set channel-set:#ChannelSet}:void
+    {self.internal-set-channel-set channel-set}
+    set self.channel-set-mode = MessageAgent.MANUALLY_ASSIGNED_CHANNELSET
+  }
+
+  {doc-next
+    {purpose
+        The {docref Url} of the server that this object is
+        going to communicate with.  Also if no {param channel-set} is
+        provided, this will be used to make a {docref ChannelSet} wrapped
+        around a {docref AMFChannel}.
+    }
+  }
+  {getter public {endpoint}:#Url
+    {return self._endpoint}
+  }
+  {setter public {endpoint e:#Url}:void
+    {if self._endpoint != e then
+        set self._endpoint = e
+        {if e != null then
+            || Clear ChannelSet so that it can be recreated from the endpoint later.
+            set self.channel-set = null
+        }
+    }
+  }
+
+  {getter public {request-timeout}:Time
+    {return self._request-timeout}
+  }
+
+  {setter public {request-timeout val:Time}:void
+    {if self._request-timeout != val then
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "request-timeout", self._request-timeout, val
+                    }
+        set self._request-timeout = val
+        {self.enqueue-event event}
+    }
+  }
+
+  {getter public {authenticated?}:bool
+    {return self._authenticated?}
+  }
+
+  {method protected {set-authenticated? b?:bool, credentials:#String = null}:void
+    {if self._authenticated? != b? then
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "authenticated?", self._authenticated?, b?
+                    }
+        set self._authenticated? = b?
+        {self.enqueue-event event}
+        
+        {if b? then
+            {if-non-null credentials then
+                {if credentials != self.credentials then
+                    def err = {ErrorMessage}
+                    set err.fault-code = "Client.Authentication.Error" ||""
+                    set err.fault-string =
+                        "Credentials specified do not match those used on underlying connection." ||""
+                    set err.fault-detail =
+                        {lmessage Channel was authenticated with a
+                            different set of credentials than those used
+                            for this agent.}
+                    {self.enqueue-event
+                        {MessageFaultEvent message = err}
+                    }
+                }
+            }
+        }
+    }
+  }
+
+  {method public {disconnect}:void
+    {if not self.disconnect-barrier? then
+        set self.client-id-wait-queue = null
+
+        {if self.connected? then
+            set self.disconnect-barrier? = true}
+
+        {if self.channel-set-mode == MessageAgent.AUTO_CONFIGURED_CHANNELSET
+         then
+            {self.internal-set-channel-set null}
+         else
+            {if-non-null channel-set = self._channel-set then
+                {channel-set.disconnect self}
+            }
+        }
+    }
+  }
+
+  {doc-next
+    {purpose
+        Provide server credentials to authenticate with a server.
+    }
+    {parameter username,
+        Username for credentials.
+    }
+    {parameter password,
+        Password for credentials.
+    }
+    {parameter character-encoding,
+        {docref CharEncoding} to encode credentials default is {ctext null} which means
+        {ctext CharEncoding.iso-latin-1}.
+        The only other supported {docref CharEncoding} is {ctext CharEncoding.utf8}.
+    }
+    {parameter immediately?,
+        Login now or wait for the first other message to be sent.
+    }
+  }
+  {method public {login
+                     username:#String,
+                     password:#String,
+                     character-encoding:#CharEncoding = null,
+                     immediately?:bool = true
+                 }:#AuthenticationAgent
+    {if-non-null cs = self.channel-set then
+        {return
+            {cs.login
+                username,
+                password,
+                character-encoding = character-encoding,
+                agent = {if immediately? then
+                            null
+                         else
+                            self
+                        }
+            }
+        }
+    }
+    {return null}
+  }
+
+  {doc-next
+    {purpose
+        Logout from the server.
+    }
+  }
+  {method public {logout force?:bool = false}:#AuthenticationAgent
+    set self.credentials = null
+    {if-non-null channel-set = self.channel-set then
+        {return {channel-set.logout
+                    agent = self,
+                    force? = force?
+                }
+        }
+    }
+    {return null}
+  }
+
+  {method public {set-credentials
+                      credentials:#String,
+                      character-encoding:#CharEncoding = null
+                  }:void
+    set self.credentials = credentials
+    set self.credentials-character-encoding = character-encoding
+    {if-non-null channel-set = self.channel-set then
+        {channel-set.set-credentials
+            self.credentials,
+            agent = self,
+            character-encoding = self.credentials-character-encoding
+        }
+    }
+  }
+
+  {doc-next
+    {purpose
+        Provide remote credentials to be passed through to the remote destination.
+    }
+    {parameter username,
+        Username for credentials.
+    }
+    {parameter password,
+        Password for credentials.
+    }
+    {parameter character-encoding,
+        {docref CharEncoding} to encode credentials default is {ctext null} which means
+        {ctext CharEncoding.iso-latin-1}.
+        The only other supported {docref CharEncoding} is {ctext CharEncoding.utf8}.
+    }
+  }
+  {method public {set-remote-credentials
+                     remote-username:#String,
+                     remote-password:#String,
+                     character-encoding:#CharEncoding = null
+                 }:void
+    {if remote-username == null and remote-password == null then
+        set self.remote-credentials = null
+        set self.remote-credentials-character-encoding = null
+        set self.send-remote-credentials? = false
+     else
+        set self.remote-credentials =
+            {encode-credentials
+                remote-username, remote-password, character-encoding
+            }
+        set self.remote-credentials-character-encoding = character-encoding
+        set self.send-remote-credentials? = true
+    }
+  }
+
+  {method protected {reauthorize message:IMessage}:void
+    {self.disconnect}
+    {self.internal-send message}
+  }
+
+  {method protected {flush-client-id-wait-queue}:void
+    {if-non-null queue = self.client-id-wait-queue then
+        def dispatch-msg = {proc {}:void
+                               {self.internal-send queue[0]}
+                               {queue.remove 0}
+                           }
+        {if-non-null self.client-id then
+            {while not queue.empty? do
+                {dispatch-msg}
+            }
+        }
+        {if not queue.empty? then
+            {dispatch-msg}
+         else
+            set self.client-id-wait-queue = null
+        }
+    }
+  }
+
+  {method protected {internal-send
+                        message:IMessage,
+                        wait-for-client-id?:bool = false
+                    }:void
+    {if (message.client-id == null) and
+        wait-for-client-id? and
+        (self.client-id == null)
+     then
+        {if self.client-id-wait-queue == null then
+            set self.client-id-wait-queue = {{Array-of IMessage}}
+         else
+            {self.client-id-wait-queue.append message}
+            {return}
+        }
+    }
+    {if message.client-id == null then
+        set message.client-id = self.client-id
+    }
+    {if self.request-timeout > 0s then
+        set message.headers[AbstractMessage.REQUEST_TIMEOUT_HEADER] =
+            self.request-timeout
+    }
+    {if self.send-remote-credentials? then
+        {if not (message isa CommandMessage and
+                 (message asa CommandMessage).operation == CommandMessage.TRIGGER_CONNECT_OPERATION)
+         then
+            set message.headers[AbstractMessage.REMOTE_CREDENTIALS_HEADER] =
+                self.remote-credentials
+            {if-non-null rcce = self.remote-credentials-character-encoding then
+                set message.headers[AbstractMessage.REMOTE_CREDENTIALS_CHARSET_HEADER] =
+                    {char-encoding-to-http-charset rcce}
+            }
+            set self.send-remote-credentials? = false
+        }
+    }
+    {if-non-null self.channel-set then
+        {if not self.connected? and
+            self.channel-set-mode == MessageAgent.MANUALLY_ASSIGNED_CHANNELSET
+         then
+            {self.channel-set.connect self}
+        }
+        {if self.channel-set.connected? and
+            self.needs-config? and
+            not self.config-requested?
+         then
+            set message.headers[CommandMessage.NEEDS_CONFIG_HEADER] = true
+            set self.config-requested? = true
+        }
+        {self.channel-set.send self, message}
+     else
+        {if not self.destination.empty? then
+            {self.init-channel-set message}
+            {if-non-null self.channel-set then
+                {self.channel-set.send self, message}
+            }
+         else
+            {error {lmessage Invalid destination.}}
+        }
+    }
+  }
+
+  {method protected {init-channel-set message:IMessage}:void
+    {if self.channel-set.connected? and
+        self.needs-config? and
+        not self.config-requested?
+     then
+        set message.headers[CommandMessage.NEEDS_CONFIG_HEADER] = true
+        set self.config-requested? = true
+    }
+
+    {self.channel-set.connect self}
+
+    {if-non-null self.credentials then
+        {self.channel-set.set-credentials
+            self.credentials,
+            agent = self,
+            character-encoding = self.credentials-character-encoding
+        }
+    }
+  }
+
+  {method protected {internal-set-channel-set channel-set:#ChannelSet}:void
+    {if self._channel-set != channel-set then
+        {if-non-null old-channel-set = self._channel-set then
+            {old-channel-set.disconnect self}
+        }
+
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "channel-set", self._channel-set, channel-set
+                    }
+        set self._channel-set = channel-set
+        {if-non-null channel-set then
+            {if-non-null self.credentials then
+                {channel-set.set-credentials
+                    self.credentials,
+                    agent = self,
+                    character-encoding = self.credentials-character-encoding
+                }
+            }
+            {channel-set.connect self}
+        }
+        {self.enqueue-event event}
+    }
+  }
+
+  {method protected {channel-connect-handler e:ChannelConnectEvent}:void
+    set self.disconnect-barrier? = false
+    {if self.needs-config? then
+        set self.pending-connect-event = e
+     else
+        set self.connected? = true
+        {self.enqueue-event e}
+    }
+  }
+
+  {method protected {channel-disconnect-handler e:ChannelDisconnectEvent}:void
+    set self.connected? = false
+    {if-non-null self.remote-credentials then
+        set self.send-remote-credentials? = true
+    }
+    {self.enqueue-event e}
+  }
+
+  {method protected {channel-fault-handler e:ChannelFaultEvent}:void
+    {if-non-null channel = e.channel then
+        {if not channel.connected? then
+            set self.connected? = false
+            {if-non-null self.remote-credentials then
+                set self.send-remote-credentials? = true
+            }
+        }
+    }
+    {self.enqueue-event e}
+  }
+
+  {method protected {acknowledge ack-message:AcknowledgeMessage, msg:IMessage}:void
+    {ack-message.headers.remove
+        AcknowledgeMessage.ERROR_HINT_HEADER, error-if-missing? = false
+    }
+    {if self.config-requested? then
+        set self.config-requested? = false
+        || TODO: Handle ServerConfig stuff.
+        set self.needs-config? = false
+        {if-non-null e = self.pending-connect-event then
+            {self.channel-connect-handler e}
+        }
+        set self.pending-connect-event = null
+    }
+    {if self.client-id == null then
+        {if-non-null id = ack-message.client-id then
+            set self.client-id = id
+         else
+            {self.flush-client-id-wait-queue}
+        }
+    }
+    {self.enqueue-event
+        {MessageAckEvent
+            ack = ack-message,
+            correlation = msg
+        }
+    }
+  }
+
+  {method protected {fault error-message:ErrorMessage, msg:IMessage}:void
+    set self.ignore-fault? = false
+    set self.config-requested? = false
+    {error-message.headers.remove
+        ErrorMessage.RETRYABLE_HINT_HEADER, error-if-missing? = false
+    }
+    {if self.client-id == null then
+        {if-non-null id = error-message.client-id then
+            set self.client-id = id
+         else
+            {self.flush-client-id-wait-queue}
+        }
+    }
+    {self.enqueue-event
+        {MessageFaultEvent message = error-message, root-cause = msg}
+    }
+    || Handle server session expiration.
+    || setting 401 to extended-data only happens
+    || when the authentication error occurs in WEBORB?
+    {if (error-message.fault-code == "Client.Authentication" or ||""
+         error-message.extended-data == 401) and
+        self.authenticated? and
+        self.channel-set != null and
+        self.channel-set.current-channel != null
+     then
+        set self.channel-set.current-channel.authenticated? = false
+        || there's no way to set a value to login-after-disconnect? currently.
+        {if self.channel-set.current-channel.login-after-disconnect? then
+            {self.reauthorize msg}
+            set self.ignore-fault? = true
+        }
+    }
+  }
+
+  {method public {has-pending-request-for-message msg:IMessage}:bool
+    {return false}
+  }
+
+}

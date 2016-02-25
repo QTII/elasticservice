@@ -1,0 +1,9 @@
+<select>
+SELECT *
+FROM T_ORD_ORD_H
+	<dynamic>
+		<iterate prepend="WHERE ORD_SEQNO IN" open="(" close=")" conjunction=",">
+	#{seqnO[].aa}, #{seqNo[].bb}
+		</iterate>
+	</dynamic>
+</select>

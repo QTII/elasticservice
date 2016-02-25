@@ -1,0 +1,66 @@
+o activator 설치
+
+o 명령행에서 
+   D:\Dev\workspace\scala>activator new elastic-test-1.5.2 play-scala
+
+o 명령행에서 Play 콘솔 실행
+   cd elastic-test-1.5.2
+   D:\Dev\workspace\scala\elastic-test-1.5.2>activator
+   [elastic-test-1.5.2]
+
+o Play 콘솔에서 elastic-test-1.5.2 실행하기
+   [elastic-test-1.5.2] $ ~ run
+
+o 브라우저에서 접속해 보기
+   http://localhost:9000/
+   
+o Play 애플리케이션 중지
+   Ctrl+D
+
+o Eclipse 용 프로젝트로 변환하기
+   [elastic-test-1.5.2] $ eclipse
+
+o Eclipse에서 애플리케이션 불러오기(import)
+   . File/Import/General/Existing project… 메뉴
+
+o build.sbt에  
+        "com.typesafe.scala-logging" %% "scala-logging" % "latest.integration",
+        "log4j" % "log4j" % "latest.integration",
+        "log4j" % "apache-log4j-extras" % "latest.integration" 를 추가
+   . 변경 전:
+libraryDependencies ++= Seq(
+  jdbc,
+  cache,
+  ws,
+  specs2 % Test
+)
+
+   . 변경 후:
+libraryDependencies ++= Seq(
+  jdbc,
+  cache,
+  ws,
+  specs2 % Test,
+        "com.typesafe.scala-logging" %% "scala-logging" % "latest.integration",
+        "log4j" % "log4j" % "latest.integration",
+        "log4j" % "apache-log4j-extras" % "latest.integration"
+)
+
+o elastic-scala-1.5.2에서 sbt 실행
+   D:\Dev\workspace\scala\elastic-scala-1.5.2>sbt
+   > package
+
+o 생성된 elastic-scala-1.5.2/target/scala-2.11/elastic-scala_2.11-1.5.2.jar를 Play 애플리케이션의 lib 폴더에 복사
+
+o Play 콘솔에서 elastic-test-1.5.2 실행하기
+   [elastic-test-1.5.2] $ ~ run
+   
+o 브라우저에서 접속해 보기
+   http://localhost:9000/
+   
+* 주의: conf/routes에 미리 다음 행을 추가했을 경우 http://localhost:9000/elastic 으로 접속해 볼 수 있습니다.
+
+GET     /elastic                    elastic.web.play.controllers.DefaultApplication.index
+
+   
+   

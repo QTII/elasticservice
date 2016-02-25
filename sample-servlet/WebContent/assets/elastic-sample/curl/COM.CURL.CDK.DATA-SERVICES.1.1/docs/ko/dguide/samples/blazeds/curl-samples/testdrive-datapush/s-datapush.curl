@@ -1,0 +1,95 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{curl 8.0 applet}
+
+{applet manifest = "../manifest.mcurl"}
+
+{import * from COM.CURL.CDK.MESSAGING}
+
+{document-style PlainDocument}
+
+{set-document-properties
+    hstretch? = true,
+    vstretch? = true,
+    background = "#e6e6e6",
+    margin = 0.5cm
+}
+
+{do
+    set {prefs}["selected-ui-background"] = "black"
+    set {prefs}["selected-ui-color"] = "white"
+    {{get-the-applet}.set-title "Testdrive - Data Push"}
+}
+
+|| This applet replicates the functionality found in the BlazeDS
+|| testdrive-datapush sample (aka Publish/Subscribe Data Push Use Case).
+{value
+    {install-style-sheet {manifest-url "file", "CDK-DS-SAMPLES-STYLE-SHEET"}}
+    def tf = {TextField style-class = "datapush"}
+    def base = {url "http://localhost:8400/samples/"}
+    def endpoint = {base.merge "messagebroker/amfpolling"}
+    def destination = "feed"
+    def consumer =
+        {Consumer
+            endpoint = endpoint,
+            destination = destination,
+            {on e:MessageEvent do
+                {type-switch e
+                 case ack:MessageAckEvent do
+                    || Ignore MessageAckEvents.
+                 else
+                    set tf.value = {format "%0.13f", e.message.body}
+                    {dispatch-events false}
+                }
+            }
+        }
+    def unsubscribe-cb =
+        {CommandButton
+            label = "Unsubscribe from 'feed' destination",
+            style-class = "datapush",
+            rollover-color = "#0b333c",
+            enabled? = false
+        }
+    def subscribe-cb =
+        {CommandButton
+            label = "Subscribe to 'feed' destination",
+            style-class = "datapush",
+            rollover-color = "#0b333c",
+            {on Action do
+                {consumer.subscribe}
+                set unsubscribe-cb.enabled? = true
+                set subscribe-cb.enabled? = false
+            }
+        }
+    {unsubscribe-cb.add-event-handler
+        {on Action do
+            {consumer.unsubscribe}
+            set subscribe-cb.enabled? = true
+            set unsubscribe-cb.enabled? = false
+        }
+    }
+    {StandardActiveTraversalContainer
+        {VBox
+            halign = "center",
+            spacing = 0.1cm,
+            subscribe-cb,
+            unsubscribe-cb,
+            tf,
+            {Fill}
+        }
+    }
+}

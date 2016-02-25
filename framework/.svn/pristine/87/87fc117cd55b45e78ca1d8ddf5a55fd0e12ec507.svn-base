@@ -1,0 +1,1650 @@
+자동측정망 -> 데이터조회 -> 오염도현황(대표적인 조회 전문)
+
+POST http://www.inair.or.kr/inair/DtSe/listDtSePollutionLoc.do HTTP/1.1
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+User-Agent: Mozilla/4.0 (compatible; MSIE 10.0; Windows) Curl/8.0.3 [win32]
+Host: www.inair.or.kr
+Content-Length: 1391
+Connection: Keep-Alive
+Pragma: no-cache
+Cookie: JSESSIONID=vfXhShGbT1gpjcJy12JQhr8GHL4v1118LTqFC74gFvrc2PwQCZJQ!-664010300
+
+<?xml version="1.0" encoding="UTF-8"?>
+<Root xmlns="http://www.tobesoft.com/platform/dataset">
+	<Parameters>
+		<Parameter id="CLIENT">ME20</Parameter>
+		<Parameter id="LINE_SEPA">8</Parameter>
+		<Parameter id="FIELD_SEPA">7</Parameter>
+		<Parameter id="JSESSIONID">SUCC</Parameter>
+	</Parameters>
+	<Dataset id="dstCond1">
+		<ColumnInfo>
+			<Column id="LOC" type="STRING" size="256" />
+			<Column id="SUB_LOC" type="STRING" size="256" />
+			<Column id="ITEM" type="STRING" size="256" />
+			<Column id="DTA_TYPE" type="STRING" size="256" />
+			<Column id="FROM_YEAR" type="STRING" size="256" />
+			<Column id="FROM_MON" type="STRING" size="256" />
+			<Column id="FROM_DATE" type="STRING" size="256" />
+			<Column id="FROM_TIME" type="STRING" size="256" />
+			<Column id="TO_YEAR" type="STRING" size="256" />
+			<Column id="TO_MON" type="STRING" size="256" />
+			<Column id="TO_DATE" type="STRING" size="256" />
+			<Column id="TO_TIME" type="STRING" size="256" />
+			<Column id="DEC_DEPTH" type="STRING" size="256" />
+		</ColumnInfo>
+		<Rows>
+			<Row >
+				<Col id="LOC">01</Col>
+				<Col id="SUB_LOC">A0101</Col>
+				<Col id="ITEM">01!04!05!06</Col>
+				<Col id="DTA_TYPE">1</Col>
+				<Col id="FROM_YEAR"></Col>
+				<Col id="FROM_MON"></Col>
+				<Col id="FROM_DATE">20140101</Col>
+				<Col id="FROM_TIME">00</Col>
+				<Col id="TO_YEAR"></Col>
+				<Col id="TO_MON"></Col>
+				<Col id="TO_DATE">20140124</Col>
+				<Col id="TO_TIME">23</Col>
+				<Col id="DEC_DEPTH">0</Col>
+			</Row>
+		</Rows>
+	</Dataset>
+</Root>
+
+자동측정망-> 시스템관리 -> 환경부 자동측정망 정보관리 -> 시설탭(Dataset이 없이 보내는 조회 전문)
+
+POST http://www.inair.or.kr/inair/StMg/MeIf/listStMgMeIfFacilityList.do HTTP/1.1
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+User-Agent: Mozilla/4.0 (compatible; MSIE 10.0; Windows) Curl/8.0.3 [win32]
+Host: www.inair.or.kr
+Content-Length: 223
+Connection: Keep-Alive
+Pragma: no-cache
+Cookie: JSESSIONID=vfXhShGbT1gpjcJy12JQhr8GHL4v1118LTqFC74gFvrc2PwQCZJQ!-664010300
+
+<?xml version="1.0" encoding="UTF-8"?>
+<Root xmlns="http://www.tobesoft.com/platform/dataset">
+	<Parameters>
+		<Parameter id="JSESSIONID"></Parameter>
+	</Parameters>
+	<Dataset id="">
+		<ColumnInfo>
+		</ColumnInfo>
+	</Dataset>
+</Root>
+
+자동측정망-> 시스템관리 -> 환경부 자동측정망 정보관리 -> 항목탭(Dataset이 2개 자료 수정 전문)
+POST http://www.inair.or.kr/inair/StMg/MeIf/saveStMgMeIfItemList.do HTTP/1.1
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+User-Agent: Mozilla/4.0 (compatible; MSIE 10.0; Windows) Curl/8.0.3 [win32]
+Host: www.inair.or.kr
+Content-Length: 1530
+Connection: Keep-Alive
+Pragma: no-cache
+Cookie: JSESSIONID=vfXhShGbT1gpjcJy12JQhr8GHL4v1118LTqFC74gFvrc2PwQCZJQ!-664010300
+
+<?xml version="1.0" encoding="UTF-8"?>
+<Root xmlns="http://www.tobesoft.com/platform/dataset">
+<Parameters>
+	<Parameter id="JSESSIONID"></Parameter></Parameters>
+	<Dataset id="dstCond1">
+		<ColumnInfo>
+			<Column id="locCode" type="STRING" size="256" />
+			<Column id="cmd" type="STRING" size="256" />
+			<Column id="action" type="STRING" size="256" />
+		</ColumnInfo>
+		<Rows>
+			<Row >
+				<Col id="locCode">A0101</Col>
+				<Col id="cmd"></Col>
+				<Col id="action"></Col>
+			</Row>
+		</Rows>
+	</Dataset>
+	<Dataset id="dstDetail">
+		<ColumnInfo>
+			<Column id="locCode" type="STRING" size="256" />
+			<Column id="itemType" type="STRING" size="256" />
+			<Column id="itemCode" type="STRING" size="256" />
+			<Column id="itemNm" type="STRING" size="256" />
+			<Column id="mchnNm" type="STRING" size="256" />
+			<Column id="itemMakr" type="STRING" size="256" />
+			<Column id="itemMeth" type="STRING" size="256" />
+			<Column id="itemModel" type="STRING" size="256" />
+			<Column id="itemSerial" type="STRING" size="256" />
+			<Column id="itemQy" type="STRING" size="256" />
+			<Column id="instlDe" type="STRING" size="256" />
+			<Column id="oprDe" type="STRING" size="256" />
+		</ColumnInfo>
+		<Rows>
+			<Row >
+				<Col id="locCode">A0101</Col>
+				<Col id="itemType">1</Col>
+				<Col id="itemCode">06</Col>
+				<Col id="itemNm">NOx</Col>
+				<Col id="mchnNm">Teledyne API</Col>
+				<Col id="itemMakr">미국</Col>
+				<Col id="itemMeth">화학발광법</Col>
+				<Col id="itemModel">200E</Col>
+				<Col id="itemSerial">1406</Col>
+				<Col id="itemQy">1</Col>
+				<Col id="instlDe">200611</Col>
+				<Col id="oprDe">200701</Col>
+			</Row>
+		</Rows>
+	</Dataset>
+</Root>
+
+자동측정망-> 시스템관리 -> 환경부 자동측정망 정보관리 -> 부대시설탭(Dataset이 3개 row가 다중인 자료 수정 전문)
+POST http://www.inair.or.kr/inair/StMg/MeIf/saveStMgMeIfSubFacilityList.do HTTP/1.1
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+User-Agent: Mozilla/4.0 (compatible; MSIE 10.0; Windows) Curl/8.0.3 [win32]
+Host: www.inair.or.kr
+Content-Length: 2643
+Connection: Keep-Alive
+Pragma: no-cache
+Cookie: JSESSIONID=vfXhShGbT1gpjcJy12JQhr8GHL4v1118LTqFC74gFvrc2PwQCZJQ!-664010300
+
+<?xml version="1.0" encoding="UTF-8"?>
+<Root xmlns="http://www.tobesoft.com/platform/dataset">
+<Parameters>
+<Parameter id="JSESSIONID"></Parameter></Parameters>
+<Dataset id="dstCond1">
+<ColumnInfo>
+<Column id="locCode" type="STRING" size="256" />
+</ColumnInfo>
+<Rows>
+<Row >
+<Col id="locCode">C04</Col>
+</Row>
+</Rows>
+</Dataset>
+<Dataset id="dstMgtVtelList">
+<ColumnInfo>
+<Column id="vtelInstyy" type="STRING" size="256" />
+<Column id="vtelInhl" type="STRING" size="256" />
+<Column id="inhVent" type="STRING" size="256" />
+<Column id="inhCpcty" type="STRING" size="256" />
+<Column id="expVent" type="STRING" size="256" />
+<Column id="expCpcty" type="STRING" size="256" />
+<Column id="vtelOprmth" type="STRING" size="256" />
+<Column id="locNo" type="STRING" size="256" />
+</ColumnInfo>
+<Rows>
+<Row >
+<Col id="vtelInstyy">1996</Col>
+<Col id="vtelInhl">-</Col>
+<Col id="inhVent">-</Col>
+<Col id="inhCpcty">-</Col>
+<Col id="expVent">40000</Col>
+<Col id="expCpcty">7.5</Col>
+<Col id="vtelOprmth">모터구동(주기적)</Col>
+<Col id="locNo">C04</Col>
+</Row>
+<Row >
+<Col id="vtelInstyy">1996</Col>
+<Col id="vtelInhl">-</Col>
+<Col id="inhVent">-</Col>
+<Col id="inhCpcty">-</Col>
+<Col id="expVent">40000</Col>
+<Col id="expCpcty">7.5</Col>
+<Col id="vtelOprmth">모터구동(주기적)</Col>
+<Col id="locNo">C04</Col>
+</Row>
+</Rows>
+</Dataset>
+<Dataset id="dstMgtAsdfList">
+<ColumnInfo>
+<Column id="asdfInstyy" type="STRING" size="256" />
+<Column id="asdfInhl" type="STRING" size="256" />
+<Column id="ventFom" type="STRING" size="256" />
+<Column id="ventExp" type="STRING" size="256" />
+<Column id="ventCpcty" type="STRING" size="256" />
+<Column id="flterCln" type="STRING" size="256" />
+<Column id="flterExc" type="STRING" size="256" />
+<Column id="locNo" type="STRING" size="256" />
+</ColumnInfo>
+<Rows>
+<Row >
+<Col id="asdfInstyy">1993</Col>
+<Col id="asdfInhl">국내선2층 기계실</Col>
+<Col id="ventFom">여과</Col>
+<Col id="ventExp">64700</Col>
+<Col id="ventCpcty">50</Col>
+<Col id="flterCln">2주</Col>
+<Col id="flterExc">분기</Col>
+<Col id="locNo">C04</Col>
+</Row>
+<Row >
+<Col id="asdfInstyy">1993</Col>
+<Col id="asdfInhl">국내선2층 기계실</Col>
+<Col id="ventFom">여과</Col>
+<Col id="ventExp">14300</Col>
+<Col id="ventCpcty">10</Col>
+<Col id="flterCln">2주</Col>
+<Col id="flterExc">분기</Col>
+<Col id="locNo">C04</Col>
+</Row>
+<Row >
+<Col id="asdfInstyy">2005</Col>
+<Col id="asdfInhl">국내선2층 기계실</Col>
+<Col id="ventFom">여과</Col>
+<Col id="ventExp">27000</Col>
+<Col id="ventCpcty">20</Col>
+<Col id="flterCln">2주</Col>
+<Col id="flterExc">분기</Col>
+<Col id="locNo">C04</Col>
+</Row>
+</Rows>
+</Dataset>
+</Root>
+
+자동측정망-> 시스템관리 -> 환경부 자동측정망 정보관리 -> 기준치탭(Dataset이 2개 자료 수정 전문)
+POST http://www.inair.or.kr/inair/StMg/MeIf/saveStMgMeIfCriterionList.do HTTP/1.1
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+User-Agent: Mozilla/4.0 (compatible; MSIE 10.0; Windows) Curl/8.0.3 [win32]
+Host: www.inair.or.kr
+Content-Length: 1873
+Connection: Keep-Alive
+Pragma: no-cache
+Cookie: JSESSIONID=vfXhShGbT1gpjcJy12JQhr8GHL4v1118LTqFC74gFvrc2PwQCZJQ!-664010300
+
+<?xml version="1.0" encoding="UTF-8"?>
+<Root xmlns="http://www.tobesoft.com/platform/dataset">
+<Parameters>
+<Parameter id="JSESSIONID"></Parameter></Parameters>
+<Dataset id="dstCond1">
+<ColumnInfo>
+<Column id="group" type="STRING" size="256" />
+<Column id="action" type="STRING" size="256" />
+<Column id="cmd" type="STRING" size="256" />
+</ColumnInfo>
+<Rows>
+<Row >
+<Col id="group">A</Col>
+<Col id="action"></Col>
+<Col id="cmd"></Col>
+</Row>
+</Rows>
+</Dataset>
+<Dataset id="dstDetail">
+<ColumnInfo>
+<Column id="stdChym" type="STRING" size="256" />
+<Column id="itemCode" type="STRING" size="256" />
+<Column id="stdName" type="STRING" size="256" />
+<Column id="locType" type="STRING" size="256" />
+<Column id="stdComm" type="STRING" size="256" />
+<Column id="stdUnit" type="STRING" size="256" />
+<Column id="stdDispDec" type="STRING" size="256" />
+<Column id="stdNation1" type="STRING" size="256" />
+<Column id="stdNation8" type="STRING" size="256" />
+<Column id="stdNation20" type="STRING" size="256" />
+<Column id="stdNationD" type="STRING" size="256" />
+<Column id="stdNationY" type="STRING" size="256" />
+<Column id="useYn" type="STRING" size="256" />
+<Column id="locTypeName" type="STRING" size="256" />
+<Column id="stdMaxValue" type="STRING" size="256" />
+<Column id="stdMinValue" type="STRING" size="256" />
+</ColumnInfo>
+<Rows>
+<Row >
+<Col id="stdChym">20121001</Col>
+<Col id="itemCode">11</Col>
+<Col id="stdName">HCHO</Col>
+<Col id="locType">A</Col>
+<Col id="stdComm">HCH</Col>
+<Col id="stdUnit">㎍/㎥</Col>
+<Col id="stdDispDec">1</Col>
+<Col id="stdNation1">100.0</Col>
+<Col id="stdNation8">100.0</Col>
+<Col id="stdNation20">100.0</Col>
+<Col id="stdNationD">100.0</Col>
+<Col id="stdNationY">100.0</Col>
+<Col id="useYn">Y</Col>
+<Col id="locTypeName">지하역사</Col>
+<Col id="stdMaxValue">200</Col>
+<Col id="stdMinValue">0</Col>
+</Row>
+</Rows>
+</Dataset>
+</Root>
+
+자동측정망-> 시스템관리 -> 다중이용시설 정보관리 -> 기준치설정탭(Dataset이 2개 자료 수정 전문)
+POST http://www.inair.or.kr/inair/StMg/MfIf/saveStMgMfIfCriterionList.do HTTP/1.1
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+User-Agent: Mozilla/4.0 (compatible; MSIE 10.0; Windows) Curl/8.0.3 [win32]
+Host: www.inair.or.kr
+Content-Length: 1483
+Connection: Keep-Alive
+Pragma: no-cache
+Cookie: JSESSIONID=vfXhShGbT1gpjcJy12JQhr8GHL4v1118LTqFC74gFvrc2PwQCZJQ!-664010300
+
+<?xml version="1.0" encoding="UTF-8"?>
+<Root xmlns="http://www.tobesoft.com/platform/dataset">
+<Parameters>
+<Parameter id="JSESSIONID"></Parameter></Parameters>
+<Dataset id="dstCond1">
+<ColumnInfo>
+<Column id="GROUP_CODE" type="STRING" size="256" />
+<Column id="action" type="STRING" size="256" />
+<Column id="cmd" type="STRING" size="256" />
+</ColumnInfo>
+<Rows>
+<Row >
+<Col id="GROUP_CODE">B</Col>
+<Col id="action"></Col>
+<Col id="cmd"></Col>
+</Row>
+</Rows>
+</Dataset>
+<Dataset id="dstDetail">
+<ColumnInfo>
+<Column id="CMMN_SE" type="STRING" size="256" />
+<Column id="STD_CHYM" type="STRING" size="256" />
+<Column id="GROUP_CODE" type="STRING" size="256" />
+<Column id="STD_DISP_DEC" type="STRING" size="256" />
+<Column id="STD_UNIT" type="STRING" size="256" />
+<Column id="STD_NATION_VAL" type="STRING" size="256" />
+<Column id="STD_NATION_MTD" type="STRING" size="256" />
+<Column id="USE_YN" type="STRING" size="256" />
+<Column id="DATA_CODE" type="STRING" size="256" />
+<Column id="CMMN_CODE" type="STRING" size="256" />
+<Column id="GROUP_NM" type="STRING" size="256" />
+</ColumnInfo>
+<Rows>
+<Row >
+<Col id="CMMN_SE">33</Col>
+<Col id="STD_CHYM">20120101</Col>
+<Col id="GROUP_CODE">B</Col>
+<Col id="STD_DISP_DEC">3</Col>
+<Col id="STD_UNIT">ppm   </Col>
+<Col id="STD_NATION_VAL">.06</Col>
+<Col id="STD_NATION_MTD">D</Col>
+<Col id="USE_YN">Y</Col>
+<Col id="DATA_CODE">P</Col>
+<Col id="CMMN_CODE">B05</Col>
+<Col id="GROUP_NM">지하도상가</Col>
+</Row>
+</Rows>
+</Dataset>
+</Root>
+
+자동측정망-> 시스템관리 -> 공동주택 정보관리 -> 기준치설정탭(Dataset이 2개 자료 수정 전문)
+POST http://www.inair.or.kr/inair/StMg/NbIf/saveStMgNbIfCriterionList.do HTTP/1.1
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+User-Agent: Mozilla/4.0 (compatible; MSIE 10.0; Windows) Curl/8.0.3 [win32]
+Host: www.inair.or.kr
+Content-Length: 1477
+Connection: Keep-Alive
+Pragma: no-cache
+Cookie: JSESSIONID=vfXhShGbT1gpjcJy12JQhr8GHL4v1118LTqFC74gFvrc2PwQCZJQ!-664010300
+
+<?xml version="1.0" encoding="UTF-8"?>
+<Root xmlns="http://www.tobesoft.com/platform/dataset">
+<Parameters>
+<Parameter id="JSESSIONID"></Parameter></Parameters>
+<Dataset id="dstCond1">
+<ColumnInfo>
+<Column id="GROUP_CODE" type="STRING" size="256" />
+<Column id="action" type="STRING" size="256" />
+<Column id="cmd" type="STRING" size="256" />
+</ColumnInfo>
+<Rows>
+<Row >
+<Col id="GROUP_CODE">A</Col>
+<Col id="action"></Col>
+<Col id="cmd"></Col>
+</Row>
+</Rows>
+</Dataset>
+<Dataset id="dstDetail">
+<ColumnInfo>
+<Column id="CMMN_SE" type="STRING" size="256" />
+<Column id="STD_CHYM" type="STRING" size="256" />
+<Column id="GROUP_CODE" type="STRING" size="256" />
+<Column id="STD_DISP_DEC" type="STRING" size="256" />
+<Column id="STD_UNIT" type="STRING" size="256" />
+<Column id="STD_NATION_VAL" type="STRING" size="256" />
+<Column id="STD_NATION_MTD" type="STRING" size="256" />
+<Column id="USE_YN" type="STRING" size="256" />
+<Column id="DATA_CODE" type="STRING" size="256" />
+<Column id="CMMN_CODE" type="STRING" size="256" />
+<Column id="GROUP_NM" type="STRING" size="256" />
+</ColumnInfo>
+<Rows>
+<Row >
+<Col id="CMMN_SE">34</Col>
+<Col id="STD_CHYM">20120101</Col>
+<Col id="GROUP_CODE">A</Col>
+<Col id="STD_DISP_DEC">2</Col>
+<Col id="STD_UNIT">㎍/㎥ </Col>
+<Col id="STD_NATION_VAL">30</Col>
+<Col id="STD_NATION_MTD">D</Col>
+<Col id="USE_YN">Y</Col>
+<Col id="DATA_CODE">M</Col>
+<Col id="CMMN_CODE">01</Col>
+<Col id="GROUP_NM">아파트</Col>
+</Row>
+</Rows>
+</Dataset>
+</Root>
+
+자동측정망-> 시스템관리 -> 권한관리 -> 메뉴탭(row의 상태 변경(맨마지막) 수정 전문)
+POST http://www.inair.or.kr/inair/StMg/AtMg/saveMenu.do HTTP/1.1
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+User-Agent: Mozilla/4.0 (compatible; MSIE 10.0; Windows) Curl/8.0.3 [win32]
+Host: www.inair.or.kr
+Content-Length: 35190
+Connection: Keep-Alive
+Pragma: no-cache
+Cookie: JSESSIONID=vfXhShGbT1gpjcJy12JQhr8GHL4v1118LTqFC74gFvrc2PwQCZJQ!-664010300
+
+<?xml version="1.0" encoding="UTF-8"?>
+<Root xmlns="http://www.tobesoft.com/platform/dataset">
+<Parameters>
+<Parameter id="JSESSIONID">SUCC</Parameter></Parameters>
+<Dataset id="in_ds">
+<ColumnInfo>
+<Column id="MENU_NAME" type="STRING" size="256" />
+</ColumnInfo>
+<Rows>
+<Row >
+<Col id="MENU_NAME"></Col>
+</Row>
+</Rows>
+</Dataset>
+<Dataset id="in_dsList">
+<ColumnInfo>
+<Column id="menuId" type="STRING" size="256" />
+<Column id="menuName" type="STRING" size="256" />
+<Column id="menuDesc" type="STRING" size="256" />
+<Column id="menuUrl" type="STRING" size="256" />
+<Column id="parentMenuId" type="STRING" size="256" />
+<Column id="funcId" type="STRING" size="256" />
+<Column id="dispOrder" type="STRING" size="256" />
+<Column id="useYn" type="STRING" size="256" />
+<Column id="imgUrl" type="STRING" size="256" />
+<Column id="screenNo" type="STRING" size="256" />
+</ColumnInfo>
+<Rows>
+<Row >
+<Col id="menuId">1</Col>
+<Col id="menuName">실시간모니터링</Col>
+<Col id="menuDesc">실시간모니터링</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId"></Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">aa</Col>
+<Col id="screenNo">0100</Col>
+</Row>
+<Row >
+<Col id="menuId">2</Col>
+<Col id="menuName">전체지도</Col>
+<Col id="menuDesc">전체지도</Col>
+<Col id="menuUrl">RtMtTiMp::RtMtMain.xfdl</Col>
+<Col id="parentMenuId">1</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">aa_00</Col>
+<Col id="screenNo">0101</Col>
+</Row>
+<Row >
+<Col id="menuId">3</Col>
+<Col id="menuName">통합모니터링</Col>
+<Col id="menuDesc">통합모니터링</Col>
+<Col id="menuUrl">RtMtTtMo::RtMtMonitoring.xfdl</Col>
+<Col id="parentMenuId">1</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">2</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">aa_01</Col>
+<Col id="screenNo">0102</Col>
+</Row>
+<Row >
+<Col id="menuId">4</Col>
+<Col id="menuName">데이터스크롤</Col>
+<Col id="menuDesc">데이터스크롤</Col>
+<Col id="menuUrl">RtMtDaSc::RtMtData.xfdl</Col>
+<Col id="parentMenuId">1</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">3</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">aa_02</Col>
+<Col id="screenNo">0103</Col>
+</Row>
+<Row >
+<Col id="menuId">5</Col>
+<Col id="menuName">데이터조회</Col>
+<Col id="menuDesc">데이터조회</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId"></Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">2</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ab</Col>
+<Col id="screenNo">0200</Col>
+</Row>
+<Row >
+<Col id="menuId">6</Col>
+<Col id="menuName">오염도현황</Col>
+<Col id="menuDesc">오염도현황</Col>
+<Col id="menuUrl">DtSeMsAt::DtSeMsAtPollution.xfdl</Col>
+<Col id="parentMenuId">5</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ab_00</Col>
+<Col id="screenNo">0201</Col>
+</Row>
+<Row >
+<Col id="menuId">7</Col>
+<Col id="menuName">오염도추이도</Col>
+<Col id="menuDesc">오염도추이도</Col>
+<Col id="menuUrl">DtSeMsAt::DtSeMsAtPollutionProgress.xfdl</Col>
+<Col id="parentMenuId">5</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">2</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ab_01</Col>
+<Col id="screenNo">0202</Col>
+</Row>
+<Row >
+<Col id="menuId">8</Col>
+<Col id="menuName">기준초과현황</Col>
+<Col id="menuDesc">기준초과현황</Col>
+<Col id="menuUrl">DtSeMsAt::DtSeMsAtExceed.xfdl</Col>
+<Col id="parentMenuId">5</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">3</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ab_02</Col>
+<Col id="screenNo">0203</Col>
+</Row>
+<Row >
+<Col id="menuId">9</Col>
+<Col id="menuName">상태표시현황</Col>
+<Col id="menuDesc">상태표시현황</Col>
+<Col id="menuUrl">DtSeMsAt::DtSeMsAtState.xfdl</Col>
+<Col id="parentMenuId">5</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">4</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ab_03</Col>
+<Col id="screenNo">0204</Col>
+</Row>
+<Row >
+<Col id="menuId">10</Col>
+<Col id="menuName">가동현황</Col>
+<Col id="menuDesc">가동현황</Col>
+<Col id="menuUrl">DtSeMsAt::DtSeMsAtOperationInfo.xfdl</Col>
+<Col id="parentMenuId">5</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">5</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ab_04</Col>
+<Col id="screenNo">0205</Col>
+</Row>
+<Row >
+<Col id="menuId">11</Col>
+<Col id="menuName">데이터기록지</Col>
+<Col id="menuDesc">데이터기록지</Col>
+<Col id="menuUrl">DtSeMsAt::DtSeMsAtRecords.xfdl</Col>
+<Col id="parentMenuId">5</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">6</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ab_05</Col>
+<Col id="screenNo">0206</Col>
+</Row>
+<Row >
+<Col id="menuId">12</Col>
+<Col id="menuName">환경부자동측정망관리</Col>
+<Col id="menuDesc">환경부자동측정망관리</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId"></Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">3</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ac</Col>
+<Col id="screenNo">0300</Col>
+</Row>
+<Row >
+<Col id="menuId">13</Col>
+<Col id="menuName">수신현황관리</Col>
+<Col id="menuDesc">수신현황관리</Col>
+<Col id="menuUrl">AtMgAtMe::AtMeReceiveTab.xfdl</Col>
+<Col id="parentMenuId">12</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ac_00</Col>
+<Col id="screenNo">0301</Col>
+</Row>
+<Row >
+<Col id="menuId">14</Col>
+<Col id="menuName">선별확정관리</Col>
+<Col id="menuDesc">선별확정관리</Col>
+<Col id="menuUrl">AtMgAtMe::AtMeConfirm.xfdl</Col>
+<Col id="parentMenuId">12</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">2</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ac_01</Col>
+<Col id="screenNo">0302</Col>
+</Row>
+<Row >
+<Col id="menuId">15</Col>
+<Col id="menuName">마감자료관리</Col>
+<Col id="menuDesc">마감자료관리</Col>
+<Col id="menuUrl">AtMgAtMe::AtMeFinishDataTab.xfdl</Col>
+<Col id="parentMenuId">12</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">3</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ac_02</Col>
+<Col id="screenNo">0303</Col>
+</Row>
+<Row >
+<Col id="menuId">16</Col>
+<Col id="menuName">점검일지관리</Col>
+<Col id="menuDesc">점검일지관리</Col>
+<Col id="menuUrl">AtMgAtMe::AtMeInspect.xfdl</Col>
+<Col id="parentMenuId">12</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">4</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ac_03</Col>
+<Col id="screenNo">0304</Col>
+</Row>
+<Row >
+<Col id="menuId">17</Col>
+<Col id="menuName">지자체연계망관리</Col>
+<Col id="menuDesc">지자체연계망관리</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId"></Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">4</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ad</Col>
+<Col id="screenNo">0400</Col>
+</Row>
+<Row >
+<Col id="menuId">18</Col>
+<Col id="menuName">확정데이터입력</Col>
+<Col id="menuDesc">확정데이터입력</Col>
+<Col id="menuUrl">AtMgAtMn::AtMnFileDataList.xfdl</Col>
+<Col id="parentMenuId">17</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ad_00</Col>
+<Col id="screenNo">0401</Col>
+</Row>
+<Row >
+<Col id="menuId">19</Col>
+<Col id="menuName">수신현황관리</Col>
+<Col id="menuDesc">수신현황관리</Col>
+<Col id="menuUrl">AtMgAtMn::AtMnReceiveTab.xfdl</Col>
+<Col id="parentMenuId">17</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">2</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ad_01</Col>
+<Col id="screenNo">0402</Col>
+</Row>
+<Row >
+<Col id="menuId">20</Col>
+<Col id="menuName">선별확정관리</Col>
+<Col id="menuDesc">선별확정관리</Col>
+<Col id="menuUrl">AtMgAtMn::AtMnConfirm.xfdl</Col>
+<Col id="parentMenuId">17</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">3</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ad_02</Col>
+<Col id="screenNo">0403</Col>
+</Row>
+<Row >
+<Col id="menuId">21</Col>
+<Col id="menuName">마감자료관리</Col>
+<Col id="menuDesc">마감자료관리</Col>
+<Col id="menuUrl">AtMgAtMn::AtMnFinishDataTab.xfdl</Col>
+<Col id="parentMenuId">17</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">4</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ad_03</Col>
+<Col id="screenNo">0404</Col>
+</Row>
+<Row >
+<Col id="menuId">22</Col>
+<Col id="menuName">자동측정망분석</Col>
+<Col id="menuDesc">자동측정망분석</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId"></Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">5</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ae</Col>
+<Col id="screenNo">0500</Col>
+</Row>
+<Row >
+<Col id="menuId">23</Col>
+<Col id="menuName">시간대별분석</Col>
+<Col id="menuDesc">시간대별분석</Col>
+<Col id="menuUrl">DtAnMsAt::DtAnMsAtTime.xfdl</Col>
+<Col id="parentMenuId">22</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ae_00</Col>
+<Col id="screenNo">0501</Col>
+</Row>
+<Row >
+<Col id="menuId">24</Col>
+<Col id="menuName">요일별분석</Col>
+<Col id="menuDesc">요일별분석</Col>
+<Col id="menuUrl">DtAnMsAt::DtAnMsAtDay.xfdl</Col>
+<Col id="parentMenuId">22</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">2</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ae_01</Col>
+<Col id="screenNo">0502</Col>
+</Row>
+<Row >
+<Col id="menuId">25</Col>
+<Col id="menuName">월별분석</Col>
+<Col id="menuDesc">월별분석</Col>
+<Col id="menuUrl">DtAnMsAt::DtAnMsAtMonth.xfdl</Col>
+<Col id="parentMenuId">22</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">3</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ae_02</Col>
+<Col id="screenNo">0503</Col>
+</Row>
+<Row >
+<Col id="menuId">26</Col>
+<Col id="menuName">계절별분석</Col>
+<Col id="menuDesc">계절별분석</Col>
+<Col id="menuUrl">DtAnMsAt::DtAnMsAtSeason.xfdl</Col>
+<Col id="parentMenuId">22</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">4</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ae_03</Col>
+<Col id="screenNo">0504</Col>
+</Row>
+<Row >
+<Col id="menuId">27</Col>
+<Col id="menuName">주중/주말분석</Col>
+<Col id="menuDesc">주중/주말분석</Col>
+<Col id="menuUrl">DtAnMsAt::MsAtWeekdaysWeekendAnalyze.xfdl</Col>
+<Col id="parentMenuId">22</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">5</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ae_04</Col>
+<Col id="screenNo">0505</Col>
+</Row>
+<Row >
+<Col id="menuId">28</Col>
+<Col id="menuName">농도빈도분석</Col>
+<Col id="menuDesc">농도빈도분석</Col>
+<Col id="menuUrl">DtAnMsAt::DtAnMsAtFrequency.xfdl</Col>
+<Col id="parentMenuId">22</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">6</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ae_05</Col>
+<Col id="screenNo">0506</Col>
+</Row>
+<Row >
+<Col id="menuId">29</Col>
+<Col id="menuName">농도고저분석</Col>
+<Col id="menuDesc">농도고저분석</Col>
+<Col id="menuUrl">DtAnMsAt::DtAnMsAtDensity.xfdl</Col>
+<Col id="parentMenuId">22</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">7</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ae_06</Col>
+<Col id="screenNo">0507</Col>
+</Row>
+<Row >
+<Col id="menuId">30</Col>
+<Col id="menuName">기준초과분석</Col>
+<Col id="menuDesc">기준초과분석</Col>
+<Col id="menuUrl">DtAnMsAt::DtAnMsAtExceed.xfdl</Col>
+<Col id="parentMenuId">22</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">8</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ae_07</Col>
+<Col id="screenNo">0508</Col>
+</Row>
+<Row >
+<Col id="menuId">31</Col>
+<Col id="menuName">연관자료통계</Col>
+<Col id="menuDesc">연관자료통계</Col>
+<Col id="menuUrl">DtAnMsAt::MsAtRelate.xfdl</Col>
+<Col id="parentMenuId">22</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">9</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ae_08</Col>
+<Col id="screenNo">0509</Col>
+</Row>
+<Row >
+<Col id="menuId">32</Col>
+<Col id="menuName">일자별연관자료통계</Col>
+<Col id="menuDesc">일자별연관자료통계</Col>
+<Col id="menuUrl">DtAnMsAt::MsAtDayRelation.xfdl</Col>
+<Col id="parentMenuId">22</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">10</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ae_09</Col>
+<Col id="screenNo">0510</Col>
+</Row>
+<Row >
+<Col id="menuId">33</Col>
+<Col id="menuName">월별연관자료통계</Col>
+<Col id="menuDesc">월별연관자료통계</Col>
+<Col id="menuUrl">DtAnMsAt::MsAtMonthRelation.xfdl</Col>
+<Col id="parentMenuId">22</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">11</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ae_10</Col>
+<Col id="screenNo">0511</Col>
+</Row>
+<Row >
+<Col id="menuId">34</Col>
+<Col id="menuName">분기별연관자료통계</Col>
+<Col id="menuDesc">분기별연관자료통계</Col>
+<Col id="menuUrl">DtAnMsAt::MsAtQuarteRelation.xfdl</Col>
+<Col id="parentMenuId">22</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">12</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ae_11</Col>
+<Col id="screenNo">0512</Col>
+</Row>
+<Row >
+<Col id="menuId">35</Col>
+<Col id="menuName">자동측정망보고서</Col>
+<Col id="menuDesc">자동측정망보고서</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId"></Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">6</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">af</Col>
+<Col id="screenNo">0600</Col>
+</Row>
+<Row >
+<Col id="menuId">36</Col>
+<Col id="menuName">가동율및수신률</Col>
+<Col id="menuDesc">가동율및수신률</Col>
+<Col id="menuUrl">DtAnMaRp::DtAnMaRpOperationInfo.xfdl</Col>
+<Col id="parentMenuId">35</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">af_00</Col>
+<Col id="screenNo">0601</Col>
+</Row>
+<Row >
+<Col id="menuId">37</Col>
+<Col id="menuName">분기별오염도분석</Col>
+<Col id="menuDesc">분기별오염도분석</Col>
+<Col id="menuUrl">DtAnMaRp::MaRpQuarterAnalyze.xfdl</Col>
+<Col id="parentMenuId">35</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">2</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">af_01</Col>
+<Col id="screenNo">0602</Col>
+</Row>
+<Row >
+<Col id="menuId">38</Col>
+<Col id="menuName">분기별초과율분석</Col>
+<Col id="menuDesc">분기별초과율분석</Col>
+<Col id="menuUrl">DtAnMaRp::MaRpExceedQuarteAnalyze.xfdl</Col>
+<Col id="parentMenuId">35</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">3</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">af_02</Col>
+<Col id="screenNo">0603</Col>
+</Row>
+<Row >
+<Col id="menuId">39</Col>
+<Col id="menuName">연도별농도현황및기준초과율</Col>
+<Col id="menuDesc">연도별농도현황및기준초과율</Col>
+<Col id="menuUrl">DtAnMaRp::MaRpExceedYearDensity.xfdl</Col>
+<Col id="parentMenuId">35</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">4</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">af_03</Col>
+<Col id="screenNo">0604</Col>
+</Row>
+<Row >
+<Col id="menuId">40</Col>
+<Col id="menuName">연도별농도및기준초과율추이</Col>
+<Col id="menuDesc">연도별농도및기준초과율추이</Col>
+<Col id="menuUrl">DtAnMaRp::MaRpExceedYearProgress.xfdl</Col>
+<Col id="parentMenuId">35</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">5</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">af_04</Col>
+<Col id="screenNo">0605</Col>
+</Row>
+<Row >
+<Col id="menuId">41</Col>
+<Col id="menuName">항목별실내공기질초과현황</Col>
+<Col id="menuDesc">항목별실내공기질초과현황</Col>
+<Col id="menuUrl">DtAnMaRp::MaRpExceedItemInterior.xfdl</Col>
+<Col id="parentMenuId">35</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">6</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">af_05</Col>
+<Col id="screenNo">0606</Col>
+</Row>
+<Row >
+<Col id="menuId">42</Col>
+<Col id="menuName">시설별특성분석</Col>
+<Col id="menuDesc">시설별특성분석</Col>
+<Col id="menuUrl">DtAnMaRp::MaRpLocAnalyze.xfdl</Col>
+<Col id="parentMenuId">35</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">7</Col>
+<Col id="useYn">N</Col>
+<Col id="imgUrl">af_06</Col>
+<Col id="screenNo">0607</Col>
+</Row>
+<Row >
+<Col id="menuId">43</Col>
+<Col id="menuName">항목별수신률및가동률</Col>
+<Col id="menuDesc">항목별수신률및가동률</Col>
+<Col id="menuUrl">DtAnMaRp::MaRpItemOperateRatio.xfdl</Col>
+<Col id="parentMenuId">35</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">8</Col>
+<Col id="useYn">N</Col>
+<Col id="imgUrl">af_07</Col>
+<Col id="screenNo">0608</Col>
+</Row>
+<Row >
+<Col id="menuId">44</Col>
+<Col id="menuName">기준치초과분석</Col>
+<Col id="menuDesc">기준치초과분석</Col>
+<Col id="menuUrl">DtAnMaRp::MaRpExceed.xfdl</Col>
+<Col id="parentMenuId">35</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">9</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">af_08</Col>
+<Col id="screenNo">0609</Col>
+</Row>
+<Row >
+<Col id="menuId">45</Col>
+<Col id="menuName">일평균초과분석</Col>
+<Col id="menuDesc">일평균초과분석</Col>
+<Col id="menuUrl">DtAnMaRp::MaRpExceedDayAvg.xfdl</Col>
+<Col id="parentMenuId">35</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">10</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">af_09</Col>
+<Col id="screenNo">0610</Col>
+</Row>
+<Row >
+<Col id="menuId">46</Col>
+<Col id="menuName">6시간평균초과분석</Col>
+<Col id="menuDesc">6시간평균초과분석</Col>
+<Col id="menuUrl">DtAnMaRp::MaRpExceed6TimAvg.xfdl</Col>
+<Col id="parentMenuId">35</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">11</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">af_10</Col>
+<Col id="screenNo">0611</Col>
+</Row>
+<Row >
+<Col id="menuId">47</Col>
+<Col id="menuName">통신관리</Col>
+<Col id="menuDesc">통신관리</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId"></Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">7</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ag</Col>
+<Col id="screenNo">0700</Col>
+</Row>
+<Row >
+<Col id="menuId">48</Col>
+<Col id="menuName">원격제어</Col>
+<Col id="menuDesc">원격제어</Col>
+<Col id="menuUrl">CcMgMsSe::CcMgMstscSend.xfdl</Col>
+<Col id="parentMenuId">47</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ag_00</Col>
+<Col id="screenNo">0701</Col>
+</Row>
+<Row >
+<Col id="menuId">49</Col>
+<Col id="menuName">원격제어이력</Col>
+<Col id="menuDesc">원격제어이력</Col>
+<Col id="menuUrl">CcMgMsLg::CcMgMstscLog.xfdl</Col>
+<Col id="parentMenuId">47</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">2</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ag_01</Col>
+<Col id="screenNo">0702</Col>
+</Row>
+<Row >
+<Col id="menuId">50</Col>
+<Col id="menuName">상태값수신이력</Col>
+<Col id="menuDesc">상태값수신이력</Col>
+<Col id="menuUrl">CcMgStLg::CcMgStateLog.xfdl</Col>
+<Col id="parentMenuId">47</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">3</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ag_02</Col>
+<Col id="screenNo">0703</Col>
+</Row>
+<Row >
+<Col id="menuId">51</Col>
+<Col id="menuName">상수검색이력</Col>
+<Col id="menuDesc">상수검색이력</Col>
+<Col id="menuUrl">CcMgRiLg::CcMgSearchLog.xfdl</Col>
+<Col id="parentMenuId">47</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">4</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ag_03</Col>
+<Col id="screenNo">0704</Col>
+</Row>
+<Row >
+<Col id="menuId">52</Col>
+<Col id="menuName">시스템관리</Col>
+<Col id="menuDesc">시스템관리</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId"></Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">8</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ah</Col>
+<Col id="screenNo">0800</Col>
+</Row>
+<Row >
+<Col id="menuId">53</Col>
+<Col id="menuName">환경부자동측정망코드관리</Col>
+<Col id="menuDesc">환경부자동측정망코드관리</Col>
+<Col id="menuUrl">StMgMeCd::StMgMeCd.xfdl</Col>
+<Col id="parentMenuId">52</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ah_00</Col>
+<Col id="screenNo">0801</Col>
+</Row>
+<Row >
+<Col id="menuId">54</Col>
+<Col id="menuName">지자체연계망코드관리</Col>
+<Col id="menuDesc">지자체연계망코드관리</Col>
+<Col id="menuUrl">StMgMnCd::StMgMnCd.xfdl</Col>
+<Col id="parentMenuId">52</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">2</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ah_01</Col>
+<Col id="screenNo">0802</Col>
+</Row>
+<Row >
+<Col id="menuId">55</Col>
+<Col id="menuName">환경부자동측정망정보관리</Col>
+<Col id="menuDesc">환경부자동측정망정보관리</Col>
+<Col id="menuUrl">StMgMeIf::StMgMeIf.xfdl</Col>
+<Col id="parentMenuId">52</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">3</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ah_02</Col>
+<Col id="screenNo">0803</Col>
+</Row>
+<Row >
+<Col id="menuId">56</Col>
+<Col id="menuName">지자체연계망정보관리</Col>
+<Col id="menuDesc">지자체연계망정보관리</Col>
+<Col id="menuUrl">StMgMnIf::StMgMnIf.xfdl</Col>
+<Col id="parentMenuId">52</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">4</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ah_03</Col>
+<Col id="screenNo">0804</Col>
+</Row>
+<Row >
+<Col id="menuId">57</Col>
+<Col id="menuName">연관통계관리</Col>
+<Col id="menuDesc">연관통계관리</Col>
+<Col id="menuUrl">StMgRsMg::StMgRsMg.xfdl</Col>
+<Col id="parentMenuId">52</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">5</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ah_04</Col>
+<Col id="screenNo">0805</Col>
+</Row>
+<Row >
+<Col id="menuId">58</Col>
+<Col id="menuName">SMS관리</Col>
+<Col id="menuDesc">SMS관리</Col>
+<Col id="menuUrl">StMgSmSd::StmgSmSd.xfdl</Col>
+<Col id="parentMenuId">52</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">6</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ah_05</Col>
+<Col id="screenNo">0806</Col>
+</Row>
+<Row >
+<Col id="menuId">59</Col>
+<Col id="menuName">사용자관리</Col>
+<Col id="menuDesc">사용자관리</Col>
+<Col id="menuUrl">StMgUsMg::StMgUsMg.xfdl</Col>
+<Col id="parentMenuId">52</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">7</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ah_06</Col>
+<Col id="screenNo">0807</Col>
+</Row>
+<Row >
+<Col id="menuId">60</Col>
+<Col id="menuName">권한관리</Col>
+<Col id="menuDesc">권한관리</Col>
+<Col id="menuUrl">StMgAtMg::AhMgAuth.xfdl</Col>
+<Col id="parentMenuId">52</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">8</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ah_07</Col>
+<Col id="screenNo">0808</Col>
+</Row>
+<Row >
+<Col id="menuId">61</Col>
+<Col id="menuName">이력관리</Col>
+<Col id="menuDesc">이력관리</Col>
+<Col id="menuUrl">StMgLoMg::StMgLoMg.xfdl</Col>
+<Col id="parentMenuId">52</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">9</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ah_08</Col>
+<Col id="screenNo">0809</Col>
+</Row>
+<Row >
+<Col id="menuId">62</Col>
+<Col id="menuName">환경설정</Col>
+<Col id="menuDesc">환경설정</Col>
+<Col id="menuUrl">StMgSySu::StMgSySu.xfdl</Col>
+<Col id="parentMenuId">52</Col>
+<Col id="funcId">1</Col>
+<Col id="dispOrder">10</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ah_09</Col>
+<Col id="screenNo">0810</Col>
+</Row>
+<Row >
+<Col id="menuId">63</Col>
+<Col id="menuName">다중이용시설관리</Col>
+<Col id="menuDesc">다중이용시설관리</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId"></Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ma</Col>
+<Col id="screenNo">0100</Col>
+</Row>
+<Row >
+<Col id="menuId">64</Col>
+<Col id="menuName">오염도검사관리</Col>
+<Col id="menuDesc">오염도검사관리</Col>
+<Col id="menuUrl">MnMgMtFc::MtFcPollutionList.xfdl</Col>
+<Col id="parentMenuId">63</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ma_00</Col>
+<Col id="screenNo">0101</Col>
+</Row>
+<Row >
+<Col id="menuId">65</Col>
+<Col id="menuName">자가측정자료관리</Col>
+<Col id="menuDesc">자가측정자료관리</Col>
+<Col id="menuUrl">MnMgMtFc::MtFcSelfList.xfdl</Col>
+<Col id="parentMenuId">63</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">2</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ma_01</Col>
+<Col id="screenNo">0102</Col>
+</Row>
+<Row >
+<Col id="menuId">66</Col>
+<Col id="menuName">오염도검사확정관리</Col>
+<Col id="menuDesc">오염도검사확정관리</Col>
+<Col id="menuUrl">MnMgMtFc::MtFcPollutionConfirm.xfdl</Col>
+<Col id="parentMenuId">63</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">3</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ma_02</Col>
+<Col id="screenNo">0103</Col>
+</Row>
+<Row >
+<Col id="menuId">67</Col>
+<Col id="menuName">자가측정자료확정관리</Col>
+<Col id="menuDesc">자가측정자료확정관리</Col>
+<Col id="menuUrl">MnMgMtFc::MtFcSelfConfirm.xfdl</Col>
+<Col id="parentMenuId">63</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">4</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ma_03</Col>
+<Col id="screenNo">0104</Col>
+</Row>
+<Row >
+<Col id="menuId">68</Col>
+<Col id="menuName">시설관리</Col>
+<Col id="menuDesc">시설관리</Col>
+<Col id="menuUrl">MnMgMtFc::MtFcFacilityYearList.xfdl</Col>
+<Col id="parentMenuId">63</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">5</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">ma_04</Col>
+<Col id="screenNo">0105</Col>
+</Row>
+<Row >
+<Col id="menuId">69</Col>
+<Col id="menuName">공동주택관리</Col>
+<Col id="menuDesc">공동주택관리</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId"></Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">2</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mb</Col>
+<Col id="screenNo">0200</Col>
+</Row>
+<Row >
+<Col id="menuId">70</Col>
+<Col id="menuName">오염도검사관리</Col>
+<Col id="menuDesc">오염도검사관리</Col>
+<Col id="menuUrl">MnMgNwBd::NwBdPollutionList.xfdl</Col>
+<Col id="parentMenuId">69</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mb_00</Col>
+<Col id="screenNo">0201</Col>
+</Row>
+<Row >
+<Col id="menuId">71</Col>
+<Col id="menuName">자가측정자료관리</Col>
+<Col id="menuDesc">자가측정자료관리</Col>
+<Col id="menuUrl">MnMgNwBd::NwBdSelfList.xfdl</Col>
+<Col id="parentMenuId">69</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">2</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mb_01</Col>
+<Col id="screenNo">0202</Col>
+</Row>
+<Row >
+<Col id="menuId">72</Col>
+<Col id="menuName">오염도검사확정관리</Col>
+<Col id="menuDesc">오염도검사확정관리</Col>
+<Col id="menuUrl">MnMgNwBd::NwBdPollutionConfirm.xfdl</Col>
+<Col id="parentMenuId">69</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">3</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mb_02</Col>
+<Col id="screenNo">0203</Col>
+</Row>
+<Row >
+<Col id="menuId">73</Col>
+<Col id="menuName">자가측정자료확정관리</Col>
+<Col id="menuDesc">자가측정자료확정관리</Col>
+<Col id="menuUrl">MnMgNwBd::NwBdSelfConfirm.xfdl</Col>
+<Col id="parentMenuId">69</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">4</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mb_03</Col>
+<Col id="screenNo">0204</Col>
+</Row>
+<Row >
+<Col id="menuId">74</Col>
+<Col id="menuName">이동식측정자료관리</Col>
+<Col id="menuDesc">이동식측정자료관리</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId"></Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">3</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mc</Col>
+<Col id="screenNo">0300</Col>
+</Row>
+<Row >
+<Col id="menuId">75</Col>
+<Col id="menuName">이동식측정자료관리</Col>
+<Col id="menuDesc">이동식측정자료관리</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId">74</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mc_00</Col>
+<Col id="screenNo">0301</Col>
+</Row>
+<Row >
+<Col id="menuId">76</Col>
+<Col id="menuName">다중이용시설분석</Col>
+<Col id="menuDesc">다중이용시설분석</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId"></Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">4</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">md</Col>
+<Col id="screenNo">0400</Col>
+</Row>
+<Row >
+<Col id="menuId">77</Col>
+<Col id="menuName">다중이용시설현황</Col>
+<Col id="menuDesc">다중이용시설현황</Col>
+<Col id="menuUrl">MnAnMtFc::MtFcState.xfdl</Col>
+<Col id="parentMenuId">76</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">md_00</Col>
+<Col id="screenNo">0401</Col>
+</Row>
+<Row >
+<Col id="menuId">78</Col>
+<Col id="menuName">오염도검사실적</Col>
+<Col id="menuDesc">오염도검사실적</Col>
+<Col id="menuUrl">MnAnMtFc::MtFcPollutionResult.xfdl</Col>
+<Col id="parentMenuId">76</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">2</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">md_01</Col>
+<Col id="screenNo">0402</Col>
+</Row>
+<Row >
+<Col id="menuId">79</Col>
+<Col id="menuName">오염도검사측정결과</Col>
+<Col id="menuDesc">오염도검사측정결과</Col>
+<Col id="menuUrl">MnAnMtFc::MtFcPollutionMeasure.xfdl</Col>
+<Col id="parentMenuId">76</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">3</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">md_02</Col>
+<Col id="screenNo">0403</Col>
+</Row>
+<Row >
+<Col id="menuId">80</Col>
+<Col id="menuName">지도점검결과</Col>
+<Col id="menuDesc">지도점검결과</Col>
+<Col id="menuUrl">MnAnMtFc::MtFcGuidanceResult.xfdl</Col>
+<Col id="parentMenuId">76</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">4</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">md_03</Col>
+<Col id="screenNo">0404</Col>
+</Row>
+<Row >
+<Col id="menuId">81</Col>
+<Col id="menuName">공동주택분석</Col>
+<Col id="menuDesc">공동주택분석</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId"></Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">5</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">me</Col>
+<Col id="screenNo">0500</Col>
+</Row>
+<Row >
+<Col id="menuId">82</Col>
+<Col id="menuName">공동주택현황</Col>
+<Col id="menuDesc">공동주택현황</Col>
+<Col id="menuUrl">MnAnNwBd::NwBdState.xfdl</Col>
+<Col id="parentMenuId">81</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">me_00</Col>
+<Col id="screenNo">0501</Col>
+</Row>
+<Row >
+<Col id="menuId">83</Col>
+<Col id="menuName">시공자측정공고현황</Col>
+<Col id="menuDesc">시공자측정공고현황</Col>
+<Col id="menuUrl">MnAnNwBd::NwBdSelfState.xfdl</Col>
+<Col id="parentMenuId">81</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">2</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">me_01</Col>
+<Col id="screenNo">0502</Col>
+</Row>
+<Row >
+<Col id="menuId">84</Col>
+<Col id="menuName">오염도검사실적</Col>
+<Col id="menuDesc">오염도검사실적</Col>
+<Col id="menuUrl">MnAnNwBd::NwBdPollutionResult.xfdl</Col>
+<Col id="parentMenuId">81</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">3</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">me_02</Col>
+<Col id="screenNo">0503</Col>
+</Row>
+<Row >
+<Col id="menuId">85</Col>
+<Col id="menuName">오염도검사측정결과</Col>
+<Col id="menuDesc">오염도검사측정결과</Col>
+<Col id="menuUrl">MnAnNwBd::NwBdPollutionMeasure.xfdl</Col>
+<Col id="parentMenuId">81</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">4</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">me_03</Col>
+<Col id="screenNo">0504</Col>
+</Row>
+<Row >
+<Col id="menuId">86</Col>
+<Col id="menuName">지도점검결과</Col>
+<Col id="menuDesc">지도점검결과</Col>
+<Col id="menuUrl">MnAnNwBd::NwBdDanceGuiResult.xfdl</Col>
+<Col id="parentMenuId">81</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">5</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">me_04</Col>
+<Col id="screenNo">0505</Col>
+</Row>
+<Row >
+<Col id="menuId">87</Col>
+<Col id="menuName">이동식측정자료분석</Col>
+<Col id="menuDesc">이동식측정자료분석</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId"></Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">6</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mf</Col>
+<Col id="screenNo">0600</Col>
+</Row>
+<Row >
+<Col id="menuId">88</Col>
+<Col id="menuName">이동식측정자료분석</Col>
+<Col id="menuDesc">이동식측정자료분석</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId">87</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mf_00</Col>
+<Col id="screenNo">0601</Col>
+</Row>
+<Row >
+<Col id="menuId">89</Col>
+<Col id="menuName">시스템관리</Col>
+<Col id="menuDesc">시스템관리</Col>
+<Col id="menuUrl"></Col>
+<Col id="parentMenuId"></Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">7</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mg</Col>
+<Col id="screenNo">0700</Col>
+</Row>
+<Row >
+<Col id="menuId">90</Col>
+<Col id="menuName">다중이용시설코드관리</Col>
+<Col id="menuDesc">다중이용시설코드관리</Col>
+<Col id="menuUrl">StMgMfCd::StMgMfCd.xfdl</Col>
+<Col id="parentMenuId">89</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">1</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mg_00</Col>
+<Col id="screenNo">0701</Col>
+</Row>
+<Row >
+<Col id="menuId">91</Col>
+<Col id="menuName">공동주택코드관리</Col>
+<Col id="menuDesc">공동주택코드관리</Col>
+<Col id="menuUrl">StMgNbCd::StMgNbCd.xfdl</Col>
+<Col id="parentMenuId">89</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">2</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mg_01</Col>
+<Col id="screenNo">0702</Col>
+</Row>
+<Row >
+<Col id="menuId">92</Col>
+<Col id="menuName">다중이용시설정보관리</Col>
+<Col id="menuDesc">다중이용시설정보관리</Col>
+<Col id="menuUrl">StMgMfIf::StMgMflf.xfdl</Col>
+<Col id="parentMenuId">89</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">3</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mg_02</Col>
+<Col id="screenNo">0703</Col>
+</Row>
+<Row >
+<Col id="menuId">93</Col>
+<Col id="menuName">공동주택정보관리</Col>
+<Col id="menuDesc">공동주택정보관리</Col>
+<Col id="menuUrl">StMgNbIf::StMgNbIf.xfdl</Col>
+<Col id="parentMenuId">89</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">4</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mg_03</Col>
+<Col id="screenNo">0704</Col>
+</Row>
+<Row >
+<Col id="menuId">94</Col>
+<Col id="menuName">사용자관리</Col>
+<Col id="menuDesc">사용자관리</Col>
+<Col id="menuUrl">StMgUsMg::StMgUsMg.xfdl</Col>
+<Col id="parentMenuId">89</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">5</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mg_04</Col>
+<Col id="screenNo">0705</Col>
+</Row>
+<Row >
+<Col id="menuId">95</Col>
+<Col id="menuName">권한관리</Col>
+<Col id="menuDesc">권한관리</Col>
+<Col id="menuUrl">StMgAtMg::AhMgAuth.xfdl</Col>
+<Col id="parentMenuId">89</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">6</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mg_05</Col>
+<Col id="screenNo">0706</Col>
+</Row>
+<Row >
+<Col id="menuId">96</Col>
+<Col id="menuName">이력관리</Col>
+<Col id="menuDesc">이력관리</Col>
+<Col id="menuUrl">StMgLoMg::StMgLoMg.xfdl</Col>
+<Col id="parentMenuId">89</Col>
+<Col id="funcId">2</Col>
+<Col id="dispOrder">7</Col>
+<Col id="useYn">Y</Col>
+<Col id="imgUrl">mg_06</Col>
+<Col id="screenNo">0707</Col>
+</Row>
+		<Row type="update">
+			<Col id="menuId">97</Col>
+			<Col id="menuName">환경설정</Col>
+			<Col id="menuDesc">환경설정1</Col>
+			<Col id="menuUrl"></Col>
+			<Col id="parentMenuId">89</Col>
+			<Col id="funcId">2</Col>
+			<Col id="dispOrder">8</Col>
+			<Col id="useYn">Y</Col>
+			<Col id="imgUrl">mg_07</Col>
+			<Col id="screenNo">0708</Col>
+			<OrgRow>
+				<Col id="menuId">97</Col>
+				<Col id="menuName">환경설정</Col>
+				<Col id="menuDesc">환경설정</Col>
+				<Col id="menuUrl"></Col>
+				<Col id="parentMenuId">89</Col>
+				<Col id="funcId">2</Col>
+				<Col id="dispOrder">8</Col>
+				<Col id="useYn">Y</Col>
+				<Col id="imgUrl">mg_07</Col>
+				<Col id="screenNo">0708</Col>
+			</OrgRow>
+		</Row>
+	</Rows>
+	</Dataset>
+</Root>

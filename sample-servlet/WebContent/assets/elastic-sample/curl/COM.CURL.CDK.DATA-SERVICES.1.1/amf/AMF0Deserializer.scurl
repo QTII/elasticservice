@@ -1,0 +1,218 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{define-class public AMF0Deserializer
+
+  field private constant input:ByteInputStream
+  field private constant obj-ref:AMF0References
+  field private constant mapper:AMFObjectAdapters
+
+  || constructor
+  {constructor public {default
+                          input:ByteInputStream,
+                          mapper:AMFObjectAdapters = AMFObjectAdapters.standard
+                      }
+    set self.input = input
+    set self.mapper = mapper
+    set self.obj-ref = {AMF0References}
+  }
+
+  {method public {deserialize}:AMFEnvelope
+
+    def p-ver = {marshal-in-uint16 self.input}
+    def env = {AMFEnvelope version = (p-ver asa int16)}
+
+    || read headers
+    def header-count = {marshal-in-uint16 self.input}
+    {for i:int=0 below header-count do
+        def name = {self.read-string}
+        def must-understand? = {marshal-in-bool self.input}
+        def length = {marshal-in-int self.input}
+        def value = {self.read-one}
+        {env.add-header
+            {AMFHeader name, must-understand?, value}
+        }
+    }
+
+    || read messages
+    def msg-count = {marshal-in-uint16 self.input}
+    {for i:int=0 below msg-count do
+        def target-uri = {self.read-string}
+        def response-uri = {self.read-string}
+        def length = {marshal-in-uint self.input}
+        def value = {self.read-one}
+        {env.add-body
+            {AMFBody
+                target-uri = target-uri,
+                response-uri = response-uri,
+                value
+            }
+        }
+    }
+
+    {return env}
+  }
+
+  || Neither movieclip type nor recordset type is supported.
+  || They are just reserved.
+  {method public open {read-one}:any
+    def type = {marshal-in-uint8 self.input}
+    {return
+        {switch type
+         case AMF0Marker.number-maker.value do
+            {marshal-in-double self.input}
+         case AMF0Marker.boolean-marker.value do
+            {marshal-in-bool self.input}
+         case AMF0Marker.string-marker.value do
+            {self.read-string}
+         case AMF0Marker.object-marker.value do
+            {self.read-object}
+         case AMF0Marker.null-marker.value do
+            null
+         case AMF0Marker.undefined-marker.value do
+            null
+         case AMF0Marker.reference-marker.value do
+            {self.read-reference}
+         case AMF0Marker.ecma-array-marker.value do
+            {self.read-ecma-array}
+         case AMF0Marker.object-end-marker.value do
+            null
+         case AMF0Marker.strict-array-marker.value do
+            {self.read-strict-array}
+         case AMF0Marker.date-marker.value do
+            {self.read-date}
+         case AMF0Marker.long-string-marker.value do
+            {self.read-string long? = true}
+         case AMF0Marker.unsupported-marker.value do
+            null
+         case AMF0Marker.xml-document-marker.value do
+            {self.read-xml-document}
+         case AMF0Marker.typed-object-marker.value do
+            {self.read-typed-object}
+         case AMF0Marker.avmplus-object-marker.value do
+            def amf3-deserializer = {AMF3Deserializer self.input, mapper = self.mapper}
+            {amf3-deserializer.read-one}
+         else
+            {throw {AMFException {lmessage Unsupported AMF0 type {value type}.}}}
+        }
+    }
+  }
+
+
+  || read utf8 strings.
+  {method public open {read-string long?:bool = false}:String
+    def n = {if long? then
+                {marshal-in-uint self.input}
+             else
+                {marshal-in-uint16 self.input}
+            }
+    def vals = {self.input.read n = (n asa int)}
+    def (num-bytes-decoded, chars) = {decode-characters
+                                         vals.underlying-FastArray,
+                                         CharEncoding.utf8
+                                     }
+    {return chars}
+  }
+
+
+  || read amf0 objects.
+  {method public open {read-object class-name:#String = null}:DataObject
+    def obj =
+        {if-non-null class-name then
+            {DataObject
+                traits = {DataObjectTraits class-name, {StringArray}}}
+         else
+            {DataObject}
+        }
+    {self.obj-ref.add-object obj}
+    let name:String = {self.read-string}
+    {while not name.empty? do
+        def val = {self.read-one}
+        set obj[name] = val
+        set name = {self.read-string}
+    }
+    {assert
+        {marshal-in-uint8 self.input} == AMF0Marker.object-end-marker.value
+    }
+    {return obj}
+  }
+
+  {method public open {read-typed-object}:DataObject
+    {return
+        {self.read-object class-name = {self.read-string}}}
+  }
+
+  || read references.
+  {method public open {read-reference}:any
+    def index = {marshal-in-uint16 self.input}
+    {return {self.obj-ref.get-object index}}
+  }
+
+
+  || read strict array
+  {method public open {read-strict-array}:{Array-of any}
+    def count = {marshal-in-uint self.input}
+    def ret = {{Array-of any} efficient-size = count asa int}
+    {self.obj-ref.add-object ret}
+
+    {for i:uint=0 below count do
+        {ret.append {self.read-one}}
+    }
+    {return ret}
+  }
+
+  {method public open {read-ecma-array}:{HashTable-of String, any}
+    def count = {marshal-in-uint self.input}
+    def ret = {{HashTable-of String, any} efficient-size = count asa int}
+    {self.obj-ref.add-object ret}
+
+    {for i:uint=0 below count do
+        def key = {self.read-string}
+        def val = {self.read-one}
+        set ret[key] = val
+    }
+    {assert {self.read-string}.empty?}
+    {assert {marshal-in-uint8 self.input} ==
+        AMF0Marker.object-end-marker.value}
+    {return ret}
+  }
+
+
+  {method public open {read-date}:DateTime
+    let (seconds:double, partial-seconds:double) =
+        {floor {marshal-in-double self.input}, 1000.0}
+    let time-zone:int16 = {marshal-in-int16 self.input}||reserved, not supported
+    {return
+        {DateTime
+            {DateTimeData
+                DateTimeData.epoch-simple.epoch-second +
+                (seconds asa int64),
+                partial-second =
+                    (partial-seconds / 1000.0 * {ldexp 1.0, 63}) asa int64
+            },
+            zone = DateTimeZone.utc
+        }
+    }
+  }
+
+  || TODO: adapter for XDMDocument
+  {method public open {read-xml-document}:Object
+    def chars = {self.read-string long? = true}
+    def xml = {AMFXmlDocument chars}
+    {return xml}
+  }
+
+}

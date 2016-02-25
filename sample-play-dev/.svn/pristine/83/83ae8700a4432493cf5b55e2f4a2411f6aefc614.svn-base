@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebSocket Chat Client</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+	<script src="../html5/elastic-init-1.4.3.jsp"></script>
+	<script src="../html5/elastic-util-1.5.js"></script>
+    <script type="text/javascript" src="../html5/prototype.js"></script>
+
+    <script type="text/javascript">
+        document.observe("dom:loaded", function() {
+	        var ws;
+            function log(text) {
+                // $("log").innerHTML = (new Date).getTime() + ": " + (!Object.isUndefined(text) && text !== null ? text.escapeHTML() : "null") + $("log").innerHTML;
+                $("log").value = (new Date).getTime() + ": " + text + $("log").value;
+            }
+
+            if (!window.WebSocket) {
+                alert("FATAL: WebSocket not natively supported. This demo will not work!");
+            }
+
+
+            $("uriForm").observe("submit", function(e) {
+                e.stop();
+                ws = new WebSocket($F("uri"));
+                ws.onopen = function() {
+                    log("[WebSocket#onopen]\n");
+                }
+                ws.onmessage = function(e) {
+                    log("[WebSocket#onmessage] Message: '" + e.data + "'\n");
+                }
+                ws.onclose = function() {
+                    log("[WebSocket#onclose]\n");
+                    $("uri", "connect").invoke("enable");
+                    $("disconnect").disable();
+                    ws = null;
+                }
+                $("uri", "connect").invoke("disable");
+                $("disconnect").enable();
+            });
+
+            $("sendForm").observe("submit", function(e) {
+                e.stop();
+                if (ws) {
+                	$("log").value = "";
+                    var textField = $("textField");
+                    ws.send(textField.value);
+                    log("[WebSocket#send]      Send:    '" + textField.value + "'\n");
+                    //textField.value = "";
+                    textField.focus();
+                }
+            });
+
+            $("Echo").observe("click", function(e) {
+                e.stop();
+               	$("textField").value = "cmd=SendTo&dstID=self&cmd.resType=PlatformXml&param1=Hello&COL_col1=Good";
+            });
+
+            $("Broadcast").observe("click", function(e) {
+                e.stop();
+               	$("textField").value = "cmd=SendTo&dstID=broadcast&cmd.resType=PlatformXml&param1=Hello&COL_col1=Good";
+            });
+
+            $("selfQuery").observe("click", function(e) {
+                e.stop();
+               	$("textField").value = "cmd=DefaultService&dstID=self&cmd.resType=PlatformXml&sqlId=sample.mysql_select1&COL_city=Illsan";
+            });
+
+            $("broadcastQuery").observe("click", function(e) {
+                e.stop();
+               	$("textField").value = "cmd=DefaultService&dstID=broadcast&cmd.resType=PlatformXml&sqlId=sample.mysql_select1&COL_city=Illsan";
+            });
+
+            $("disconnect").observe("click", function(e) {
+                e.stop();
+                if (ws) {
+                    ws.close();
+                    ws = null;
+                }
+            });
+        });
+    </script>
+  </head>
+  <body>
+  		<H3>WebSocket Sample</H3>
+      <form id="uriForm">
+      	<input type="text" id="uri" value="ws://localhost:8887" style="width:200px;"> 
+      	<input type="submit" id="connect" value="Connect">
+      	<input type="button" id="disconnect" value="Disconnect" disabled="disabled">
+      </form><br>
+      <form id="sendForm">
+      	<font size=2><b>Choose a service :</b></font> 
+      	<input type="button" id="Echo" value="Echo">
+      	<input type="button" id="Broadcast" value="Broadcast">
+      	<input type="button" id="selfQuery" value="Run a query and receive its result">
+      	<input type="button" id="broadcastQuery" value="Run a query and broadcast its result">
+      	<br>
+      	<input type="text" id="textField" value="" style="width:600px;"> 
+      	<input type="submit" value="Send">
+      </form><br>
+      <form>
+      	<textarea id="log" rows="30" cols="100" style="font-family:monospace; color:red;"></textarea>
+      </form><br>
+  </body>
+</html>

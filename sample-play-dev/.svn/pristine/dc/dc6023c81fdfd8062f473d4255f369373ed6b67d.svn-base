@@ -1,0 +1,194 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{curl 8.0 applet}
+
+{applet manifest = "manifest.mcurl", locale = "en"}
+
+{include "../utils/guide-header.scurl"}
+{include "../utils/support.scurl"}
+
+{chapter
+    index= {HeadingIndex primary-key="Curl Data Kit Data Services"},
+    CDK Data Services Overview
+}
+{paragraph
+    With Curl Data Kit library Data Services (CDK-DS) packages,
+    you can use remoting and messaging to interact with
+    servers supporting the AMF data transfer protocol.
+}
+{summary
+
+    The CDK-DS implements all the remoting and web messaging services
+    that are supported by the open source BlazeDS server,
+    including remote procedure calls (RPC) and publish/subscribe messaging.
+    {itemize
+
+        {item {bold Remoting}
+            
+            The {docref COM.CURL.CDK.RPC} package
+            provides a {docref RemoteObject} adapter
+            for invocation of remote methods.
+
+            This allows Curl applications to invoke
+            remote methods available from AMF service providers.
+        }
+
+        {item {bold Messaging}
+            
+            The {docref COM.CURL.CDK.MESSAGING} package
+            provides a {docref Producer} and {docref Consumer} adapters
+            for exchange of messages with AMF service providers.
+
+            This allows Curl applications to participate in
+            Publish / Subscribe message exchange.
+        }
+
+        {item  {bold Data Object}
+            
+            The {docref COM.CURL.CDK.DATA-OBJECT} package
+            provides a flexible representation for data records.
+
+            This allows data centric Curl applications to
+            work in a uniform way with data obtained from data services.
+        }
+    }
+}
+{paragraph
+    CDK-DS development takes place at the Open Source
+    {link href = {url "http://curl-cdk.wiki.sourceforge.net/"},
+    Curl Data Kit Project}.
+    
+}
+
+{heading level=2,
+    What's New in CDK-DS 1.1
+}
+
+{paragraph
+    This CDK-DS Release is a manintenance release,
+    for use with Curl API Version 7.0.
+
+    CDK-DS packages are marked as version 1.1.
+
+    {itemize
+        {item CDK-DS Developer's Guide is indexed for full text search}
+    }
+
+}
+
+{heading level=2,
+    What was New in CDK-DS 1.0
+}
+
+{paragraph
+    This CDK-DS Initial Release is for use with Curl API Version 6.0.
+
+    CDK-DS Initial Release packages are marked as version 1.0.
+
+    {itemize
+        {item 
+            {link href = {url "cdk-ds-remoting.curl"}, 
+            Remoting}}
+        {item 
+            {link href = {url "cdk-ds-messaging.curl"}, 
+            Messaging}}
+        {item 
+            {link href = {url "cdk-ds-data-object.curl"}, 
+            Data Object}}
+    }
+}
+
+{paragraph
+    This is the first CDK-DS Release.
+}
+
+|| ====================
+{heading level=2,    
+    destination-name = "amf-protocol",
+    AMF Protocol 
+}
+
+{paragraph
+    Action Message Format (AMF) is a compact binary data transfer format used
+    originally for serializing ActionScript object graphs.
+
+    The AMF protocol specification is open source, described by these documents:
+    {itemize
+        {item
+            {link href = {url "http://download.macromedia.com/pub/labs/amf/amf3_spec_121207.pdf"},
+            AMF 3 Specification}
+        }
+        {item
+            {link href = {url "http://download.macromedia.com/pub/labs/amf/amf0_spec_121207.pdf"},
+            AMF 0 Specification}
+        }}
+
+    It is now supported on a wide range of server platforms, including
+    {itemize
+        {item
+            {link href = {url "http://opensource.adobe.com/wiki/display/blazeds/Overview"},
+            BlazeDS}
+        }
+        {item
+            {link href = {url "http://www.adobe.com/products/livecycle/dataservices/"},
+            LiveCycle Data Services}
+        }
+        {item
+            {link href = {url "http://www.themidnightcoders.com/products.html"},
+            WebORB}
+        }
+        {item
+            {link href = {url "http://framework.zend.com/manual/en/zend.amf.html"},
+            Zend Framework}
+        }}
+}
+
+|| ====================
+{heading level=2,
+    destination-name = "samples-project",
+    CDK-DS Sample Applications
+}
+{def samples-loc = {url "samples/"}}
+{def samples-zip-loc = {samples-loc.merge "blazeds-curl-samples.zip"}}
+{def samples-readme-loc = {samples-loc.merge  "blazeds/curl-samples/README.txt"}}
+{def samples-project-loc = {samples-loc.merge  "blazeds/curl-samples/project.cprj"}}
+
+{paragraph
+    The sample applications referenced in this developers guide
+    work with testdrive services provided with
+    {link href = {url "http://opensource.adobe.com/wiki/display/blazeds/Release+Builds"},
+    BlazeDS Turnkey distribution} version {monospace 3.2.0978}.
+
+    These examples are supplied as an archive file (.zip) in
+    {link href = samples-zip-loc, {value samples-zip-loc.filename}}
+
+    See {link href = samples-readme-loc, {value samples-readme-loc.filename}}
+    for information of setting up BlazeDS Turnkey installation with these Curl samples.
+
+    Note that samples that access service use localhost as the hostname, and 8400 as the port.
+    || TODO: checking
+
+    Source code for the samples is collected in a Curl project,
+    that can be loaded into the IDE:  
+    {link href = {curl-edit-url samples-project-loc}, {value samples-project-loc.filename}}
+ 
+    || TODO: Note that files under this directory can be deleted or modified when you reinstall or upgrade Curl.
+}
+
+|| ====================
+{curl-copyright}
+

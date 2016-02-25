@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		
+		<!--  jQuery Mobile 1.4.2 CDN -->
+<!-- 		<link rel="stylesheet" href="../html5/jqm/1.4.2/css/themes/default/jquery.mobile-1.4.2.min.css" /> -->
+<!-- 		<script src="../html5/jq/jquery-1.9.1.min.js"></script> -->
+<!-- 		<script src="../html5/jqm/1.4.2/js/jquery.mobile-1.4.2.min.js"></script> -->
+		
+		<!--  jQuery Mobile 1.3.2 CDN -->
+		<link rel="stylesheet" href="../html5/jqm/1.3.2/css/themes/default/jquery.mobile-1.3.2.min.css" />
+		<script src="../html5/jq/jquery-1.9.1.min.js"></script>
+		<script src="../html5/elastic-init-1.4.3.jsp"></script>
+		<script src="../html5/elastic-util-1.5.js"></script>
+		
+		<!-- 
+			jQuery mobile의 event 관련 초기화 코드는 항상 여기에 둔다. 
+			즉, jquery.js와 jquery.mobile.js 사이. 
+		-->
+		<script>
+			// Initialization Event
+			$(document).on("mobileinit", function() {
+				// 페이지 기본 애니메이션 변경
+				$.mobile.defaultPageTransition = "flow";
+				// 다이얼로그 기본 애니메이션 변경
+				$.mobile.defaultDialogTransition = "turn";
+				// ajax 사용 여부
+				$.mobile.ajaxEnabled = true;
+				
+				/*
+					터치 이벤트
+					tap: 눌렀을 때
+				 */
+				 $(document).on("tap", "#btn", function(e) {
+					    var postData = $("#form1").serializeArray();
+					    var formURL = elastic_baseUrl() + "/main";//$("#form1").attr("action");
+						$.ajax({
+							// 접속할 페이지의 주소
+					        url : formURL,
+							// 전송타입(post, get)
+					        type: "GET",
+							// 수신 데이터 타입(text, html, xml, json)
+							dataType: "html",
+							// 데이터
+					        data : postData,
+							// 통신이 성공하면 호출되는 함수
+							success: function(resData) {
+								$('#result').html("<button onClick=\"$('#result').html('')\">Clear Result</button><xmp>" + resData + "</xmp>");
+							},
+							// 통신이 실패하면 호출되는 함수
+							error: function(error) {
+								$('#result').html("error: " + error.code);
+							}
+						})
+						e.preventDefault(); //STOP default action
+					    e.unbind(); //unbind. to stop multiple form submit.
+					});
+			});
+		</script>
+		
+		<script src="../html5/jqm/1.3.2/js/jquery.mobile-1.3.2.min.js"></script>
+</head>
+<BODY>
+	<div data-role="page">
+		<div data-role="header">
+			<h1>Set session's expiration time (seconds)</h1>
+			<a href="javascript:window.history.go(-1)" data-theme="a" data-ajax="false">Home</a>
+		</div>
+		
+		<div data-role="content">
+		<UL>
+			<LI>
+				<FORM METHOD="GET" ID="form1">
+					<B>URL :</B> <script>document.write(elastic_baseUrl())</script>/main<BR> 
+					<div data-role="fieldcontain"> 
+					?cmd=<INPUT TYPE=TEXT NAME='cmd' VALUE="SessionService"><BR>
+					</div>
+					<div data-role="fieldcontain"> 
+					&cmd.resType=<SELECT NAME="cmd.resType">
+						<OPTION VALUE="ME20">MakeElastic(ME20)</OPTION>
+						<OPTION VALUE="PlatformXml" selected>XML</OPTION>
+						<OPTION VALUE="PWPLUS10">PWPLUS10</OPTION>
+						<OPTION VALUE="PWPLUS15">PWPLUS15</OPTION>
+						<OPTION VALUE="JSON10">JSON10</OPTION>
+						<OPTION VALUE="JSON11">JSON11</OPTION>
+						<OPTION VALUE="JSON12" selected>JSON12</OPTION>
+						<OPTION VALUE="CSV">엑셀(XLS)</OPTION>
+						</SELECT><BR>
+					</div>
+					<div data-role="fieldcontain"> 
+					?sessionTimeout=<INPUT TYPE=TEXT NAME='sessionTimeout' VALUE="10"><BR>
+					</div>
+						 <button id="btn">Submit</button>
+				</FORM>
+			</LI>
+			<P>
+			<LI><B>Result :</B> <div id="result"></div></LI>
+		</UL>
+		</div>
+	</div>
+</BODY>
+</HTML>

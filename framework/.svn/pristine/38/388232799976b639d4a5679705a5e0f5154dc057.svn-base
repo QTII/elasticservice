@@ -1,0 +1,18 @@
+package elasticservice.web.play
+
+import com.google.inject.AbstractModule
+import com.google.inject.ImplementedBy
+import com.typesafe.scalalogging.LazyLogging
+
+/**
+ * application.conf에 다음과 같이 Module을 등록해야 합니다.
+ *    - play.modules.enabled += "elastic.web.play.PlayConfigListener"
+ */
+class PlayConfigListenerAfterApp extends AbstractModule with LazyLogging {
+
+  private val PropElasticXML = "elasticXml"
+
+  def configure() = {
+    bind(classOf[Configurator]).to(classOf[PlayConfiguratorAfterApp]).asEagerSingleton
+  }
+}

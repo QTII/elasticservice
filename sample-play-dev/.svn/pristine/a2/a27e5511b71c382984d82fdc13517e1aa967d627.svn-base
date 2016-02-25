@@ -1,0 +1,38 @@
+
+-----------------------
+HTML Page 접속
+-----------------------
+
+http://localhost:9000/assets/index.html
+
+o 주의, conf\routes 파일에 다음과 같이 설정되어 있어야 합니다.
+GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+
+
+-----------------------
+Database Connection
+-----------------------
+
+이 데모용 Play 애플리케이션은 h2 database을 사용합니다.
+
+o h2 다운로드
+   . http://www.h2database.com/html/cheatSheet.html 에서 jar 다운로드
+   . 아무 디렉토리에 jar 파일 복사 (이하 D:\Dev\database\h2)
+
+o 콘솔 실행
+   . Command 창에서 다음 명령을 실행해서 h2 콘솔 실행.
+      - D:\Dev\database\h2>java -jar h2-1.4.190.jar
+	  
+   . 자동으로 브라우저가 콘솔에 접속을 합니다.(http://192.168.1.177:8082/)
+
+o 데이터베이스 파일 생성
+   . 콘솔에서 JDBC URL을 jdbc:h2:~/test 로 설정(default)하고 '연결' 버튼 클릭
+   . 이렇게 하면 윈도우즈 사용자 홈 디렉토리에 'test.mv.db' 파일 생성
+
+o Play 애플리케이션에서 Database 연결 설정
+   . conf/application.conf에 다음 사황을 활성화
+      db.default.driver=org.h2.Driver
+      db.default.url="jdbc:h2:~/test"
+      #db.default.url="jdbc:h2:tcp://localhost/~/test"
+      db.default.username= sa
+      db.default.password=""

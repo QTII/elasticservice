@@ -1,0 +1,174 @@
+ ||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{curl 8.0 applet}
+
+{applet manifest = "manifest.mcurl", locale = "en"}
+
+{include "../utils/guide-header.scurl"}
+{include "../utils/support.scurl"}
+
+{def samples-loc =
+    {url "samples/blazeds/curl-samples/"}
+}
+{chapter
+    index= {HeadingIndex primary-key="CDK Data Services Remoting"},
+    CDK Data Services Remoting
+}
+
+{summary    
+    The {docref COM.CURL.CDK.RPC} package
+    provides a {docref RemoteObject} adapter
+    for invocation of remote methods.
+
+    This allows Curl applications to invoke
+    remote methods available from AMF service providers.
+}
+|| ====================
+{heading level=2,    
+    Remote Object
+}
+{paragraph
+    Use {docref RemoteObject} to invoke remote methods
+    provided by AMF aware servers.
+
+    {itemize
+        {item Identify the service
+            by specifying the {ctext endpoint} Url
+            and the {ctext destination}
+            for {ctext RemoteObect}}
+
+        {item Obtain the operation by name 
+            using {docref-abbr AbstractService.get-operation}}
+
+        {item Prepare for the response by adding event handlers to the operation (or service)
+            {itemize
+                {item {docref ResultEvent} indicates a successful call,
+                    and contains the result returned}
+                {item {docref FaultEvent} indicates a failure condition
+                    and contains information about the fault}
+            }}
+
+        {item Invoke the operation,
+            by supplying the arguments  to {docref Operation.send}}
+    }
+}
+{paragraph
+    The {bold Remote Object} sample illustrates these techniques.
+
+    Editable source code is available in the
+    {link href = {url "cdk-ds-overview.curl#samples-project"}, sample applications}.
+}
+{x-code-ref title = {message Remote Object},
+    background = "beige",
+    {samples-loc.merge "testdrive-remoteobject/s-remoteobject.curl"}
+}
+{paragraph
+    Communication with the server is asynchronous,
+    so that the application can remain active
+    while awaiting a response from the server.
+    The application provides event handlers to react 
+    to results (or failure notifications) from the remote service.
+}
+
+|| ====================
+{heading level=2,    
+    Remote Object Datatypes
+}
+{paragraph
+    Requests and responses to remote object services are repesented using the
+    {link href = {url "cdk-ds-overview.curl#amf-protocol"}, AMF Protocol},
+    a compact binary serialization protocol.
+
+    The following datatypes are supported:
+    {itemize
+        {item primitives
+            {itemize
+                {item {docref bool}}
+                {item {docref null}}
+                {item {docref String}}
+                {item {docref int}}
+                {item {docref double}}
+                {item {docref DateTime}}
+            }}
+        {item structures
+            {itemize
+                {item {docref DataObject}}
+                {item {docref Array}}
+                {item {docref ExtendedArray}}
+                {item {docref ByteArray}}
+                {item {docref AMFXmlDocument}}
+            }}
+    }
+}
+|| ====================
+{heading level=3,    
+    Data Adapters
+}
+{paragraph
+    The protocol encodes objects as collections of properties,
+    represented by {docref DataObject} instances.  
+    These are characterized by their {docref DataObjectTraits}.
+
+    It is possible to map named {ctext DataObject}s
+    to a Curl {docref Class},
+    by registering an adapter that specifes the
+    {docref DataObjectTraits} corresponding to that class.
+
+    Note that Curl variable naming conventions differ from
+    those of {ctext Java} and {ctext ActionScript}.
+    Class member variables are converted accordingly
+    by the traits adapter, so that, for example,
+    {ctext product-id} becomes {ctext productId}.
+
+    Use {docref AMFObjectAdapters.register-class} to register an adapter.
+    The traits can be specified as a class variable {ctext traits},
+    or by keyword argument.
+
+    Use {docref AMFObjectAdapters.register-package} to
+    register all classes with a {ctext traits} class variable
+    in a package.
+
+    By default, AMF serialization and deserialization
+    uses adapters defined by {docref AMFObjectAdapters.standard}.
+    If it is necessary to use particular adapters for some
+    {ctext RemoteObject} instance, it can be supplied
+    explicitly using the {ctext mapper} keyword
+    when constructing an {docref AMFChannel}.   
+}
+{x-example-ref title = "DataObject adapters",
+    {url "examples/data-object-mapping.curl"}
+}
+{paragraph
+    The {bold Update} sample illustrates these techniques.
+
+    Editable source code is available in the
+    {link href = {url "cdk-ds-overview.curl#samples-project"}, sample applications}.
+}
+{x-code-ref title = {message Update},
+    background = "beige",
+    {samples-loc.merge "testdrive-update/s-update.curl"}
+}
+
+|| TODO:
+|| - awaiting an asynchronous response
+|| -- sequencing operations
+|| - need to know thw available services and operations
+|| -- discovery?
+
+|| ====================
+{curl-copyright}
+

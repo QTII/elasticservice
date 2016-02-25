@@ -1,0 +1,225 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{import * from CURL.IDE.DOCUMENTATION}
+{import * from CURL.GUI.TEXT-EDIT}
+
+|| styles
+|| --------------------
+{define-proc {code-box ...}:Graphic
+    {return
+        {VBox
+            background = "beige",
+            border-width = 2px,
+            margin = 8px,
+            {splice ...}
+        }
+    }
+}
+{define-text-proc {preliminary ...}:any
+    {return
+        {TextFlowBox 
+            background = "beige",
+            width = 5in,
+            border-width = 2px, 
+            {bold Note:},
+            {paragraph
+                font-size = 0.8em,
+                {splice ...}}
+        }}
+}
+|| NOTE: privilege no longer needed when using built-in library
+|| -- CURL IO.SQLITE-LIBRARY
+{define-proc {privilege-note}:Visual
+    {return
+        {Frame background = "#DDD",
+            {paragraph
+                {bold Note about privilege:}
+                In accord with the Curl security provisions,
+                normal Curl applets may not call foreign code.                
+                
+                Thus, in order to call the SQLite engine,
+                it is necessary for an applet to be privileged.
+                
+                See 
+                {link href = {dguide.merge "security.curl"}, Security} 
+                for more on Curl security provisions.
+                
+                These Developer Guide pages, of course, are not normally privileged.
+                {Frame border-width = 1px,
+                    {paragraph
+                        At the moment, they are
+                        {if {process-privileged?} 
+                         then {text color = "green", privileged}
+                         else {text color = "red", not privileged}}.
+                    }}
+                
+                To grant privilege to the examples, you need to use the Curl Control Panel
+                to grant privilege to the directory containing this page, 
+
+                {monospace {value {{get-the-applet}.url.parent-dir.url.canonicalize}.local-filename}}
+                
+                and then issue the {monospace Reload Page} command.    
+            }}
+    }}
+
+|| Curl Lab Documentation links 
+|| --------------------
+{let docsdir:String = "curl://install/docs/" & {get-host-locale}.language}
+{let dguide:Url = {url docsdir & "/dguide/"}}
+{let uguide:Url = {url docsdir & "/uguide/"}}
+
+|| examples support
+|| --------------------
+{define-proc {expandable 
+                 label:Visual, 
+                 content:Visual,
+                 ...
+             }:TreeControl
+    {return
+        {TreeControl 
+            tree-connector-width = 0pt,
+            selection-policy = "disabled",
+            control-appearance-changeable? = true,
+            data-model =
+                {TreeModel root = 
+                    {TreeNode node-data = label,
+                        {TreeNode 
+                            node-data = 
+                                {TextFlowBox 
+                                    text-breakable? = true, 
+                                    content}}}},
+            {splice ...}}}
+}
+{define-proc {prelude-line? line:StringBuf}:bool
+    {return
+        || herald comment prefix
+        {line.prefix? |"|||"|} or
+        || whitespace
+        {line.trim-clone}.empty?
+    }
+}
+{define-proc {strip-prelude-lines
+                 buf:StringBuf,
+                 prelude-line?:{proc-type {StringBuf}:bool}
+             }:void
+    {with-open-streams in = {buf.to-InputStream} do
+        || read each line
+        {while true do
+            let pos:int64 = {in.tell}
+            || check if prelude
+            let skip?:bool =
+                {if-non-null line = {in.read-line} then
+                    {prelude-line? line}
+                 else false}
+            || until beyond prelude or done
+            {if not skip? then
+                {buf.remove 0, length = pos asa int}
+                {break}}}}
+    
+}
+|| example references
+|| --------------------
+{define-proc public {example-ref
+                        loc:Url,
+                        title:#String = null,
+                        base-url:Url = {get-base-url},
+                        manifest:ComponentManifest = {get-default-manifest},
+                        package:OpenPackage = 
+                            {OpenPackage 
+                                CURL.IMPLICIT.APPLET,
+                                CURL.IDE.DOCUMENTATION,
+                                manifest = manifest},
+                        ...
+                    }:Graphic
+    let result:any = 
+        {try
+            let buf:StringBuf = {read-from loc}
+            {strip-prelude-lines buf, prelude-line?}
+            {evaluate 
+                base-url = loc,
+                package = package,
+                {format "\{example title = %w,\n %s\}",
+                    title,
+                    buf}}
+         catch e:Exception do
+            {paragraph
+                Error in {bold {value loc}}:{br}                
+                {text color = "red", {value e}}}}
+    {return {Frame result, {splice ...}}}
+}
+{define-proc {x-example-ref
+                 title:String = {message Example},
+                 href:Url,
+                 ...}:Visual
+    let display:Graphic = 
+        {example-ref title = title, href, {splice ...}}
+    {return
+        {text-width-display 
+            {expandable
+                border-width = 2px, 
+                {bold {value title}},
+                display}}}
+}
+{define-proc public {code-ref
+                        loc:Url,
+                        ...
+                    }:Graphic
+    let result:any = 
+        {try
+            let buf:StringBuf = {read-from loc}
+            {strip-prelude-lines buf, prelude-line?}
+            {evaluate 
+                {format "\{curl-code \n%s\}",
+                    buf}}
+         catch e:Exception do
+            {paragraph
+                Error in {bold {value loc}}:{br}                
+                {text color = "red", {value e}}}}
+    {return {Frame result, {splice ...}}}
+}
+{define-proc {x-code-ref
+                 title:String = {message Example},
+                 href:Url,
+                 ...}:Visual
+    {return
+        {text-width-display 
+            {expandable
+                border-width = 2px, 
+                {bold {value title}},
+                {code-ref href,
+                    {splice ...}}}}}
+}
+|| sourceref
+|| --------------------
+{define-proc public {curl-edit-url
+                        file:Url,
+                        line:int = -1,
+                        location:int = -1
+                    }:Url
+    {return
+        {abs-url
+            "curl://edit/" & file &
+            {if location >= 0 then
+                "#@" & location
+             elseif line >= 0 then
+                "#" & line
+             else
+                ""
+            }
+        }
+    }
+}

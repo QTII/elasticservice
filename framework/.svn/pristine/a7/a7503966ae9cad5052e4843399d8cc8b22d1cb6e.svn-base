@@ -1,0 +1,64 @@
+package elasticservice.web.play
+
+import java.io.File
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
+import com.typesafe.scalalogging.LazyLogging
+import elasticservice.Key
+import elasticservice.ElasticConfigurator
+import elasticservice.util.DataValid
+import elasticservice.util.ExceptionDetail
+import elasticservice.util.FilePathUtil
+import play.api.ApplicationLoader
+import play.api.Configuration
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.guice.GuiceApplicationLoader
+import elasticservice.DefaultVal
+
+class PlayConfigListener extends GuiceApplicationLoader() {
+
+  override def builder(context: ApplicationLoader.Context): GuiceApplicationBuilder = {
+    val extra = Configuration("a" -> 1)
+    val builder = initialBuilder
+      .in(context.environment)
+      .loadConfig(extra ++ context.initialConfiguration)
+      .overrides(overrides(context): _*)
+
+    PlayConfigListener.loadElasticConf(context.initialConfiguration, context.environment.rootPath)
+
+    builder
+  }
+}
+
+object PlayConfigListener extends LazyLogging {
+  def loadElasticConf(conf: Configuration, rootPath: File) {
+    detectXmlPath(conf, rootPath) match {
+      case Success(f) => ElasticConfigurator.init(f)
+      case Failure(e) => logger.error(ExceptionDetail.getDetail(e))
+    }
+  }
+
+  def detectXmlPath(conf: Configuration, rootPath: File): Try[File] = {
+    Try {
+      var esConfig = conf.getString(Key.PropESConfig) match {
+        case None                                => System.getenv(Key.PropESConfig)
+        case Some(p) if !new File(p).isDirectory => System.getenv(Key.PropESConfig)
+        case Some(p)                             => p
+      }
+
+      if (DataValid.isEmpty(esConfig) || !new File(esConfig).isDirectory)
+        esConfig = rootPath.getAbsolutePath + File.separator + Key.PropESConfig
+
+      val xmlPath = FilePathUtil.getAbsolutePath(esConfig, DefaultVal.ESXMLFile)
+      val xmlFile = new File(xmlPath)
+
+      if (!xmlFile.exists)
+        throw new Exception("file not found: " + xmlPath)
+      else if (!xmlFile.isFile)
+        throw new Exception("not file: " + xmlPath)
+      else
+        xmlFile
+    }
+  }
+}

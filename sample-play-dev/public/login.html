@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <style type="text/css">
+        a {text-decoration: none; }
+    </style>
+    		
+	<script src="html5/jq/jquery-1.9.1.min.js"></script>
+	<script src="html5/elastic-util-1.5.js"></script>
+
+<script type="text/javascript">
+
+function login(btn) {
+	$(document).ajaxStart(function() {
+		$(btn).prop('disabled', true);
+	}).ajaxStop(function() {
+		$(btn).prop('disabled', false);
+	});
+	
+	var reqEP = new ElasticParams($('#form1'));
+	reqEP.addParameters({
+		"service": "sample.elasticservice.service.LoginService",
+		"service.resType": "json13"
+	});
+	
+	elastic_ajax(
+		elastic_baseUrl(), 
+		reqEP,
+		function(resEP) {
+			alert(resEP.getMessage());
+		}, 
+		function(resEP) {
+			alert("ERROR-" + resEP.getCode() + ": " + resEP.getMessage());
+		}
+	)
+}
+</script>
+</head>
+
+<BODY>
+	<div data-role="page">
+		<div data-role="header">
+			<h1>Login</h1>
+			<a href="index.html" data-theme="a" data-ajax="false">Home</a>
+		</div>
+		<br>
+		
+		<div data-role="content">
+			<table>
+			<tr valign="top">
+				<td valign="top">
+					<form id="form1" method="POST">
+					<table>
+					<tr valign="top"><td>ID:</td><td><input type="text" name="id" id="id"></td></tr>
+					<tr valign="top"><td>Password:</td><td><input type="password" name="pw" id="pw"></td></tr>
+					<tr align="center"><td colspan=2><button id="btn" onclick="login(this)">Login</button></td></tr>
+					</table>
+					</form>
+				</td>
+			</tr>
+			</table>
+		</div>
+	</div>
+</BODY>
+</HTML>

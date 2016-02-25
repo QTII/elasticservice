@@ -1,0 +1,132 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{define-class public ConsumerMessageDispatcher
+  let private instance:#ConsumerMessageDispatcher
+
+  field private constant consumers:{HashTable-of #String, AbstractConsumer} =
+      {new {HashTable-of #String, AbstractConsumer}}
+  field private constant channel-set-ref-counts:{HashTable-of #ChannelSet, int} =
+      {new {HashTable-of #ChannelSet, int}}
+  field private constant consumer-duplicate-message-barrier:{HashTable-of String, Array} =
+      {new {HashTable-of String, Array}}
+  field private constant channel-set-event-handler:EventHandler
+
+  field private last-target:#ChannelSet
+
+  {constructor protected {default}
+    set self.channel-set-event-handler =
+        {on e:MessageEvent at cs:ChannelSet do
+            {if {type-of e} == MessageEvent then
+                {self.message-handler e, cs}
+            }
+        }
+  }
+
+  {factory public {get-instance}:ConsumerMessageDispatcher
+    {if ConsumerMessageDispatcher.instance == null then
+        set ConsumerMessageDispatcher.instance = {new ConsumerMessageDispatcher}
+    }
+    {return {non-null ConsumerMessageDispatcher.instance}}
+  }
+
+  {method public {is-channel-used-for-subscriptions? channel:Channel}:bool
+    {for channel-set in channel.channel-sets do
+        || FIXME: is this right?  Shouldn't it insist that the ref-count
+        || be > 0?
+        {if {self.channel-set-ref-counts.key-exists? channel-set} and
+            channel-set.current-channel == channel
+         then
+            {return true}
+        }
+    }
+    {return false}
+  }
+
+  {method public {register-subscription consumer:AbstractConsumer}:void
+    set self.consumers[consumer.client-id] = consumer
+    def channel-set = consumer.channel-set
+    def (ref-count, exists?) =
+        {self.channel-set-ref-counts.get-if-exists channel-set}
+    {if not exists? then
+        {channel-set.add-event-handler self.channel-set-event-handler}
+        set self.last-target = channel-set
+    }
+    set self.channel-set-ref-counts[channel-set] = ref-count + 1
+  }
+
+  {method public {unregister-subscription consumer:AbstractConsumer}:void
+    {if-non-null consumer.client-id then
+        {self.consumers.remove consumer.client-id, error-if-missing? = true}
+    }
+    def channel-set = consumer.channel-set
+    let (ref-count:int, exists?:bool) =
+        {self.channel-set-ref-counts.get-if-exists channel-set}
+    {if exists? then
+        {dec ref-count}
+        {if ref-count == 0 then
+            {self.channel-set-ref-counts.remove channel-set}
+            {channel-set.remove-event-handler self.channel-set-event-handler}
+            {self.consumer-duplicate-message-barrier.remove
+                consumer.id, error-if-missing? = false
+            }
+         else
+            set self.channel-set-ref-counts[channel-set] = ref-count
+        }
+    }
+  }
+
+  {method private {message-handler event:MessageEvent, target:ChannelSet}:void
+    def client-id = event.message.client-id
+    {if client-id == null then
+        {return}
+    }
+    def (consumer, exists?) = {self.consumers.get-if-exists client-id}
+    {if not exists? then
+        {return}
+    }
+    
+    {if target.current-channel.channel-sets.size > 1 then
+        let cnt:int = 0
+        {for cs in target.current-channel.channel-sets do
+            {if {self.channel-set-ref-counts.key-exists? cs} then
+                {inc cnt}
+            }
+        }
+
+        {if cnt > 1 then
+            def consumer-id = consumer.id
+            {if not {self.consumer-duplicate-message-barrier.key-exists?
+                        consumer-id
+                    }
+             then
+                set self.consumer-duplicate-message-barrier[consumer-id] =
+                    {Array event.message-id, cnt}
+                {consumer.message-handler event}
+            }
+
+            def guard = self.consumer-duplicate-message-barrier[consumer-id]
+            {if (guard[0] asa String) == event.message-id then
+                {if (guard[1] asa int) == 1 then
+                    {self.consumer-duplicate-message-barrier.remove consumer-id}
+                }
+            }
+            {return}
+        }
+    }
+    {consumer.message-handler event}
+  }
+}

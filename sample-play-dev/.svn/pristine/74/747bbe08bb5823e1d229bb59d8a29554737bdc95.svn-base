@@ -1,0 +1,65 @@
+name := "elasticservice-sample"
+version := "0.1"
+scalaVersion := "2.11.7"
+scalacOptions += "-feature"
+//scalacOptions += "-unchecked"
+scalacOptions += "-deprecation"
+
+val elasticserviceProject = ProjectRef(file("../elasticservice-0.1"), "elasticservice")
+
+lazy val root = (project in file("."))
+	.enablePlugins(PlayScala)
+	.dependsOn(elasticserviceProject)
+
+libraryDependencies ++= Seq(
+  jdbc,
+  cache,
+  ws,
+  specs2 % Test,
+        "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
+        //"ch.qos.logback" % "logback-classic" % "1.1.5",
+        //"org.slf4j" % "slf4j-log4j12" % "1.7.16",
+        //"org.slf4j" % "slf4j-simple" % "1.7.16",
+        "javax.servlet" % "javax.servlet-api" % "4.0.0-b01"
+)
+
+resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+
+// Play provides two styles of routers, one expects its actions to be injected, the
+// other, legacy style, accesses its actions statically.
+routesGenerator := InjectedRoutesGenerator
+
+fork in run := true
+
+excludeFilter in Assets := HiddenFileFilter || "*WEB-INF*"
+
+// retrieveManaged := true
+
+lazy val copyDependencies = TaskKey[Unit]("pack")
+
+def copyDepTask = copyDependencies <<= (update, crossTarget, scalaVersion) map {
+  (updateReport, out, scalaVer) =>
+    updateReport.allFiles foreach {
+      srcPath =>
+        val destPath = out / "lib" / srcPath.getName
+        IO.copyFile(srcPath, destPath, preserveLastModified = true)
+    }
+}
+
+copyDepTask
+
+lazy val copyClasses = TaskKey[Unit]("servlet")
+
+def copyServletResources = copyClasses <<= (update, crossTarget, scalaVersion) map {
+  (updateReport, out, scalaVer) =>
+    updateReport.allFiles foreach {
+      srcPath =>
+        IO.copyFile(srcPath, file("servlet/WEB-INF/lib") / srcPath.getName, preserveLastModified = true)
+    }
+    IO.copyFile(file("esConfig/elasticservice.xml"), file("servlet/WEB-INF/elasticservice.xml"), preserveLastModified = true)
+    IO.copyDirectory(file("esConfig/sqlrepo"), file("servlet/WEB-INF/sqlrepo"), overwrite = true, preserveLastModified = true)
+    IO.copyDirectory(out / "classes", file("servlet/WEB-INF/classes"), overwrite = true, preserveLastModified = true)
+}
+
+copyServletResources
+

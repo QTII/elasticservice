@@ -1,0 +1,122 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{curl 8.0 applet}
+
+{applet manifest = "manifest.mcurl"}
+
+{import * from CURL.DOC.CONTENT.ACCESSORIES}
+{import * from COM.CURL.CDK.SAMPLES-SUPPORT}
+
+{{get-the-applet}.set-title "CDK-DS Samples"}
+{VBox
+    outside-margin = {OffsetSpec left = 2.5cm, right = 2.5cm, top = 0.7cm},
+    spacing = 0.2cm,
+    {HBox
+        spacing = 0.25cm,
+        valign = "bottom",
+        {image source = {manifest-url "file", "CURL-LOGO"}},
+        {image source = {manifest-url "file", "BLAZEDS-LOGO"}}
+    },
+    {heading CDK-DS Samples},
+    {br},
+    {heading level = 2, Server Configuration},
+    {paragraph
+        In order to run the CDK-DS sample applets, Tomcat needs to be configured
+        to serve Curl files.
+        {itemize
+            {item Configure the following MIME type mappings in Tomcat's main
+                configuration web.xml file, located at
+                [installdir]/tomcat/conf/web.xml
+                {curl-code
+                    <mime-mapping>
+                      <extension>curl</extension>
+                      <mime-type>text/vnd.curl</mime-type>
+                    </mime-mapping>
+                    <mime-mapping>
+                      <extension>dcurl</extension>
+                      <mime-type>text/vnd.curl.dcurl</mime-type>
+                    </mime-mapping>
+                }
+            }
+            {item Deploy a curl-license-5.dat file to either the
+                [installdir]/tomcat/webapps/ROOT
+                or
+                [installdir]/tomcat/webapps/curl-samples
+                directory. A curl-license-5.dat file for use with
+                http://localhost urls can be found in your Curl installation.
+                For example, if you installed the Curl IDE on Windows in the
+                location {italic C:\\Program Files\\Curl Corporation\\} then you
+                can find a license file in the
+                {italic C:\\Program Files\\Curl Corporation\\Surge\\7\\ide\\etc\\localhost}
+                directory. If you installed a Pro IDE then look in
+                {italic C:\\Program Files\\Curl Corporation\\Surge\\7\\ide\\etc\\localhost-pro}
+            }
+            {item Create and deploy a curl-access.txt file in the
+                [installdir]/tomcat/webapps/ROOT directory.
+                Its contents should look like this:
+                {br}
+                {pre   version: 2.0}
+                {br}
+                {pre   allow: localhost}
+            }
+        }
+    },
+    {VBox
+        border-width = 1px,
+        border-color = "#2080b3",
+        margin = 0.5cm,
+        spacing = 10pt,
+        {heading level = 3,
+            {text color = "#004477", Starting the Samples Database}
+        },
+        {paragraph
+            You have to {bold start the sample database} before you can run the
+            CDK-DS samples. The samples use an HSQLDB database that located in
+            the [installdir]/sampledb directory.
+        },
+        {paragraph
+            To start the sample database:
+        },
+        {enumerate
+            {item Open a command prompt and go to the [installdir]/sampledb}
+            {item Run startdb.bat (Windows) or startdb.sh (Unix-based systems)}
+        }
+    },
+    {br},
+    {br},
+    {heading level = 2, 30 Minute Test Drive},
+    {br},
+    {paragraph
+        The objective of this test drive is to give you, in a very short amount
+        of time, an understanding of how the CDK-DS data services work and what
+        they can do. This test drive consists of a series of basic samples which
+        demonstrate features of interest.
+    },
+    {paragraph
+        {clink href = {url "testdrive.curl"}, Take the test drive}
+    },
+    {br},
+    {br},
+    {heading level = 2, Source Code},
+    {br},
+    {paragraph
+        The sample applications are delivered as source code, and can be found
+        in the [installdir]/tomcat/webapps/curl-samples/ directory. They can be
+        viewed in any text editor. The supporting libraries are delivered in
+        pcurl format.
+    }
+}

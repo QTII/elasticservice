@@ -1,0 +1,429 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+|| NOTE: defined first to avoid load order problem
+{def cc-upper =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ" asa CharClass ||""
+}
+
+{doc-next ||=== AMFObjectAdapter
+    {purpose
+        Describes transformation between {docref DataObjectTraits} and a {docref ClassType}.}
+    {details
+        Used by {docref AMFChannel} for serializing and deserializing {docref DataIbject}s
+        to and from native data types.}
+}
+{define-class public AMFObjectAdapter
+  field public constant type:ClassType
+  field public constant traits:DataObjectTraits
+  field public constant name:String
+  field public constant factory:{proc-type {}:Object}
+  field public constant reader:{proc-type {Object, AMF3Deserializer}:void}
+  field public constant writer:{proc-type {Object, AMF3Serializer}:void}
+  {constructor public {default
+                          type:ClassType,
+                          traits:DataObjectTraits = {traits-for type},
+                          remote-traits?:bool = true
+                      }
+    set self.type = type
+    set self.traits = traits
+    set self.name = traits.name
+    set self.factory = {factory-for type}
+    set self.reader = {reader-for type, traits, remote-traits? = remote-traits?}
+    set self.writer = {writer-for type, traits, remote-traits? = remote-traits?}
+  }
+}
+
+{doc-next ||=== AMFObjectAdapters
+    {purpose
+        Describes transformations between {docref DataObjectTraits} and a {docref ClassType}.}
+    {details
+        Used by {docref AMFChannel} for serializing and deserializing {docref DataIbject}s
+        to and from native data types.}
+}
+{define-class public AMFObjectAdapters
+  field constant traits-for-class:{HashTable-of ClassType, DataObjectTraits}
+  field constant adapters-by-name:{HashTable-of String, AMFObjectAdapter}
+  field constant readers-by-traits:{HashTable-of DataObjectTraits,
+                                     {proc-type {Object, AMF3Deserializer}:void}}
+  
+  {doc-next ||=== AMFObjectAdapters.default
+    {purpose
+        Create an {docref AMFObjectAdapters} object.}
+    {parameter default-mappings?, specifies whether to register internal AMF mappings
+        (using {docref-abbr AMFObjectAdapters.register-defaults}).}
+  }
+  {constructor public {default
+                          default-mappings?:bool = true
+                      }
+    set self.traits-for-class = {{HashTable-of ClassType, DataObjectTraits}}
+    set self.adapters-by-name = {{HashTable-of String, AMFObjectAdapter}}
+    set self.readers-by-traits =
+        {{HashTable-of DataObjectTraits, {proc-type {Object, AMF3Deserializer}:void}}}
+    {if default-mappings? then
+        {self.register-defaults}}
+  }
+  {method public {class-for name:String}:(ClassType, bool)
+    def (adapter, adapter?) = {self.adapters-by-name.get-if-exists name}
+    {return
+        {if adapter?
+         then (adapter.type, true)
+         else ({uninitialized-value-for-type ClassType}, false)
+        }}
+  }
+  {method public {factory-for name:String}:({proc-type {}:Object}, bool)
+    def (adapter, adapter?) = {self.adapters-by-name.get-if-exists name}
+    {return
+        {if adapter?
+         then (adapter.factory, true)
+         else ({uninitialized-value-for-type {proc-type {}:Object}}, false)
+        }}
+  }
+  {method public {reader-for
+                     traits:DataObjectTraits
+                 }:({proc-type {Object, AMF3Deserializer}:void}, bool)
+    || NOTE: member ordering varies by server
+    || -  so look up by 'traits' not 'name' 
+    def name = traits.name
+    def (adapter, adapter?) = {self.adapters-by-name.get-if-exists name}
+    {return
+        {if adapter? then
+            {if traits == adapter.traits then
+                || same as registered adapter
+                (adapter.reader, true)
+             else
+                def (reader, reader?) =
+                    {self.readers-by-traits.get-if-exists traits}
+                {if reader? then
+                    || seen traits: code already generated
+                    (reader, true)
+                 else
+                    || new traits: generate code
+                    def type = adapter.type
+                    def reader = {reader-for type, traits}
+                    set self.readers-by-traits[traits] = reader
+                    (reader, true)
+                }}
+         else ({uninitialized-value-for-type {proc-type {Object, AMF3Deserializer}:void}}, false)
+        }}
+  }
+  {method public {writer-for name:String}:({proc-type {Object, AMF3Serializer}:void}, bool)
+    def (adapter, adapter?) = {self.adapters-by-name.get-if-exists name}
+    {return
+        {if adapter?
+         then (adapter.writer, true)
+         else ({uninitialized-value-for-type {proc-type {Object, AMF3Serializer}:void}}, false)
+        }}
+  }
+  {doc-next ||=== AMFObjectAdapters.register-class
+    {purpose
+        Register mappings for specified class.}
+    {parameter type, the Curl class}
+    {parameter traits, the corresponding AMF traits.
+        The default is obtains from the class variable {ctext {metavar type}.traits},
+        or, if that is not defined, is derived from public properties of the class.}
+  }
+  {method public {register-class
+                     type:ClassType,
+                     traits:DataObjectTraits = {traits-for type}
+                 }:void
+    def name = traits.name
+    set self.traits-for-class[type] = traits
+    set self.adapters-by-name[name] =
+        {AMFObjectAdapter type, traits = traits}
+  }
+  {doc-next ||=== AMFObjectAdapters.register-package
+    {purpose
+        Register mappings for specified package.}
+    {parameter package, the Curl package.
+        All classes which define class variable {ctext {metavar type}.traits}
+        will be registered.}
+  }
+  {method public {register-package
+                     package:Package
+                 }:void
+    {for m in {package.get-members} do
+        {type-switch {m.get-value}
+         case type:ClassType do
+            {if-non-null traits = {class-traits-for type} then
+                {self.register-class type, traits = traits}
+            }}}
+  }
+  {doc-next ||=== AMFObjectAdapters.register-defaults
+    {purpose
+        Register mappings for AMF implemantation.}
+    {details
+        This registers mappings for
+        {itemize
+            {item {docref AcknowledgeMessage}}
+            {item {docref AcknowledgeMessageExt}}
+            {item {docref AsyncMessage}}
+            {item {docref AsyncMessageExt}}
+            {item {docref CommandMessage}}
+            {item {docref CommandMessageExt}}
+            {item {docref ErrorMessage}}
+            {item {docref RemotingMessage}}
+            {item {docref ArrayCollection}}
+        }}
+  }
+  {method public {register-defaults}:void
+
+    {self.register-package COM.CURL.CDK.MESSAGES}
+    || -- IMessage
+    || COM.CURL.CDK.MESSAGES.AcknowledgeMessage
+    || COM.CURL.CDK.MESSAGES.CommandMessage
+    || COM.CURL.CDK.MESSAGES.ErrorMessage
+    || COM.CURL.CDK.MESSAGES.RemotingMessage
+    || COM.CURL.CDK.MESSAGES.AsyncMessage
+    || - ISmallMessage
+    || COM.CURL.CDK.MESSAGES.AcknowledgeMessageExt
+    || COM.CURL.CDK.MESSAGES.AsyncMessageExt
+    || COM.CURL.CDK.MESSAGES.CommandMessageExt
+    
+    || COM.CURL.CDK.AMF -- this-package
+    {self.register-class ArrayCollection}
+  }
+  {doc-next ||=== AMFObjectAdapters.standard
+    {purpose
+        Describes standard transformations between {docref DataObjectTraits} and a {docref ClassType}.}
+    {details
+        This is the default mapper used by {docref AMFChannel}
+        for serializing and deserializing {docref DataIbject}s
+        to and from native data types.}
+  }
+  def public standard = {AMFObjectAdapters}
+}
+|| traits discovery
+|| --------------------
+{define-proc {class-traits-for type:ClassType}:#DataObjectTraits
+    {return
+        {if-non-null class-traits = {type.get-class-variable "traits"} then ||""
+            {type-switch {class-traits.get-value}
+             case traits:DataObjectTraits do
+                traits
+             else
+                {error
+                    {lmessage Expected DataObjectTraits for {value type}.traits
+                        but found {value class-traits}}}}
+         else null}}
+}
+{define-proc public {traits-for type:ClassType}:DataObjectTraits
+    {return
+        {if-non-null traits = {class-traits-for type} then
+            traits
+         else
+            {DataObjectTraits-for type}}}
+}
+
+|| ClassType traits adapter 
+|| --------------------
+{define-class public DataObjectTraits-for {inherits StandardDataObjectTraits}
+  {constructor public {default
+                          type:ClassType,
+                          name:#String = null,
+                          namespace:#String = null}
+    def qualified-name =
+        {format "%s.%s",
+            {if-non-null namespace then namespace
+             else
+                {if-non-null package-name = type.package.name
+                 then package-name
+                 else ""}},
+            {if-non-null name then name
+             else type.name}}
+    def members = {StringArray}
+    def members-seen = {{Set-of String}}
+    def fields = 
+        {type.get-members 
+            filter = ClassMember.set-property-filter}
+    {for f in fields do
+        {if not {members-seen.member? f.name} then
+            {members-seen.insert f.name}
+            {members.append f.name}}}
+    {construct-super
+        qualified-name,
+        members,
+        dynamic? = false,
+        externalizable? = {type.subtype-of? Externalizable}}
+  }
+}
+|| name transformation
+|| --------------------
+{define-proc {curlify-name name:String}:String
+    || unchanged if no uppercase
+    def i = {name.find-char-class cc-upper}
+    {if i < 0 then
+        {return name}}
+    || work buffer
+    def buf = {StringBuf}
+    let prev?:bool = true
+    || copy characters
+    {for c in name do
+        def upper? = cc-upper[c]
+        {if upper? and not prev? then
+            {buf.append '-'}}
+        set prev? = upper?
+        {buf.append {char-downcase c}}}
+    {return {buf.to-String}}        
+}
+{define-proc {javafy-name name:String}:String
+    || unchanged if no dash
+    def i = {name.find '-'}
+    {if i < 0 then
+        {return name}}
+    || work buffer
+    def buf = {StringBuf}
+    let upcase?:bool = false
+    || copy characters, skipping dashes, upcasing following character
+    {for c in name do
+        set upcase? = 
+            {switch c
+             case '-' do
+                true
+             else
+                {buf.append
+                    {if upcase? then
+                        {char-upcase c}
+                     else c}}
+                false}}
+    {return {buf.to-String}}        
+}
+|| code generation
+|| --------------------
+{define-proc {factory-for type:ClassType}:{proc-type {}:Object}
+    || NOTE: requires no-arg constructor or factory
+    || find one, preferring 'default' 
+    def cs =
+        {type.get-members
+            search-superclasses? = false,
+            filter =
+                {proc {c:ClassMember}:bool
+                    {return
+                        {type-switch c
+                         case c:InstanceMaker do
+                            def p = c.type asa ProcType
+                            p.num-args == 0
+                         else false}}}}
+    {if cs.size == 0 then
+        {error {lmessage Type {value type} does not have a no-arg constructor or factory.}}}
+    
+    let factory-name:String = ""
+    {for c in cs do
+        def name = c.name
+        {if name == "default" then ||""
+            set factory-name = name
+            {break}
+         elseif factory-name == "" then
+            set factory-name = name
+        }}
+   
+    def src =
+        {expand-template
+            {proc {}:Object
+                {return
+                    {?{Literal type}.?{Identifier factory-name}}
+                }}
+        }
+    def factory =
+        {evaluate src} asa {proc-type {}:Object}
+    {return factory}
+}
+{define-proc {writer-for
+                 type:ClassType,
+                 traits:DataObjectTraits,
+                 remote-traits?:bool = true
+             }:{proc-type {Object, AMF3Serializer}:void}
+    def statements = {{Array-of CurlSource}}
+    {for member in traits.members do
+        || NOTE: distinguish local vs remote trait names
+        || - if remote, need to curlify
+        def m =
+            {if remote-traits? then
+                {curlify-name member}
+             else member}
+        {statements.append
+            {expand-template
+                {out.write-one self.?{Identifier m}}
+            }}}
+    def src =
+        {expand-template
+            {proc {obj:Object, out:AMF3Serializer}:void
+                def self = obj asa ?{Literal type} 
+                ?statements
+            }
+        }
+    def writer =
+        {evaluate src,
+            package = {OpenPackage {this-package}}
+        } asa {proc-type {Object, AMF3Serializer}:void}
+    {return writer}
+}
+{define-proc {reader-for
+                 type:ClassType,
+                 traits:DataObjectTraits,
+                 remote-traits?:bool = true
+             }:{proc-type {Object, AMF3Deserializer}:void}
+    def statements = {{Array-of CurlSource}}
+    {for member in traits.members do
+        || NOTE: distinguish local vs remote trait names
+        || - if remote, need to curlify
+        def m =
+            {if remote-traits? then
+                {curlify-name member}
+             else member}
+        def t =
+            {if-non-null p = {type.get-property-for-set m} then
+                p.type
+             else
+                null}
+        {statements.append
+            {if-non-null t then
+                {expand-template
+                    set self.?{Identifier m} = 
+                        {if-non-null val = {in.read-one} then
+                            val asa ?{Literal t}
+                         else
+                            {uninitialized-value-for-type ?{Literal t}}}
+                }
+             else
+                {output
+                    {lmessage Unexpected reader property: '{value type}.{value m}'}}
+                {expand-template
+                    {do
+                        def val = {in.read-one}
+                        {if-debuggable 
+                            def msg =
+                                {lmessage Ignoring property
+                                    '{value ?{Literal type}}.{value ?{Literal m}}':
+                                    {value val}}
+                            {output msg}}}
+                }}
+        }}
+    def src =
+        {expand-template
+            {proc {obj:Object, in:AMF3Deserializer}:void
+                def self = obj asa ?{Literal type} 
+                ?statements
+            }
+        }
+    def reader =
+        {evaluate src,
+            package = {OpenPackage {this-package}}
+        } asa {proc-type {Object, AMF3Deserializer}:void}
+    {return reader}
+}
+
+

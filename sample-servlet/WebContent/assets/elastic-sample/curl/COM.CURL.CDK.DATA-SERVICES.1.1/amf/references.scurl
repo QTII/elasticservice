@@ -1,0 +1,159 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{define-class package final AMF0References
+
+  field private constant cached-objects:{Array-of Object}
+
+  {constructor package {default}
+    set self.cached-objects = {{Array-of Object}}
+  }
+
+  {method package {initialize}:void
+    {self.cached-objects.clear}
+  }
+  
+  {method package {add-object obj:Object}:void
+    {if self.cached-objects.size < max-uint16 then
+        {self.cached-objects.append obj}
+     else
+        {throw {AMFException {lmessage Too many references in '{value {this-function}}'.}}}
+    }
+  }
+
+  {method package {get-object index:int}:Object
+    def (ret, found?) = {self.cached-objects.get-if-exists index}
+    {if found? then
+        {return ret}
+     else
+        {throw {AMFException {lmessage Reference for index {value index} in '{value {this-function}}' not found.}}}
+    }
+  }
+
+  {method package {get-object-index obj:Object}:int
+    def ret = {self.cached-objects.find obj}
+    {if ret == -1 then
+        {self.add-object obj}
+    }
+    {return ret}
+  }
+}
+
+
+{define-class package final AMF3References
+
+  field private constant cached-strings:StringArray
+  field private constant cached-objects:{Array-of Object}
+  field private constant cached-traits:{Array-of DataObjectTraits}
+  
+  {constructor package {default}
+    set self.cached-strings = {StringArray}
+    set self.cached-objects = {{Array-of Object}}
+    set self.cached-traits = {{Array-of DataObjectTraits}}
+  }
+
+  {method public open {initialize}:void
+    {self.cached-strings.clear}
+    {self.cached-traits.clear}
+    {self.cached-objects.clear}
+  }
+
+  {method public open {add-string str:String}:void
+    {if self.cached-strings.size < max-int29 then
+        {self.cached-strings.append str}
+     else
+        {throw {AMFException {lmessage Too many references in '{value {this-function}}'.}}}
+    }
+  }
+
+  {method public open {get-string index:int}:String
+    def (ret, found?) = {self.cached-strings.get-if-exists index}
+    {if found? then
+        {return ret}
+     else
+        {throw {AMFException {lmessage Reference for index {value index} in '{value {this-function}}' not found.}}}
+    }
+  }
+
+  {method public open {get-string-index str:String}:int
+    def ret = {self.cached-strings.find str}
+    {if ret == -1 and not str.empty? then
+        || BlazeDS does not add the empty string to its string reference
+        || table. Doing so here make out string table out of sync with
+        || BlazeDS' string table.
+        {self.add-string str}
+    }
+    {return ret}
+  }
+  
+  {method public open {add-object obj:Object}:void
+    {if self.cached-objects.size < max-int29 then
+        {self.cached-objects.append obj}
+     else
+        {throw {AMFException {lmessage Too many references in '{value {this-function}}'.}}}
+    }
+  }
+
+  {method public open {get-object index:int}:Object
+    def (ret, found?) = {self.cached-objects.get-if-exists index}
+    {if found? then
+        {return ret}
+     else
+        {throw {AMFException {lmessage Reference for index {value index} in '{value {this-function}}' not found.}}}
+    }
+  }
+
+  {method public open {get-object-index obj:Object}:int
+    def ret = {self.cached-objects.find obj}
+    {if ret == -1 then
+        {self.add-object obj}
+    }
+    {return ret}
+  }
+
+  {method public open {add-trait trait:DataObjectTraits}:void
+    || up to 27bit
+    {if self.cached-traits.size < 0x7FFFFFF then
+        {self.cached-traits.append trait}
+     else
+        {throw {AMFException {lmessage Too many references in '{value {this-function}}'.}}}
+    }
+  }
+  
+  {method public open {get-trait index:int}:DataObjectTraits
+    def (ret, found?) = {self.cached-traits.get-if-exists index}
+    {if found? then
+        {return ret}
+     else
+        {throw {AMFException {lmessage Reference for index {value index} in '{value {this-function}}' not found.}}}
+    }
+  }
+
+  {method public open {get-trait-index trait:DataObjectTraits}:int
+    def ret = 
+        {self.cached-traits.find
+            equality-proc = {proc {a:DataObjectTraits, b:DataObjectTraits}:bool
+                                {return {a.equal? b}}
+                            },
+            trait
+        }
+    {if ret == -1 then
+        {self.add-trait trait}
+    }
+    {return ret}
+  }
+}
+

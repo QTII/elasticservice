@@ -1,0 +1,237 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{define-class public MultiTopicConsumer {inherits AbstractConsumer}
+
+  field private _subscriptions:SubscriptionInfos
+  field private current-subscriptions:{Set-of String}
+  field private subchange-alarm:#Alarm
+  field private subscriptions-change-proc:EventHandler
+
+  {constructor public {default
+                          endpoint:#Url = null,
+                          destination:String = "",
+                          channel-set:#ChannelSet = null,
+                          subscriptions:SubscriptionInfos =
+                              {SubscriptionInfos {SubscriptionInfo}},
+                          ...:EventHandler
+                      }
+    {construct-super
+        endpoint = endpoint,
+        destination = destination,
+        channel-set = channel-set,
+        ...
+    }
+    set self._subscriptions = subscriptions
+    set self.current-subscriptions = {{Set-of String}}
+
+    set self.subscriptions-change-proc =
+        {on SubscriptionInfosChanged do
+            {self.subscriptions-change-handler}
+        }
+    {self.subscriptions.add-event-handler
+        self.subscriptions-change-proc
+    }
+  }
+
+  {getter public {subscriptions}:SubscriptionInfos
+    {return self._subscriptions}
+  }
+
+  {setter public {subscriptions val:SubscriptionInfos}:void
+    {if self._subscriptions != val then
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "subscriptions", self._subscriptions, val}
+        
+        {if self.subscribed? then
+            {self.unsubscribe}
+            set self.should-be-subscribed? = true
+        }
+
+        {self.subscriptions.remove-event-handler
+            self.subscriptions-change-proc
+        }
+
+        set self._subscriptions = val
+
+        {self.subscriptions.add-event-handler
+            self.subscriptions-change-proc
+        }
+
+        {if self.should-be-subscribed? then
+            {self.subscribe client-id = self.client-id}
+        }
+
+        {self.enqueue-event event}
+    }
+  }
+
+  {setter protected {subscribed? val:bool}:void
+    {if not val then
+        set self.current-subscriptions = {{Set-of String}}
+    }
+    set super.subscribed? = val
+  }
+
+  {method public {add-subscription
+                     subtopic:String = "",
+                     selector:String = ""
+                 }:void
+    {self.subscriptions.append
+        {SubscriptionInfo subtopic = subtopic, selector = selector}
+    }
+  }
+
+  {method public {remove-subscription
+                     subtopic:String = "",
+                     selector:String = ""
+                 }:void
+    {try
+        {self.subscriptions.remove-by-str
+            subtopic = subtopic,
+            selector = selector
+        }
+     catch e:KeyNotFoundException do
+        || if not found
+        {error 
+            {lmessage Attempt to remove a subscription with subtopic:
+                {value subtopic} and selector: {value selector} that this
+                consumer does not have
+            }
+        }
+    }
+  }
+
+  {method protected {build-subscribe-message}:CommandMessage
+    def msg = {super.build-subscribe-message}
+    set msg.operation = CommandMessage.MULTI_SUBSCRIBE_OPERATION
+
+    def subs = {self.get-current-subscriptions}
+    def to-add = {Array}
+    def to-remove = {Array}
+    
+    {for s in subs do
+        {if not {self.current-subscriptions.member? s} then
+            {to-add.append s}
+        }
+    }
+    {for s in self.current-subscriptions do
+        {if not {subs.member? s} then
+            {to-remove.append s}
+        }
+    }
+
+    {if not to-add.empty? then
+        set msg.headers[CommandMessage.ADD_SUBSCRIPTIONS] = to-add
+    }
+    {if not to-remove.empty? then
+        set msg.headers[CommandMessage.REMOVE_SUBSCRIPTIONS] = to-remove
+    }
+
+    set self.current-subscriptions = subs
+
+    {if self.current-subscriptions.empty? then
+        set msg.headers["DSlastUnsub"] = true
+    }
+    {return msg}
+  }
+
+  {method protected {build-unsubscribe-message
+                        preserve-durable?:bool = false
+                    }:CommandMessage
+    def msg = {super.build-unsubscribe-message
+                  preserve-durable? = preserve-durable?
+              }
+    set msg.operation = CommandMessage.MULTI_SUBSCRIBE_OPERATION
+
+    def to-remove = {Array}
+    {for s in self.current-subscriptions do
+        {to-remove.append s}
+    }
+    set self.current-subscriptions = {{Set-of String}}
+
+    {if not to-remove.empty? then
+        set msg.headers[CommandMessage.REMOVE_SUBSCRIPTIONS] = to-remove
+    }
+
+    set msg.headers["DSlastUnsub"] = true
+    
+    {return msg}
+  }
+
+  {method protected {internal-send
+                        message:IMessage,
+                        wait-for-client-id?:bool = true
+                    }:void
+    {if {message.headers.key-exists? CommandMessage.ADD_SUBSCRIPTIONS} or
+        {message.headers.key-exists? CommandMessage.REMOVE_SUBSCRIPTIONS}
+     then
+        {super.internal-send
+            message,
+            wait-for-client-id? = wait-for-client-id?
+        }
+     else
+        {type-switch message
+         case cmd:CommandMessage do
+            {if not self.channel-set.connected? and
+                cmd.operation == CommandMessage.MULTI_SUBSCRIBE_OPERATION
+             then
+                {super.internal-send
+                    message,
+                    wait-for-client-id? = wait-for-client-id?
+                }
+            }
+        }
+
+        {if {message.headers.key-exists? "DSlastUnsub"} then
+            set self.subscribed? = false
+         elseif self.channel-set.connected? then
+            set self.subscribed? = true
+        }
+    }
+  }
+
+  {method private {get-current-subscriptions}:{Set-of String}
+    def subs = {{Set-of String}}
+    {for si in self.subscriptions do
+        {subs.insert
+            si.subtopic & CommandMessage.SUBTOPIC_SEPARATOR & si.selector
+        }
+    }
+    {return subs}
+  }
+
+  {method private {subscriptions-change-handler}:void
+    {if (self.should-be-subscribed? or self.subscribed?) and
+        self.subchange-alarm == null
+     then
+        set self.subchange-alarm = {Alarm
+                                       {proc {}:void
+                                           {self.do-resubscribe}
+                                       },
+                                       delay = 0s
+                                   }
+    }
+  }
+
+  {method private {do-resubscribe}:void
+    set self.subchange-alarm = null
+
+    {if self.subscribed? then
+        {self.internal-send {self.build-subscribe-message}}
+    }
+  }
+}

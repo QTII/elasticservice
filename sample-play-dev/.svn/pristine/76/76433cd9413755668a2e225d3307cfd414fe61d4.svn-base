@@ -1,0 +1,63 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{define-class public AMFEnvelope
+  field public constant headers:{Array-of AMFHeader}
+  field public constant bodies:{Array-of AMFBody}
+
+  field public constant version:int16
+
+  || An AMFEnvelope has the following general form:
+  ||
+  || 1. Preamble
+  ||    o Typically 2 bytes, 0x00 0x03.
+  || 2. AMF Headers
+  || 3. AMF Bodies
+  ||
+  || Some bytes are inserted along the way, such as a header count value
+  || preceding the headers, and a body count value preceding the bodies.
+  {constructor public {default version:int16 = 3}
+    set self.headers = {new {Array-of AMFHeader}}
+    set self.bodies = {new {Array-of AMFBody}}
+    set self.version = version
+  }
+
+  {method public {add-header header:AMFHeader}:void
+    {self.headers.append header}
+  }
+
+  {method public {add-body body:AMFBody}:void
+    {self.bodies.append body}
+  }
+
+  {method public {serialize mapper:AMFObjectAdapters = AMFObjectAdapters.standard}:ByteArray
+    def bytes = {ByteArray}
+    {with-open-streams out = {new ByteArrayOutputStream, bytes} do
+        def serializer = {new AMF0Serializer, out, mapper = mapper}
+        {serializer.serialize self}
+    }
+
+    {return bytes}
+  }
+
+  {define-proc public {deserialize
+                          stream:ByteInputStream,
+                          mapper:AMFObjectAdapters = AMFObjectAdapters.standard
+                      }:AMFEnvelope
+    def amf0-deserializer = {AMF0Deserializer stream, mapper = mapper}
+    {return {amf0-deserializer.deserialize}}
+  }
+}

@@ -1,0 +1,6 @@
+<update>
+	insert into t_emp values (8223,'jakelee70','CEO')
+	<selectKey keyProperty="seq_no" resultClass="Integer"> 
+		SELECT SCOPE_IDENTITY() 
+	</selectKey> 
+</update>

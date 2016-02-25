@@ -1,0 +1,493 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+|| StyleSheet
+{import * from CURL.GUI.STANDARD}
+
+|| Define some variables to hold reusable colors.
+{let transparent:FillPattern = "transparent"}
+{let white:FillPattern = "white"}
+{let silver:FillPattern = "silver"}
+{let black:FillPattern = "black"}
+{let active:FillPattern = "#b3baca"}
+{let inactive:FillPattern = "#d3daea"}
+{let scrollbar-border:FillPattern = "#a3aaba"}
+{let scrollbar-rollover-border:FillPattern = "#737a8a"}
+
+{let text-inset:int = 2 div 3}
+
+|| Define the StyleSheet.
+{StyleSheet
+    {get-default-style-sheet},
+    || General purpose
+    {StyleRule "Panel",
+        hstretch? = true,
+        vstretch? = true,
+        width = {make-elastic preferred-size = 5cm},
+        height = {make-elastic preferred-size = 10cm},
+        skin =
+            {ShadedSkinSpec
+                "#eca562",
+                "#d48e5a",
+                corner-radius = 6px
+            },
+        shadow-color = "#7a3400",
+        shadow-spec = {ShadowSpec angle = 180deg, offset = 3px}
+    },
+    {StyleRule "Panel/stack",
+        margin = 10px
+    },
+    {StyleRule "Panel/title",
+        font-size = 8pt,
+        font-weight = "bold",
+        margin = 4px
+    },
+    {StyleRule "Panel/content",
+        shadow-color = "#a3795a",
+        shadow-spec = {ShadowSpec angle = 180deg, offset = 4px}
+    },
+    {StyleRule "DisplayFrame.title",
+        font-weight = "bold"
+    },
+    {StyleRule "DisplayFrame.image",
+        height = 80px,
+        width = 40px
+    },
+    {StyleRule "DisplayFrame.price",
+        color = "#e57000"
+    },
+    {StyleRule "DisplayFrame.product",
+        font-weight = "bold"
+    },
+    {StyleRule "CommandButton.get-data",
+        width = 2.15cm,
+        skin = {ShadedSkinSpec
+                   "#fbfbfb",
+                   "#ebebeb",
+                   border-color = "#5e6162",
+                   rollover-border-color = "#0076c1",
+                   corner-radius = 4px
+               },
+        focus-skin = {FocusShadedSkinSpec
+                         "#0076c1",
+                         corner-radius = 4px
+                     }
+    },
+    {StyleRule "Frame.grid-frame",
+        background = "white",
+        border-width = 1px,
+        border-color = "#b7babc",
+        hstretch? = true,
+        vstretch? = true
+    },
+    {StyleRule "SkinnableFrame.main",
+        skin = {ShadedSkinSpec
+                   "#f47f0f",
+                   "#cc5700",
+                   border-color = "black"
+               },
+||--        background = "#E57000",
+||--        margin = 6px,
+||--        outside-margin = 12px,
+||--        hstretch? = true,
+||--        vstretch? = true,
+        font-size = 8pt
+    },
+    {StyleRule "HBox.main",
+        margin = 0.65cm,
+        spacing = 0.2cm
+    },
+    {StyleRule "RecordGrid",
+        border-width = 1px,
+        border-color = "#b7babc",
+        background = "#ffffff",
+        alternate-row-background = "#f7f7f7",
+        horizontal-grid-line-width = 0cm,
+        vertical-grid-line-width = 1px,
+        grid-line-color = "#cccccc",
+        cells-take-focus? = false,
+        editable? = false,
+        display-filler-column? = true,
+        display-record-selectors? = false,
+        display-navigation-panel? = false,
+        multiple-selection-enabled? = false,
+        select-current-record? = true
+||--        ,
+||--        key-spec = {proc {r:Record}:any
+||--                       {return r}
+||--                   }
+||--        header-spec =
+||--            {proc {rgc:RecordGridColumn}:Graphic
+||--                {if-non-null f = rgc.field then
+||--                    {return
+||--                        {Frame
+||--                            width = {add-stretch},
+||--                            height = {add-stretch},
+||--                            border-spec =
+||--                                {BorderSpec
+||--                                    bottom-border-width = 1px
+||--                                },
+||--                            f.caption
+||--||--                                ,
+||--||--                                {on PointerEnter at f:Frame do
+||--||--                                    set f.background = "#b2e1ff"
+||--||--                                },
+||--||--                                {on PointerLeave at f:Frame do
+||--||--                                    {unset f.background}
+||--||--                                },
+||--||--                                {on PointerPress at f:Frame do
+||--||--                                    set f.background = "#7fceff"
+||--||--                                },
+||--||--                                {on PointerRelease at f:Frame do
+||--||--                                    {unset f.background}
+||--||--                                }
+||--                        }
+||--                    }
+||--                 else
+||--                    {return rgc.field-name}
+||--                }
+||--            }
+    },
+    {StyleRule "RecordForm",
+        width = {add-stretch},
+        height = {add-stretch},
+        background = "#ffffff",
+        display-navigation-panel? = false
+    },
+    {StyleRule "Scrollbar",
+        thumb-skin =
+            {ShadedSkinSpec 
+                inactive,
+                inactive,
+                border-color = scrollbar-border,
+                rollover-border-color = scrollbar-rollover-border,
+                gradient-angle = 0deg,
+                highlight-alpha-1 = 0.2,
+                highlight-alpha-2 = 0.1,
+                highlight-boundary = .05,
+                overlay-decoration = "grip",
+                corner-radius = 3px
+            },
+        channel-skin = 
+            {ShadedSkinSpec 
+                "#bbb",
+                "#dde6eb",
+                border-color = scrollbar-border,
+                rollover-border-color = scrollbar-border,
+                gradient-angle = -90deg,
+                highlight-alpha-1 = 0.0,
+                highlight-alpha-2 = 0.0,
+                highlight-boundary = .35,
+                corner-radius = 0px,
+                orientation-transform = "rotate-base"
+            }
+    },
+    {StyleRule "Scrollbar/decrease-button",
+        skin = {ShadedSkinSpec
+                   inactive,
+                   inactive,
+                   border-color = scrollbar-border,
+                   rollover-border-color = scrollbar-rollover-border,
+                   overlay-decoration = "decrease-triangle",
+                   highlight-boundary = .05,
+                   corner-radius = 3px
+               }
+    },
+    {StyleRule "Scrollbar/increase-button",
+        skin = {ShadedSkinSpec
+                   inactive,
+                   inactive,
+                   border-color = scrollbar-border,
+                   rollover-border-color = scrollbar-rollover-border,
+                   overlay-decoration = "increase-triangle",
+                   highlight-boundary = .05,
+                   corner-radius = 3px
+               }
+    },
+    || testdrive-remoteobject
+    || - No specific rules
+    || testdrive-101
+    {StyleRule "TileSelector.tiles",
+        border-width = 1px,
+        border-color = "#b7babc",
+        selection-color = "#ffcc33",
+        rollover-color = "#ffcc99",
+        background = "white",
+        width = {add-stretch},
+        height = {add-stretch}
+    },
+    {StyleRule "Frame.panel",
+        width = {add-stretch},
+        height = {add-stretch},
+        background = "white"
+    },
+    {StyleRule "VBox.stack",
+        margin = 6px,
+        spacing = 6px
+    },
+    {StyleRule "HBox.stack",
+        margin = 6px,
+        spacing = 6px
+    },
+    {StyleRule "VBox.thumbnail",
+        margin = 6px,
+        halign = "center",
+        width = 120px,
+        height = 120px,
+        font-size = 8pt
+    },
+    || testdrive-update
+    {StyleRule "Panel.update",
+        hstretch? = true,
+        vstretch? = true,
+        width = {make-elastic preferred-size = 5cm},
+        height = {make-elastic preferred-size = 10cm},
+        skin =
+            {ShadedSkinSpec
+                "#b2bfc6",
+                "#9ca9b0",
+                corner-radius = 6px
+            },
+        shadow-color = "#424f56",
+        shadow-spec = {ShadowSpec angle = 180deg, offset = 3px}
+    },
+    {StyleRule "Panel/update-content",
+        shadow-color = "#81898d",
+        shadow-spec = {ShadowSpec angle = 180deg, offset = 4px}
+    },
+    {StyleRule "CommandButton.update",
+        width = 1.85cm,
+        height = 0.7cm,
+        color = "#0b333c",
+        font-size = 7.5pt,
+        font-weight = "bold",
+        skin = {ShadedSkinSpec
+                   "#e3e7e8",
+                   "#b0b8bc",
+                   border-color = "#5e6162",
+                   rollover-border-color = "#0076c1",
+                   corner-radius = 4px
+               },
+        focus-skin = {FocusShadedSkinSpec
+                         "#0076c1",
+                         corner-radius = 4px
+                     }
+    },
+    {StyleRule "TextField.update",
+        width = 4cm,
+        skin =
+            {ShadedSkinSpec
+                content-background-inset = 0,
+                draw-content-background? = true,
+                margin-spec =
+                    {OffsetSpec text-inset * 1px + 3px, text-inset * 1px + 4px},
+                "transparent",
+                "transparent",
+                gradient-angle = 0deg,
+                highlight-alpha-1 = 0.0,
+                highlight-alpha-2 = 0.0,
+                border-color = "#6b6b6b",
+                corner-radius = 0px
+            },
+        focus-skin = {ShadedSkinSpec
+                         "#5cc0ff",
+                         "#99d8ff",
+                         corner-radius = 0px
+                     }
+    },
+    {StyleRule "TextArea.update",
+        width = {add-stretch},
+        height = 3cm,
+        skin =
+            {ShadedSkinSpec
+                content-background-inset = 0,
+                draw-content-background? = true,
+                margin-spec = {OffsetSpec 3px, 3px},
+                "transparent",
+                "transparent",
+                gradient-angle = 0deg,
+                highlight-alpha-1 = 0.0,
+                highlight-alpha-2 = 0.0,
+                border-color = "#6b6b6b",
+                corner-radius = 0px
+            },
+        focus-skin = {ShadedSkinSpec
+                         "#5cc0ff",
+                         "#99d8ff",
+                         corner-radius = 0px
+                     }
+    },
+    {StyleRule "Table.update",
+        outside-margin = {OffsetSpec left = 15px, top = 10px, right = 5px}
+    },
+    {StyleRule "SkinnableFrame.main-update",
+        skin = {ShadedSkinSpec
+                   "#95abb6",
+                   "#6d838e",
+                   border-color = "black"
+               },
+        font-size = 8pt
+    },
+    || testdrive-datapush
+    {StyleRule "CommandButton.datapush",
+        color = "#0b333c",
+        font-weight = "bold",
+        skin = {ShadedSkinSpec
+                   "#ffffff",
+                   "#eaeaea",
+                   rollover-start-color = "#ffffff",
+                   rollover-end-color = "#f3f3f3",
+                   border-color = "#919495",
+                   rollover-border-color = "#0076c1",
+                   corner-radius = 4px
+               },
+        focus-skin = {FocusShadedSkinSpec
+                         "#0076c1",
+                         corner-radius = 4px
+                     }
+    },
+    {StyleRule "TextField.datapush",
+        width = 4cm,
+        skin =
+            {ShadedSkinSpec
+                content-background-inset = 0,
+                draw-content-background? = true,
+                margin-spec =
+                    {OffsetSpec text-inset * 1px + 3px, text-inset * 1px + 4px},
+                "transparent",
+                "transparent",
+                gradient-angle = 0deg,
+                highlight-alpha-1 = 0.0,
+                highlight-alpha-2 = 0.0,
+                border-color = "#6b6b6b",
+                corner-radius = 0px
+            },
+        focus-skin = {ShadedSkinSpec
+                         "#5cc0ff",
+                         "#99d8ff",
+                         corner-radius = 0px
+                     }
+    },
+    || testdrive-chat
+    {StyleRule "Panel.chat",
+        hstretch? = true,
+        vstretch? = true,
+        width = {make-elastic preferred-size = 5cm},
+        height = {make-elastic preferred-size = 10cm},
+        skin =
+            {ShadedSkinSpec
+                "#b2bfc6",
+                "#9ca9b0",
+                corner-radius = 6px
+            },
+        shadow-color = "#424f56",
+        shadow-spec = {ShadowSpec angle = 180deg, offset = 3px}
+    },
+    {StyleRule "Panel/chat-content",
+        shadow-color = "#81898d",
+        shadow-spec = {ShadowSpec angle = 180deg, offset = 4px}
+    },
+    {StyleRule "CommandButton.chat",
+        width = 1.5cm,
+        height = 26px,
+        color = "#0b333c",
+        font-weight = "bold",
+        skin = {ShadedSkinSpec
+                   "#e3e7e8",
+                   "#b0b8bc",
+                   rollover-start-color = "#edf0f1",
+                   rollover-end-color = "#d1d6d8",
+                   border-color = "#737677",
+                   rollover-border-color = "#0076c1",
+                   corner-radius = 4px
+               },
+        focus-skin = {FocusShadedSkinSpec
+                         "#0076c1",
+                         corner-radius = 4px
+                     }
+    },
+    {StyleRule "TextField.chat",
+        width = {add-stretch},
+        height = 22px,
+        skin =
+            {ShadedSkinSpec
+                content-background-inset = 0,
+                draw-content-background? = true,
+                margin-spec =
+                    {OffsetSpec text-inset * 1px + 3px, text-inset * 1px + 4px},
+                "transparent",
+                "transparent",
+                gradient-angle = 0deg,
+                highlight-alpha-1 = 0.0,
+                highlight-alpha-2 = 0.0,
+                border-color = "#6b6b6b",
+                corner-radius = 0px
+            },
+        focus-skin = {ShadedSkinSpec
+                         "#5cc0ff",
+                         "#99d8ff",
+                         corner-radius = 0px
+                     }
+    },
+    {StyleRule "Frame.chat-transcript",
+        width = {add-stretch},
+        height = {add-stretch},
+        background = "white",
+        border-color = "#b7babc",
+        border-width = 1px,
+        shadow-color = "#828a8e",
+        shadow-spec = {ShadowSpec angle = 180deg, offset = 3px}
+    },
+    {StyleRule "HBox.chat-control-bar",
+        spacing = 6px
+    },
+    {StyleRule "VBox.chat-main",
+        hstretch? = true,
+        background = "#B1BFC5",
+        margin = 9pt,
+        spacing = 7pt
+    },
+    {StyleRule "TextArea.chat-transcript",
+        width = {add-stretch},
+        height = {add-stretch},
+        skin =
+            {ShadedSkinSpec
+                content-background-inset = 0,
+                draw-content-background? = true,
+                margin-spec = {OffsetSpec 3px, 3px},
+                "transparent",
+                "transparent",
+                gradient-angle = 0deg,
+                highlight-alpha-1 = 0.0,
+                highlight-alpha-2 = 0.0,
+                border-color = "transparent",
+                corner-radius = 0px
+            },
+        focus-skin = {ShadedSkinSpec
+                         "#5cc0ff",
+                         "#99d8ff",
+                         corner-radius = 0px
+                     }
+    },
+    {StyleRule "SkinnableFrame.main-chat",
+        skin = {ShadedSkinSpec
+                   "#95abb6",
+                   "#6d838e",
+                   border-color = "black"
+               },
+        font-size = 8pt
+    }
+}

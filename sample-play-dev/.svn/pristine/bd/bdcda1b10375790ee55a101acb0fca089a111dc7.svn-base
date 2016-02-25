@@ -1,0 +1,64 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{define-class public FlexClient {inherits EventTarget}
+  field private _id:#String
+  field _wait-for-flex-client-id?:bool = false
+
+  let private instance:#FlexClient
+
+  let public constant NULL_FLEXCLIENT_ID:String = "nil" ||""
+
+  {constructor protected {default}
+    {construct-super}
+  }
+
+  {factory public {get-instance}:FlexClient
+    {if FlexClient.instance == null then
+        set FlexClient.instance = {new FlexClient}
+    }
+    {return {non-null FlexClient.instance}}
+  }
+
+  {getter public {id}:#String
+    {return self._id}
+  }
+
+  {setter public {id s:#String}:void
+    {if self._id != s then
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "id", self._id, s
+                    }
+        set self._id = s
+        {self.enqueue-event event}
+    }
+  }
+
+  {getter public {wait-for-flex-client-id?}:bool
+    {return self._wait-for-flex-client-id?}
+  }
+
+  {setter public {wait-for-flex-client-id? b?:bool}:void
+    {if self._wait-for-flex-client-id? != b? then
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "wait-for-flex-client-id?",
+                        self._wait-for-flex-client-id?, b?
+                    }
+        set self._wait-for-flex-client-id? = b?
+        {self.enqueue-event event}
+    }
+  }
+}

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Elastic Service v0.1 Examples</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		
+<script src="../html5/jq/jquery-1.9.1.min.js"></script>
+<script src="../html5/elastic-util-1.5.js"></script>
+
+</head>
+<BODY>
+	<div data-role="page">
+		<div data-role="header">
+			<h1><script>document.write(elastic_project_name())</script> Examples</h1>
+		</div>
+		<br>
+		<div data-role="content">
+			<div id="built-in" data-inline="true">
+				<font size="4">테스트 테이블(T_TEST) 준비</font>
+				<OL>
+					<LI><a charset="UTF-8" href="Builtin_DefaultService_1CreateTestTable.html" data-ajax="false">테스트 테이블(T_TEST): 테이블 생성</a></LI>
+					<LI><a charset="UTF-8" href="Sample031_MultiInsertService.html" data-ajax="false">테스트 테이블(T_TEST): 데이터 반복 입력 & 건수 조회</a></LI>
+				</OL>
+				<br>
+				
+				<font size="4">Built-in services</font>
+				<UL>
+					<LI>QueryService
+						<OL>
+							<LI><a charset="UTF-8" href="Builtin_DefaultService_SingleQuery.html" data-ajax="false">DB 쿼리 한번 실행 - sample.mysql_select1</a></LI>
+							<LI><a charset="UTF-8" href="Builtin_SingleQueryService.html" data-ajax="false">DB 쿼리 한번 실행 - sample.sql1</a></LI>
+							<LI><a charset="UTF-8" href="Builtin_DefaultService_TransactionQuery.html" data-ajax="false">[Built-In] 트랜잭션 걸고 두 개의 DB 쿼리 수행 후 결과 받기</a></LI>
+						</OL>
+					</LI>
+					<P>
+					<LI>EchoService
+						<OL>
+							<LI><a charset="UTF-8" href="Sample13_jsonp.html" data-ajax="false">Mobile AJAX JSONP</a></LI>
+						</OL>
+					</LI>
+				</UL>
+				<br>
+				
+				<font size="4">Scala Example</font>
+				<UL>
+					<LI>DB Query Service
+						<OL>
+							<LI><a charset="UTF-8" href="Sample_SingleQueryService.html" data-ajax="false">DB 쿼리 한번 실행 - sample.sql1</a></LI>
+							<LI><a charset="UTF-8" href="Sample03_TransactionQueryService.html" data-ajax="false">트랜잭션 걸고 두 개의 DB 쿼리 수행 후 결과 받기</a></LI>
+							<LI><a charset="UTF-8" href="Sample02_MultiQueryService.html" data-ajax="false">두 개의 DB 쿼리 수행 후 결과 받기</a></LI>
+						</OL>
+					</LI>
+					<p>
+					<LI>Session Service
+						<OL>
+							<LI><a charset="UTF-8" href="Sample_SessionGetService.html" data-ajax="false">Session 정보 조회</a></LI>
+							<LI><a charset="UTF-8" href="Sample_SessionSetService.html" data-ajax="false">Session 정보 설정</a></LI>
+							<LI><a charset="UTF-8" href="Sample_SessionClearService.html" data-ajax="false">Session 정보 삭제</a></LI>
+						</OL>
+					</LI>
+					<p>
+					<LI>Miscellaneous
+						<OL>
+							<LI><a charset="UTF-8" href="Sample04_ElasticParamsService.html" data-ajax="false">Request 데이터 구하기 및 Response 데이터 만들기</a></LI>
+							<LI><a charset="UTF-8" href="Sample05_DatasetService.html" data-ajax="false">응답을 List 객체로 하기</a></LI>
+							<LI><a charset="UTF-8" href="Sample06_ParameterService.html" data-ajax="false">응답을 Map 객체로 하기</a></LI>
+							<LI><a charset="UTF-8" href="Sample07_ExceptionService.html" data-ajax="false">오류가 발생했을 때</a></LI>
+						</OL>
+					</LI>
+				</UL>
+				
+				<hr>
+				
+				<h3>Query Service</h3>
+				<OL>
+					<LI><a charset="UTF-8" href="Builtin_DefaultService_2StreamingQuery.html" data-ajax="false">[Built-In] 테스트 테이블(T_TEST): 대용량 스트리밍 쿼리</a></LI>
+				</OL>
+				<h3>Login Service</h3>
+				<OL>
+					<LI><a charset="UTF-8" href="Builtin_SessionTimeoutService.html" data-ajax="false">[Built-In] Session 유효시간(초) 설정</a></LI>
+				</OL>
+				<h3>Curl</h3>
+				<OL>
+					<LI><a charset="UTF-8" href="curl/start.curl" data-ajax="false">Remote: curl/start.curl</a></LI>
+					<LI><a charset="UTF-8" href="file:///<%= getServletContext().getRealPath("/") %>elastic-sample\curl\start.curl" data-ajax="false">Local: file:///<%= getServletContext().getRealPath("/") %>elastic-sample\curl\start.curl</a></LI>
+				</OL>
+				<h3>WebSocket Service</h3>
+				<OL>
+					<LI><a charset="UTF-8" href="WebSocket.html" data-ajax="false">[Built-In] WebSocket</a></LI>
+				</OL>
+				<h3>Background Scheduling Job Service</h3>
+				<OL>
+					<LI><a charset="UTF-8" href="Builtin_SqlRunCronjob.html" data-ajax="false">[Built-In] DB 쿼리를 수행하는 백그라운드 스케줄 작업 등록</a></LI>
+					<LI><a charset="UTF-8" href="Builtin_SystemCallCronjob.html" data-ajax="false">[Built-In] 시스템 명령어를 수행하는 백그라운드 스케줄 작업 등록</a></LI>
+					<LI><a charset="UTF-8" href="Sample11_Cronjob.html" data-ajax="false">[User Defined] 백그라운드 스케줄 작업 프로그램 작성 및 등록</a></LI>
+				</OL>
+			</div>
+			
+			<div id="user-dev" data-inline="true">
+				<h3>Miscellaneous</h3>
+				<OL>
+					<LI><a charset="UTF-8" href="Sample04_ElasticParamsService.html" data-ajax="false">[User Defined] Request 데이터 구하기 및 Response 데이터 만들기</a></LI>
+					<LI><a charset="UTF-8" href="Sample05_ListService.html" data-ajax="false">[User Defined] 응답을 List 객체로 하기</a></LI>
+					<LI><a charset="UTF-8" href="Sample06_RowService.html" data-ajax="false">[User Defined] 응답을 Map 객체로 하기</a></LI>
+					<LI><a charset="UTF-8" href="Sample07_ExceptionService.html" data-ajax="false">[User Defined] 오류가 발생했을 때</a></LI>
+					<LI><a charset="UTF-8" href="Sample10_ConfigService.html" data-ajax="false">[User Defined] XML 파일의 엘리먼트 값 읽기</a></LI>
+					<LI><a charset="UTF-8" href="Sample12_ResourceBundle.html" data-ajax="false">[User Defined] Resource Bundle</a></LI>
+				</OL>
+			</div>
+			<div id="demo-env" data-inline="true">
+				<h3>System Environment</h3>
+				<img src="image/demo-env.png" width="700" height="auto">
+			</div>
+		</div>
+	</div>
+</BODY>
+</html>

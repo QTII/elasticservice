@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Root xmlns="http://www.tobesoft.com/platform/dataset">
+	<Parameters>
+		<Parameter id="JSESSIONID">fJz2Sb6SytwLl5GW0v0CLtmKvcm4Dhrhn76ylSn7MN1pgDyPcVth!248174166!1381726898961</Parameter>
+	</Parameters>
+	<Dataset id="gdsUserInfo">
+		<ColumnInfo>
+			<Column id="useLocal" type="string" size="255" />
+			<Column id="passwordEnc" type="string" size="255" />
+			<Column id="userIp" type="string" size="255" />
+			<Column id="smsYn" type="string" size="255" />
+			<Column id="groupName" type="string" size="255" />
+			<Column id="sidoCode" type="string" size="255" />
+			<Column id="userDept" type="string" size="255" />
+			<Column id="groupCode" type="string" size="255" />
+			<Column id="roleMode" type="string" size="255" />
+			<Column id="roleName" type="string" size="255" />
+			<Column id="createDe" type="string" size="255" />
+			<Column id="password" type="string" size="255" />
+			<Column id="sigunCode" type="string" size="255" />
+			<Column id="userNm" type="string" size="255" />
+			<Column id="useYn" type="string" size="255" />
+			<Column id="useDn" type="string" size="255" />
+			<Column id="email" type="string" size="255" />
+			<Column id="userId" type="string" size="255" />
+			<Column id="fclCode" type="string" size="255" />
+			<Column id="mobile" type="string" size="255" />
+			<Column id="roleId" type="string" size="255" />
+		</ColumnInfo>
+		<Rows>
+			<Row>
+				<Col id="userIp">127.0.0.1</Col>
+				<Col id="userDept">券版包府傍窜</Col>
+				<Col id="groupCode">01</Col>
+				<Col id="roleMode">1</Col>
+				<Col id="createDe">20080225</Col>
+				<Col id="userNm">包力</Col>
+				<Col id="useYn">Y</Col>
+				<Col id="userId">iaq</Col>
+				<Col id="fclCode" />
+				<Col id="roleId">R01</Col>
+			</Row>
+		</Rows>
+	</Dataset>
+</Root>

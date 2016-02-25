@@ -1,0 +1,208 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+|| protocol
+|| ====================
+{doc-next ||=== DataObjectTraits
+    {purpose Describes the characteristics of a {docref DataObject}.}
+}
+{define-class public abstract DataObjectTraits
+  {doc-next ||=== DataObjectTraits.name
+    {purpose The unique name.}
+  }
+  {getter public abstract {name}:String}
+
+  {doc-next ||=== DataObjectTraits.members
+    {purpose The names of required properties.}
+  }
+  {getter public abstract {members}:StringArray}
+
+  {doc-next ||=== DataObjectTraits.dynamic?
+    {purpose Indicates whether properties can be added.}
+  }
+  {getter public abstract {dynamic?}:bool}
+
+  {doc-next ||=== DataObjectTraits.externalizable?
+    {purpose Indicates whether a special AMF serialization is used.}
+  }
+  {getter public abstract {externalizable?}:bool}
+
+  {doc-next ||=== DataObjectTraits.equal?
+    {purpose Compares its argument with this object for structural equality.}
+  }
+  {method public abstract {equal? other:DataObjectTraits}:bool}
+
+  {doc-next ||=== DataObjectTraits.index-for
+    {purpose The index corresponding to the specified property name.}
+  }
+  {method public abstract {index-for member:String}:int}
+  
+  || NOTE: docstring inherited
+  {method public {object-describe out:TextOutputStream, locale:Locale}:void
+    {wrap-object-description out = out, self,
+        description = {message '{value self.name}'}}
+  }
+
+  {getter abstract {value-hash}:int}
+  {method abstract {value-equal? other:DataObjectTraits}:bool}
+
+  {define-proc public inline {intern traits:DataObjectTraits}:DataObjectTraits
+    || instances are interned so pointer-equal? ==> value-equal? 
+    let (interned:DataObjectTraits, interned?:bool) =
+        {DataObjectTraits.interned.get-member-if-exists traits} 
+    {return
+        {if interned? then 
+            interned
+         else
+            {DataObjectTraits.interned.insert traits}
+            traits}}
+  }
+  let constant interned:DataObjectTraitsSet = {DataObjectTraitsSet}
+  let constant hash-multiplier:int = 8191  
+
+  {doc-next ||=== DataObjectTraits.default
+    {purpose Creates a {docref DataObjectTraits} instance.}
+    {parameter name, The {docref-abbr DataObjectTraits.name}.}
+    {parameter members, The {docref-abbr DataObjectTraits.member}.}
+    {parameter dynamic?, The {docref-abbr DataObjectTraits.dynamic?} value.}
+    {parameter externalizable?, The {docref-abbr DataObjectTraits.externalizable?} value.}
+    {details A single unique object is used for 
+        each distinct set of characteristics,
+        so that traits can be efficiently stored and compared.}
+  }
+  {factory public {default ...}:DataObjectTraits
+    def traits = {DataObjectTraits.internal {splice ...}}
+    {return {DataObjectTraits.intern traits}}
+  }
+
+  {factory public {internal ...}:StandardDataObjectTraits
+    {return
+        {StandardDataObjectTraits {splice ...}}}
+  }
+  def public anonymous =
+      {DataObjectTraits "", {StringArray}}
+}
+|| interning support
+|| ====================
+|| these can not be class variables
+{define-proc inline {DataObjectTraits-equal? self:DataObjectTraits, other:DataObjectTraits}:bool
+    {return {self.value-equal? other}}
+}
+{define-proc inline {DataObjectTraits-hash self:DataObjectTraits}:int
+    {return self.value-hash}
+}
+{let constant DataObjectTraitsSet:ClassType =
+    {Set-of DataObjectTraits, 
+        key-equality-proc = DataObjectTraits-equal?,
+        key-hash-proc = DataObjectTraits-hash}
+}
+|| implementation
+|| ====================
+{doc-next ||=== StandardDataObjectTraits
+    {purpose A basic implmentation of {docref DataObjectTraits}.}
+}
+{define-class public StandardDataObjectTraits {inherits DataObjectTraits}
+  field private constant _name:String
+  field private constant _members:StringArray
+  field private constant _dynamic?:bool
+  field private constant _externalizable?:bool
+  field private constant member-indices:{BucketHashTable-of String, int}
+  {doc-next ||=== StandardDataObjectTraits.default
+    {purpose Creates a {docref StandardDataObjectTraits} instance.}
+    {parameter name, The {docref-abbr DataObjectTraits.name}.}
+    {parameter members, The {docref-abbr DataObjectTraits.member}.}
+    {parameter dynamic?, The {docref-abbr DataObjectTraits.dynamic?} value.}
+    {parameter externalizable?, The {docref-abbr DataObjectTraits.externalizable?} value.}
+    {details A single unique object is used for 
+        each distinct set of characteristics,
+        so that traits can be efficiently stored and compared.}
+  }
+  || TODO: should probably be interned
+  {constructor public {default
+                          name:String,
+                          members:StringArray,
+                          dynamic?:bool = true,
+                          externalizable?:bool = false}
+    set self._name = name
+    set self._members = members
+    set self._dynamic? = dynamic?
+    set self._externalizable? = externalizable?
+    set self.member-indices = {{BucketHashTable-of String, int}}
+    {self.generate-index}
+  }
+  || NOTE: docstring inherited
+  {getter public {name}:String
+    {return self._name}
+  }
+  || NOTE: docstring inherited
+  {getter public {members}:StringArray
+    {return self._members}
+  }
+  || NOTE: docstring inherited
+  {getter public {dynamic?}:bool
+    {return self._dynamic?}
+  }
+  || NOTE: docstring inherited
+  {getter public {externalizable?}:bool
+    {return self._externalizable?}
+  }
+  || NOTE: docstring inherited
+  {method public {equal? other:DataObjectTraits}:bool
+    {return
+        self == other or
+        (self.name == other.name and
+         self.dynamic? == other.dynamic? and
+         self.externalizable? == other.externalizable? and
+         {self.members.equal? other.members})}
+  }
+  || interning support
+  || --------------------
+  || criteria: type, name, dynamic?, externalizable?, members
+  field _hash:int = 0
+  {getter {value-hash}:int
+    {if self._hash == 0 then
+        let h:int = {value-hash {type-of self}}
+        set h = {value-hash self.name} + h * DataObjectTraits.hash-multiplier
+        set h = {value-hash self.dynamic?} + h * DataObjectTraits.hash-multiplier 
+        set h = {value-hash self.externalizable?} + h * DataObjectTraits.hash-multiplier
+        {for k in self.members do
+            set h =  {value-hash k} + h * DataObjectTraits.hash-multiplier }
+        set self._hash = h}
+    {return self._hash}
+  }
+  {method {value-equal? other:DataObjectTraits}:bool
+    {return
+        {type-of self} == {type-of other} and
+        {self.equal? other}
+    }
+  }
+  || performance hacks
+  || --------------------
+  || NOTE: docstring inherited
+  {method public {index-for member:String}:int
+    def (index, index?) =
+        {self.member-indices.get-if-exists member}
+    {return
+        {if index? then index
+         else -1}}
+  }
+  || NOTE: must be called after deserialization
+  {method |#TEMP#| public {generate-index}:void
+    {for member key index in self.members do
+        set self.member-indices[member] = index
+    }
+  }
+}

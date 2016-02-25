@@ -1,0 +1,56 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{define-class public open AsyncMessageExt {inherits AsyncMessage, Externalizable}
+  
+  def public traits =
+      {DataObjectTraits
+        "DSA", ||""
+        {StringArray},
+        dynamic? = false,
+        externalizable? = true}
+
+  field private _message:#AsyncMessage
+
+  {constructor public {default message:#AsyncMessage = null}
+    set self._message = message
+    {construct-super.AsyncMessage}
+    {construct-super.Externalizable}
+  }
+
+  {getter public {message-id}:String
+    {if-non-null msg = self._message then
+        {return msg.message-id}
+    }
+    {return super.message-id}
+  }
+
+  {method public open {read-externalizable deserializer:AMFDeserializer}:void
+    {if-non-null msg = self._message then
+        {msg.read-external deserializer}
+     else
+        {super.read-external deserializer}
+    }
+  }
+
+  {method public open {write-externalizable serializer:AMFSerializer}:void
+    {if-non-null msg = self._message then
+        {msg.write-external serializer}
+     else
+        {super.write-external serializer}
+    }
+  }
+}

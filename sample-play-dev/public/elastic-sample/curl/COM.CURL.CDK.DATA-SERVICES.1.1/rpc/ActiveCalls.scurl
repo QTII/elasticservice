@@ -1,0 +1,71 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{define-class public sealed ActiveCalls
+  field protected constant calls:{HashTable-of String, AsyncToken}
+  field protected constant call-order:{Array-of String}
+
+  {constructor public {default}
+    set self.calls = {new {HashTable-of String, AsyncToken}}
+    set self.call-order = {new {Array-of String}}
+  }
+
+  {method public {add-call id:String, token:AsyncToken}:void
+    set self.calls[id] = token
+    {self.call-order.append id}
+  }
+
+  {method public {get-all-messages}:{Array-of AsyncToken}
+    def messages = {new {Array-of AsyncToken}}
+    {for call in self.calls do
+        {messages.append call}
+    }
+    {return messages}
+  }
+
+  {method public {cancel-last}:#AsyncToken
+    {if not self.call-order.empty? then
+        {return {self.remove-call {self.call-order.pop}}}
+    }
+    {return null}
+  }
+
+  {method public {has-active-calls?}:bool
+    {return not self.call-order.empty?}
+  }
+
+  {method public {remove-call id:String}:#AsyncToken
+    def (token:#AsyncToken, token-exists?) = {self.calls.get-if-exists id}
+    {if token-exists? then
+        {self.calls.remove id}
+        def index =
+            {self.call-order.find
+                id, search-direction = SearchDirection.backward}
+        {if index != -1 then
+            {self.call-order.remove index}
+        }
+    }
+    {return token}
+  }
+
+  {method public {was-last-call? id:String}:bool
+    {if not self.call-order.empty? then
+        {return self.call-order[self.call-order.size - 1] == id}
+     else
+        {return false}
+    }
+  }
+}

@@ -1,0 +1,11 @@
+<update>
+   	<![CDATA[
+CREATE TABLE t_emp (
+	seqno int NOT NULL IDENTITY (1, 1),
+	emp_no int NULL,
+	emp_name varchar(50) NULL,
+	role varchar(50) NULL
+	CONSTRAINT PK_t_emp PRIMARY KEY (seqno)
+)
+   	]]>
+</update>

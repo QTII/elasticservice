@@ -1,0 +1,128 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{define-class public Consumer {inherits AbstractConsumer}
+  field protected _selector:String = ""
+  field protected _subtopic:String = ""
+
+  {doc-next
+    {purpose
+        Create an {docref Consumer} with some server information.
+    }
+    {parameter endpoint,
+        The {docref Url} of the server that this object is
+        going to communicate with.  Also if no {docref channel-set} is
+        provided, this will be used to make a {docref ChannelSet} wrapped
+        around a {docref AMFChannel}.
+    }
+    {parameter destination,
+        The destination at the {param endpoint} for all messages being sent.
+    }
+    {parameter channel-set,
+        A {docref ChannelSet} to use to send messages, this will be
+        implicitly created from the {param endpoint} if it is not supplied.
+    }
+    {parameter selector,
+        The selector understood by the destination to subscribe to.
+    }
+    {parameter subtopic,
+        The subtopic understood by the destination to subscribe to.
+    }
+    {parameter ...,
+        {docref EventHandler}s to receive events on this object.
+    }
+    {notes
+        The {docref EventHandler}s on this object can receive
+        {docref MessageEvent}s and {docref MessageFaultEvent}s.
+    }
+  }
+  {constructor public {default
+                          endpoint:#Url = null,
+                          destination:String = "",
+                          channel-set:#ChannelSet = null,
+                          selector:String = "",
+                          subtopic:String = "",
+                          ...:EventHandler
+                      }
+    {construct-super
+        endpoint = endpoint,
+        destination = destination,
+        channel-set = channel-set,
+        ...
+    }
+    set self.selector = selector
+    set self.subtopic = subtopic
+  }
+
+  {doc-next
+    {purpose
+        The selector understood by the destination to subscribe to.
+    }
+  }
+  {getter public {selector}:String
+    {return self._selector}
+  }
+  {setter public {selector s:String}:void
+    {if self._selector != s then
+        let reset-subscription?:bool = self.subscribed?
+        {if reset-subscription? then
+            {self.unsubscribe}
+        }
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "selector", self._selector, s
+                    }
+        set self._selector = s
+        {if reset-subscription? then
+            {self.subscribe client-id = self.client-id}
+        }
+        {self.enqueue-event event}
+    }
+  }
+
+  {doc-next
+    {purpose
+        The subtopic understood by the destination to subscribe to.
+    }
+  }
+  {getter public {subtopic}:String
+    {return self._subtopic}
+  }
+  {setter public {subtopic s:String}:void
+    {if self._subtopic != s then
+        let reset-subscription?:bool = self.subscribed?
+        {if reset-subscription? then
+            {self.unsubscribe}
+        }
+        set self._subtopic = s
+        {if reset-subscription? then
+            {self.subscribe}
+        }
+    }
+  }
+
+  {method protected {internal-send
+                     message:IMessage,
+                     wait-for-client-id?:bool = true
+                 }:void
+    {if not self.subtopic.empty? then
+        set message.headers[AsyncMessage.SUBTOPIC_HEADER] = self.subtopic
+    }
+    {if not self._selector.empty? then
+        set message.headers[CommandMessage.SELECTOR_HEADER] = self._selector
+    }
+    {super.internal-send message, wait-for-client-id? = wait-for-client-id?}
+  }
+}

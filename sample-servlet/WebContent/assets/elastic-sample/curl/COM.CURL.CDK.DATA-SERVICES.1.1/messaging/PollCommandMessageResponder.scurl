@@ -1,0 +1,201 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{define-class public PollCommandMessageResponder {inherits MessageResponder}
+
+  field private suppress-handlers:bool = false
+  field private prop-change-handler:EventHandler
+
+  {constructor public {default
+                          agent:#MessageAgent,
+                          imessage:IMessage,
+                          channel:PollingChannel
+                      }
+    {construct-super agent, imessage, channel = channel}
+    set self.result-handler =
+        {proc {msg:IMessage}:void
+            def polling-channel = self.channel asa PollingChannel
+
+            set polling-channel.poll-outstanding? = false
+            {self.remove-property-change-handler}
+            
+            {if self.suppress-handlers then
+                {self.do-poll}
+                {return}
+            }
+
+            {type-switch msg
+             case cm:CommandMessage do
+                {if {cm.headers.key-exists? CommandMessage.NO_OP_POLL_HEADER}
+                    and cm.headers[CommandMessage.NO_OP_POLL_HEADER] == true
+                 then
+                    {return}
+                }
+                {type-switch cm.body
+                 case messages:Array do
+                    {for message in messages do
+                        {type-switch message
+                         case item:IMessage do
+                            {channel.enqueue-event
+                                {MessageEvent message = item}
+                            }
+                         else
+                            || TODO: The Flex code seems to imply that we'll
+                            ||       only ever get IMessages, but that has yet
+                            ||       to be confirmed by any documentation. For
+                            ||       now we just ignore anything that isn't an
+                            ||       IMessage.
+                        }
+                    }
+                }
+             case am:AcknowledgeMessage do
+                || This case intentionally left blank.
+             else
+                def err = {new ErrorMessage}
+                set err.fault-detail = {lmessage Received null}
+                {self.status err}
+                {return}
+            }
+
+            def (adaptive-poll-wait, found?) =
+                {msg.headers.get-if-exists CommandMessage.POLL_WAIT_HEADER}
+            {if found? and adaptive-poll-wait isa int then
+                {self.do-poll
+                    adaptive-poll-wait = (adaptive-poll-wait asa int)
+                }
+             else
+                {self.do-poll}
+            }
+        }
+
+    set self.status-handler =
+        {proc {msg:IMessage}:void
+            {self.remove-property-change-handler}
+
+            {if self.suppress-handlers then
+                {return}
+            }
+            
+            let polling-channel:PollingChannel =
+                self.channel asa PollingChannel
+            {polling-channel.stop-polling}
+            def details =
+                {type-switch msg
+                 case err:ErrorMessage do
+                    err.fault-detail
+                 else
+                    ""
+                }
+            def fault-event =
+                {ChannelFaultEvent
+                    channel = polling-channel,
+                    code = "Channel.Polling.Error", ||""
+                    level = "error", ||""
+                    description = details,
+                    root-cause = msg
+                }
+            {polling-channel.enqueue-event fault-event}
+            {type-switch msg
+             case err:ErrorMessage do
+                {if err.fault-code == "Server.PollNotSupported" then ||""
+                    {polling-channel.poll-failed rejected? = true}
+                 else
+                    {polling-channel.poll-failed rejected? = false}
+                }
+             else
+                {polling-channel.poll-failed rejected? = false}
+            }
+        }
+
+    set self.prop-change-handler =
+        {on e:PropertyChangeEvent do
+            {self.channel-property-change-handler e}
+        }
+    {self.add-property-change-handler}
+  }
+
+  {method private {do-poll adaptive-poll-wait:int = 0}:void
+    def polling-channel = self.channel asa PollingChannel
+    {if polling-channel.connected? and
+        polling-channel.should-poll?
+     then
+        {if adaptive-poll-wait == 0 then
+            {if polling-channel.polling-interval == 0s then
+                {polling-channel.poll}
+             elseif not {polling-channel.alarm-running?} then
+                {polling-channel.enable-alarm}
+            }
+         else
+            set polling-channel.polling-interval = 
+                adaptive-poll-wait * 1s
+            {polling-channel.enable-alarm}
+        }
+    }
+  }
+
+  {method private {channel-property-change-handler
+                      event:PropertyChangeEvent
+                  }:void
+    {if event.property == "connected?" and
+        not (event.new-value asa bool)
+     then
+        set self.suppress-handlers = true
+        {self.remove-property-change-handler}
+    }
+  }
+
+  {method private {add-property-change-handler}:void
+    {self.channel.add-event-handler
+        self.prop-change-handler
+    }
+  }
+
+  {method private {remove-property-change-handler}:void
+    def channel = self.channel
+    {if {channel.event-handler-present? self.prop-change-handler} then
+        {channel.remove-event-handler
+            self.prop-change-handler
+        }
+    }
+  }
+
+
+||--  {method protected {async-message-from-amf-object
+||--                        amf-obj:DataObject
+||--                    }:AsyncMessage
+||--    def async-message = {new AsyncMessage}
+||--    set async-message.headers =
+||--        amf-obj["headers"] asa IMessageHeaders
+||--    set async-message.body = amf-obj["body"]
+||--    set async-message.message-id = amf-obj["messageId"] asa String
+||--    set async-message.client-id = amf-obj["clientId"] asa #String
+||--    set async-message.correlation-id =
+||--        {if-non-null d = amf-obj["correlationId"] then
+||--            d asa String
+||--         else
+||--            ""
+||--        }
+||--    set async-message.destination =
+||--        {if-non-null d = amf-obj["destination"] then
+||--            d asa String
+||--         else
+||--            ""
+||--        }
+||--    set async-message.time-to-live = amf-obj["timeToLive"] asa double
+||--    set async-message.timestamp = amf-obj["timestamp"] asa double
+||--    {return async-message}
+||--  }
+}

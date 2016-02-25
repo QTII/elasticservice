@@ -1,0 +1,110 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{doc-next
+    {purpose
+        Object used to make remote calls to a server.
+    }
+}
+{define-class public RemoteObject {inherits AbstractService}
+  field public source:#String
+
+  {doc-next
+    {purpose
+        Create a {docref RemoteObject} with some server information.
+    }
+    {parameter endpoint,
+        The {docref Url} of the server that this object is
+        going to communicate with.  Also if no {param channel-set} is
+        provided, this will be used to make a {docref ChannelSet} wrapped
+        around a {docref AMFChannel}.
+    }
+    {parameter destination,
+        The destination at the {param endpoint} for all messages being sent.
+    }
+    {parameter channel-set,
+        A {docref ChannelSet} to use to send messages, this will be
+        implicitly created from the {param endpoint} if it is not supplied.
+    }
+    {parameter ...,
+        {docref EventHandler}s to receive events on this object.
+    }
+    {notes
+        The {docref EventHandler}s on this object can receive
+        {docref ResultEvent}s, {docref InvokeEvent}s, and {docref FaultEvent}s
+        for all messages sent and received through this object.  If events
+        for just a single request are desired, add the {docref EventHandler}
+        to the {docref Operation} returned by
+        {docref AbstractService.get-operation} on this object.
+    }
+  }
+  {constructor public {default
+                          endpoint:Url,
+                          destination:String,
+                          channel-set:#ChannelSet = null,
+                          ...:EventHandler
+                      }
+    {construct-super
+        endpoint = endpoint,
+        destination = destination,
+        channel-set = channel-set,
+        ...
+    }
+  }
+
+|| Not used right now, just let AbstractService.dispatch-event do the enqueue.
+|#
+  {method public {dispatch-event event:Event}:void
+||--    {super.enqueue-event event}
+||--    {if {self.has-event-listener? event.type} then
+        {super.enqueue-event event}
+||--     else
+||--        {type-switch event
+||--         case fe:FaultEvent do
+||--            {if not {self.has-token-responders? event} then
+||--                def reason = fe.fault.fault-string
+||--                {if self.document and
+||--                    {self.document.will-trigger ErrorEvent.ERROR}
+||--                 then
+||--                    def ee = {new ErrorEvent,
+||--                                 bubbles? = true,
+||--                                 cancelable? = true
+||--                             }
+||--                    set ee.text = reason
+||--                    {self.document.dispatch-event ee}
+||--                 else
+||--                    {throw {new FaultEvent, event}.fault}
+||--                }
+||--            }
+||--         case ee:ErrorEvent do
+||--            def reason = ee.text
+||--            {if self.document and
+||--                {self.document.will-trigger ErrorEvent.ERROR}
+||--             then
+||--                def err = {new ErrorEvent,
+||--                              bubbles? = true,
+||--                              cancelable? = true
+||--                          }
+||--                set err.text = reason
+||--                {self.document.dispatch-event err}
+||--             else
+||--                {throw {new Exception, "No listener for event"}}
+||--            }
+||--        }
+||--    }
+  }
+#|
+}

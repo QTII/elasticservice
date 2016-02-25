@@ -1,0 +1,108 @@
+WAS를 실행하고 다음의 주소를 접속한다.
+http://localhost:8080/elastic
+
+- 기타 메모 - 
+
+ㅁ 일반 파라미터 테스트
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&aa=aaaa&aa=111111
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&aa=aaaa&aa=111111&cmd.resType=PlatformXml
+
+
+ㅁ COL_ 파라미터 테스트
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&COL_aa=aaaa&COL_aa=111111&COL_bb=bbbbbbb&
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&COL_aa=aaaa&COL_aa=111111&COL_bb=bbbbbbb&cmd.resType=json11
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&COL_aa=aaaa&COL_aa=111111&COL_bb=bbbbbbb&cmd.resType=PlatformXml
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&COL_aa=aaaa&COL_aa=111111&COL_bb=bbbbbbb&cmd.resType=ME20
+
+
+ㅁ S#COL_, 파라미터 테스트
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&S1COL_aa=aaaa&S1COL_aa=111111&S1COL_bb=bbbbbbb&cmd.resType=PlatformXml
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&S1COL_aa=aaaa&S1COL_aa=111111&S2COL_bb=bbbbbbb&cmd.resType=PlatformXml
+
+
+ㅁ 암호화 테스트
+    o 주소: http://localhost:8080/elastic/main?cmd.resType=json11&cmd.encryptType=1&1c8121544c7f1d8c67225f3e5b687c78=4b3d10e33f8254d75772d345042c5505&e34ac5b329eaccf1c3c5f119a243fdd2=e34ac5b329eaccf1c3c5f119a243fdd2
+    o WAS 로그:
+11:37:00,671 INFO  [elastic.web.server.ServiceLogger:54] - - Request Begin - - - - - - - - - - - - - -
+11:37:00,672 DEBUG [elastic.web.server.ServiceLogger:56] Content-Type: null
+11:37:00,672 INFO  [elastic.web.server.ServiceLogger:59] 0:0:0:0:0:0:0:1 [REQUEST(EUC-KR)] /elastic/main: EchoService: Params:{cmd=EchoService, cmd.encryptType=1, 한글사랑=한글사랑} RecordList:{}
+11:37:00,673 TRACE [elastic.web.server.CommonHttpHandler:46] ### Client -> Server: 0:0:0:0:0:0:0:1 -> localhost:80
+11:37:00,674 TRACE [elastic.web.server.req.ElasticRequest:139] elasticParams: Params:{cmd=EchoService, cmd.encryptType=1, 한글사랑=한글사랑} RecordList:{}
+
+11:37:00,687 INFO  [elastic.web.server.ServiceLogger:101] 0:0:0:0:0:0:0:1 [RESPONSE(EUC-KR)] /elastic/main: EchoService: elapsed=00:00:00.032(32ms): Params:{cmd=EchoService, cmd.encryptType=1, 한글사랑=한글사랑} RecordList:{}
+11:37:00,687 INFO  [elastic.web.server.ServiceLogger:102] - - - - - - - - - - - - - - Response End - -
+
+
+ㅁ 암호화 테스트
+    o 주소: http://localhost:8080/elastic/main?cmd.encryptType=1&1C8121544C7F1D8C67225F3E5B687C78=F31CE3DDB54FDB6BFE0761970668160E&302B5BE3DDA79BE56B6B744BB89496B7=91D3234A0C46A5B0930B6B6A821122D9&80C41C72D1AF26F41431182E2E0F66A5=EB36B5238A66EF4A714A6E47E28EC03FAF5E6265B36F99C87ED44B87D48A0E3E&255232A8B801E188FFFF2B4534FD7B5F=221FF807DB35D248F376D42A41190533&2CAA76DF0091FA56B5337FBE2C16A80E=461FA7C3CCDB0B70BCB597D1A468888C&0592ED1FFE251DC6B7657CE07E1AD818=3C30D91A5B118EEFD091BFCD3577E460&8669C6C49F2262A125092FD7DA223CBC=7D0B2C27088D1ED9D9C0C847E03E64E4&86A4E5FC27A0DD0969F17831383DEB3D3E389C98BD032647E7BCA8184ACD6FEC=553E115AF40D802B54126D3493BD9BA0&8B494CC283265DE85736C7CE8F6FBAE1=553E115AF40D802B54126D3493BD9BA0&86A4E5FC27A0DD0969F17831383DEB3DCC797280F751E771D1B34D851AB8C94F=B68D0D109FCABA6F1A9ABEFE1CD2A6CB&036C1A4741446A4F9F9F1A771932398B=B68D0D109FCABA6F1A9ABEFE1CD2A6CB&12C687DB8C7F75AF07EDE63219CB7417AE92D39382D0076588380FDE7C1E219A=283BE2D0B5D6E8BF898A24F2FB9EBA1C&9FD0A435951C986C4F02809D55A82365=CB6558779C31D363BFE999F3928DAFC7&F6DC4A5906CE052F758FCF117BFB0AE32760D6ABE0F4AE327DBEF2EF79DF6065=C27D17A7EB293D4B069B6B6994209AC4&8FF3E31D7D08F8D7743289500EAEACE724EEE94870469EC01A7584882E77D670=B73431B7C48CA1D2DC0D1F9193C8FADB&8AE306F2B83FD1F2F4A3A2A5CEF9F2A9=BA52B4E4AA48427310F8D84C4A0833A9&E56AA0BF0CA986501D6F3B538119646DBA9C05846692906BF2E41DA6F368E3EF=B73431B7C48CA1D2DC0D1F9193C8FADB&261327379320A7FF94A7CBADFCA51090=C27D17A7EB293D4B069B6B6994209AC4&EF3851DC7C849E4286AAC6554247327E=C27D17A7EB293D4B069B6B6994209AC4&98C5659E465B42D141AF3A295FB9A1F3BDA6D2D3FC6BCE058F298F6DBDF798E6=C27D17A7EB293D4B069B6B6994209AC4&803ECE41F9A5052BB73248ACA095676A=1A937425F8545824AD03093F67E096A2&FC27DFC013B7C443B12E4E3F36B67ABB=B68D0D109FCABA6F1A9ABEFE1CD2A6CB&398342C3EECF3BE2907FF437B8974C82C3857011EC024D78282B70478F12331F=C27D17A7EB293D4B069B6B6994209AC4&9ACAED920E377204E4D51FC8CCF0C03A=&7043F792163991D2B6D4DF78DA353329=E9C64819F31EB9E4F0332F3A4AADE210&1D143810130E7B3A17C156DA17215645=E9C64819F31EB9E4F0332F3A4AADE210&C322DEE22AAD47B18B33C328F34E0469=14B941016666C842FEF9262C9C1CF11A&FCC3206468A971CDBC8CE5439D2E46E9=B68D0D109FCABA6F1A9ABEFE1CD2A6CB&4A5AC28F6EF2EDFAD9B2C226C91C5794=&1010AAB9E32BAF9ADE9ED2994D3C518E=&7F9DE18C27F868CA038274324D3D001F=
+    o WAS 로그:
+11:32:08,914 INFO  [elastic.web.server.ServiceLogger:54] - - Request Begin - - - - - - - - - - - - - -
+11:32:08,915 DEBUG [elastic.web.server.ServiceLogger:56] Content-Type: null
+11:32:08,915 INFO  [elastic.web.server.ServiceLogger:59] 0:0:0:0:0:0:0:1 [REQUEST(EUC-KR)] /elastic/main: DefaultService: Params:{cmd=DefaultService, cmd.encryptType=1, sqlId=mstCrm.updateMstCrm21020m_none, action=U} RecordList:{__NRL__=[0:{SITE_ID=SITE_FRIGGA}]}
+11:32:08,916 TRACE [elastic.web.server.CommonHttpHandler:46] ### Client -> Server: 0:0:0:0:0:0:0:1 -> localhost:8080
+11:32:08,916 TRACE [elastic.web.server.req.ElasticRequest:139] elasticParams: Params:{cmd=DefaultService, cmd.encryptType=1, sqlId=mstCrm.updateMstCrm21020m_none, action=U} RecordList:{__NRL__=[0:{SITE_ID=SITE_FRIGGA}]}
+
+11:41:24,429 INFO  [elastic.web.server.ServiceLogger:101] 0:0:0:0:0:0:0:1 [RESPONSE(EUC-KR)] /elastic/main: DefaultService: elapsed=00:00:00.374(374ms): Exception:Namespace not found: mstCrm
+11:41:24,429 INFO  [elastic.web.server.ServiceLogger:102] - - - - - - - - - - - - - - Response End - -
+
+
+ㅁ ME20 type 응답 요청
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&a=AAA&cmd.resType=ME20&COL_abc=ABC
+    o 응답: 
+ME200DataSet=__NRL__FTSCabcString-1abcABC
+
+
+ㅁ TobeSoft XPlatform Xml type 응답 요청
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&a=AAA&cmd.resType=PlatformXml&COL_abc=ABC
+    o 응답: 
+<?xml version="1.0" encoding="EUC-KR"?>
+<Root>
+	<Parameters>
+		<Parameter id="cmd">EchoService</Parameter>
+		<Parameter id="a">AAA</Parameter>
+		<Parameter id="cmd.resType">PlatformXml</Parameter>
+	</Parameters>
+	<Dataset id="__NRL__">
+		<ColumnInfo>
+			<Column id="abc" type="String" />
+		</ColumnInfo>
+		<Rows>
+			<Row>
+				<Col id="abc">ABC</Col>
+			</Row>
+		</Rows>
+	</Dataset>
+</Root>
+
+
+ㅁ json10 type 응답 요청
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&a=AAA&cmd.resType=json10&COL_abc=ABC
+    o 응답: 
+{	"HEADER":{
+	"VERSION":"json10","SUCCESS CODE":"000","CHARSET":"EUC-KR","NULL EXPRESSION":" "
+},	"RESPONSE":{
+	"RETURN MESSAGE":"SUCCESS","RETURN CODE":"000"
+},	"TYPE":{"abc":"String"}
+,	"DATA":[
+		{"abc":"ABC"
+}	]
+}
+
+
+ㅁ json11 type 응답 요청(웰스토리 TOMS SDS에서 사용중, 2014년 7월 4일 현재)
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&a=AAA&cmd.resType=json11&COL_abc=ABC
+    o 응답: 
+{	"FORMAT":{
+	"ENCODING":"EUC-KR","VERSION":"json11","SUCCESS CODE":"000"
+},	"RESULT":{
+	"RESULT CODE":"000","RESULT MESSAGE":"SUCCESS"
+},	"COLUMNS":{"abc":"String"}
+}
+{"abc":"ABC"
+}
+
+ㅁ PWPLUS10 type 응답 요청(웰스토리 TOMS에서 사용중, 2014년 7월 4일 현재)
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&a=AAA&cmd.resType=PWPLUS10&COL_abc=ABC
+    o 응답: 
+PWPLUS_1.0TRUEabcStringabcABC
+

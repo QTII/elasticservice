@@ -1,0 +1,500 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{define-class public abstract AbstractConsumer {inherits MessageAgent}
+  field protected should-be-subscribed?:bool = false
+  field protected subscribe-message:#CommandMessage
+  field protected _max-frequency:Frequency = 0(1/s)
+  field private current-attempt:int
+  field private _resubscribe-attempts:int = 5
+  field private _resubscribe-interval:Time = 5000ms
+  field private resubscribe-timer:#Timer
+  field private _subscribed?:bool = false
+  field private _timestamp:double = -1
+
+  {doc-next
+    {purpose
+        Create an {docref AbstractConsumer} with some server information.
+    }
+    {parameter endpoint,
+        The {docref Url} of the server that this object is
+        going to communicate with.  Also if no {docref channel-set} is
+        provided, this will be used to make a {docref ChannelSet} wrapped
+        around a {docref AMFChannel}.
+    }
+    {parameter destination,
+        The destination at the {param endpoint} for all messages being sent.
+    }
+    {parameter channel-set,
+        A {docref ChannelSet} to use to send messages, this will be
+        implicitly created from the {param endpoint} if it is not supplied.
+    }
+    {parameter ...,
+        {docref EventHandler}s to receive events on this object.
+    }
+    {notes
+        The {docref EventHandler}s on this object can receive
+        {docref MessageEvent}s, {docref MessageFaultEvent}s,
+        {docref ChannelEvent}s, and {docref ChannelFaultEvent}s.
+    }
+  }
+  {constructor public {default
+                          endpoint:#Url = null,
+                          destination:String = "",
+                          channel-set:#ChannelSet = null,
+                          ...:EventHandler
+                      }
+    {construct-super 
+        endpoint = endpoint,
+        destination = destination,
+        channel-set = channel-set,
+        ...
+    }
+    set self.agent-type = "consumer" ||""
+  }
+
+  || TODO: remove this?
+  {setter protected {client-id id:#String}:void
+    || FIXME: This is the same as {self.subscribe client-id = id} except for how
+    || null id's are handled.
+    {if super.client-id != id then
+        def reset-subscription? = self.subscribed?
+        {if reset-subscription? then
+            {self.unsubscribe}
+        }
+        set super.client-id = id
+        {if reset-subscription? then
+            {self.subscribe}
+         }
+    }
+  }
+
+  {setter public {destination d:String}:void
+    {if self.destination != d then
+        def reset-subscription? = self.subscribed?
+        {if reset-subscription? then
+            {self.unsubscribe}
+        }
+        set super.destination = d
+        {if reset-subscription? then
+            {self.subscribe}
+        }
+    }
+  }
+
+  {doc-next
+    {purpose
+        How many attempts should this object make to try to resubscribe.
+    }
+    {notes
+        {ctext -1} means attempt forever.
+    }
+  }
+  {getter public {resubscribe-attempts}:int
+    {return self._resubscribe-attempts}
+  }
+
+  {setter public {resubscribe-attempts n:int}:void
+    {if self._resubscribe-attempts != n then
+        {if n == 0 then
+            {self.stop-resubscribe-timer}
+        }
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "resubscribe-attempts",
+                        self._resubscribe-attempts, n
+                    }
+        set self._resubscribe-attempts = n
+        {self.enqueue-event event}
+    }
+  }
+
+  {doc-next
+    {purpose
+        How long this object should wait between attempts to resubscribe.
+    }
+  }
+  {getter public {resubscribe-interval}:Time
+    {return self._resubscribe-interval}
+  }
+
+  {setter public {resubscribe-interval t:Time}:void
+    {if self._resubscribe-interval != t then
+        {if t < 0s then
+            {error {lmessage Negative interval not allowed.}}
+         elseif t == 0s then
+            {self.stop-resubscribe-timer}
+         else
+            {if-non-null self.resubscribe-timer then
+                set self.resubscribe-timer.interval = t
+            }
+        }
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "resubscribe-interval",
+                        self._resubscribe-interval, t
+                    }
+        set self._resubscribe-interval = t
+        {self.enqueue-event event}
+    }
+  }
+
+  {doc-next
+    {purpose
+        Has this object been able to tell the server what it wants to subscribe to.
+    }
+  }
+  {getter public {subscribed?}:bool
+    {return self._subscribed?}
+  }
+
+  {setter protected {subscribed? b?:bool}:void
+    {if self._subscribed? != b? then
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "subscribed?",
+                        self._subscribed?, b?
+                    }
+        set self._subscribed? = b?
+        {if self._subscribed? then
+            {{ConsumerMessageDispatcher.get-instance}.register-subscription
+                self
+            }
+            {if-non-null channel-set = self.channel-set then
+                {if-non-null current-channel = channel-set.current-channel then
+                    {type-switch current-channel
+                     case pc:PollingChannel do
+                        {pc.enable-polling}
+                    }
+                }
+            }
+         else
+            {{ConsumerMessageDispatcher.get-instance}.unregister-subscription
+                self
+            }
+            {if-non-null channel-set = self.channel-set then
+                {if-non-null current-channel = channel-set.current-channel then
+                    {type-switch current-channel
+                     case pc:PollingChannel do
+                        {pc.disable-polling}
+                    }
+                }
+            }
+        }
+        {self.enqueue-event event}
+    }
+  }
+
+  {getter public {timestamp}:double
+    {return self._timestamp}
+  }
+
+  {setter public {timestamp d:double}:void
+    {if self._timestamp != d then
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "timestamp", self._timestamp, d
+                    }
+        set self._timestamp = d
+        {self.enqueue-event event}
+    }
+  }
+
+  {method protected {acknowledge ack:AcknowledgeMessage, message:IMessage}:void
+    {if self.disconnect-barrier? then
+        {return}
+    }
+    {if not {ack.headers.key-exists? AcknowledgeMessage.ERROR_HINT_HEADER} then
+        {type-switch message
+         case cm:CommandMessage do
+            let operation:uint = cm.operation
+            {if operation == CommandMessage.MULTI_SUBSCRIBE_OPERATION then
+                {if {cm.headers.key-exists? "DSlastUnsub"} then ||""
+                    set operation = CommandMessage.UNSUBSCRIBE_OPERATION
+                 else
+                    set operation = CommandMessage.SUBSCRIBE_OPERATION
+                }
+            }
+            {switch operation
+             case CommandMessage.UNSUBSCRIBE_OPERATION do
+                set super.client-id = null
+                set self.subscribed? = false
+                set ack.client-id = null
+                {super.acknowledge ack, cm}
+             case CommandMessage.SUBSCRIBE_OPERATION do
+                {self.stop-resubscribe-timer}
+                {if ack.timestamp > self.timestamp then
+                    || NOTE: From Flex code:
+                    || // NOTE: the -1 in the timestamp assignment below.  
+                    || // This works around a bug where if a Producer sends
+                    || // a message in the same batch as the subscribe,
+                    || // it will end up with (likely) the same timestamp
+                    || // as the consumer.  Because the message is sent
+                    || // by the client after the subscribe though, it
+                    || // should still be delivered.
+                    || // TODO: Improve solution here.  
+                    set self.timestamp = ack.timestamp - 1
+                }
+                set super.client-id = ack.client-id
+                set self.subscribed? = true
+                {super.acknowledge ack, cm}
+             case CommandMessage.POLL_OPERATION do
+                || Handle the result of a 'receive' invocation,
+                || but is this necessary?
+                {type-switch ack.body
+                 case array:{Array-of any} do
+                    {for a in array do
+                        {type-switch a
+                         case msg:IMessage do
+                            {self.message-handler
+                                {MessageEvent message = msg}
+                            }
+                        }
+                    }
+                }
+                {super.acknowledge ack, cm}
+            }
+         else
+            {super.acknowledge ack, message}
+        }
+     else
+        {super.acknowledge ack, message}
+    }
+  }
+
+  {method public {disconnect}:void
+    set self.should-be-subscribed? = false
+    {self.stop-resubscribe-timer}
+    set self.subscribed? = false
+    {super.disconnect}
+  }
+
+  {method protected {fault err:ErrorMessage, message:IMessage}:void
+    {if self.disconnect-barrier? then
+        {return}
+    }
+    {if {err.headers.key-exists? ErrorMessage.RETRYABLE_HINT_HEADER} then
+        {if self.resubscribe-timer == null then
+            {if-non-null subscribe-message = self.subscribe-message then
+                {if err.correlation-id == subscribe-message.message-id then
+                    set self.should-be-subscribed? = false
+                }
+            }
+            {super.fault err, message}
+        }
+     else
+        {super.fault err, message}
+    }
+  }
+
+  {doc-next
+    {purpose
+        Force a poll request to be sent now.
+    }
+  }
+  {method public {receive}:void
+    {if-non-null self.client-id then
+        def message = {CommandMessage}
+        set message.operation = CommandMessage.POLL_OPERATION
+        set message.destination = self.destination
+        {self.internal-send message}
+    }
+  }
+
+  {doc-next
+    {purpose
+        Force an attempt to subscribe right now, unless already properly subscribed.
+    }
+  }
+  {method public {subscribe client-id:#String = null}:void
+    let unsubscribing?:bool = false
+    def reset-client-id? =
+        client-id != null and self.client-id != client-id
+    {if self.subscribed? and (reset-client-id? or client-id == null) then
+        {self.unsubscribe}
+        set unsubscribing? = true
+    }
+
+    {self.stop-resubscribe-timer}
+
+    set self.should-be-subscribed? = true
+    {if reset-client-id? then
+        || Avoid similar logic in self.client-id setter.
+        set super.client-id = client-id
+    }
+    set self.subscribe-message = {self.build-subscribe-message}
+    {if-non-null msg = self.subscribe-message then
+        {if unsubscribing? then
+            {after 1s do {self.internal-send msg}}
+         else
+            {self.internal-send msg}
+        }
+    }
+  }
+
+  {method public {unsubscribe preserve-durable?:bool = false}:void
+    set self.should-be-subscribed? = false
+    {if self.subscribed? then
+        {self.internal-send
+            {self.build-unsubscribe-message
+                preserve-durable? = preserve-durable?
+            }
+        }
+     else
+        {self.stop-resubscribe-timer}
+    }
+  }
+
+  {method protected {resubscribe}:void
+    {if self.resubscribe-attempts != -1 and
+        self.current-attempt > self.resubscribe-attempts
+     then
+        {self.stop-resubscribe-timer}
+        set self.should-be-subscribed? = false
+        def err = {ErrorMessage}
+        set err.fault-code = "Client.Error.Subscribe" ||""
+        set err.fault-string = {lmessage Consumer subscribe error}
+        set err.fault-detail =
+            {lmessage The consumer was not able to subscribe to its target destination.}
+        {if-non-null subscribe-message = self.subscribe-message then
+            set err.correlation-id = subscribe-message.message-id
+            {self.fault err, subscribe-message}
+        }
+     else
+        {inc self.current-attempt}
+        {self.internal-send {non-null self.subscribe-message}}
+    }
+  }
+
+  {method protected {build-subscribe-message}:CommandMessage
+    def command-message = {CommandMessage}
+    set command-message.operation = CommandMessage.SUBSCRIBE_OPERATION
+    set command-message.client-id = self.client-id
+    set command-message.destination = self.destination
+    {if self.max-frequency > 0(1/s) then
+        set command-message.headers[CommandMessage.MAX_FREQUENCY_HEADER] = 
+            (self.max-frequency * 1s) asa int
+    }
+    {return command-message}
+  }
+
+  {method protected {build-unsubscribe-message
+                        preserve-durable?:bool = false
+                    }:CommandMessage
+    def command-message = {CommandMessage}
+    set command-message.operation = CommandMessage.UNSUBSCRIBE_OPERATION
+    set command-message.client-id = self.client-id
+    set command-message.destination = self.destination
+    {if preserve-durable? then
+        set command-message.headers[CommandMessage.PRESERVE_DURABLE_HEADER] =
+            preserve-durable?
+    }
+    {return command-message}
+  }
+
+  {method protected {start-resubscribe-timer}:void
+    {if self.should-be-subscribed? and self.resubscribe-timer == null then
+        {if self.resubscribe-attempts != 0 and self.resubscribe-interval > 0s then
+            set self.resubscribe-timer =
+                {Timer
+                    interval = self.resubscribe-interval,
+                    {on e:TimerEvent do
+                        {self.resubscribe}
+                    },
+                    delay = 1ms
+                }
+            set self.current-attempt = 0
+        }
+    }
+  }
+
+  {method protected {stop-resubscribe-timer}:void
+    {if-non-null self.resubscribe-timer then
+        {self.resubscribe-timer.disable}
+        set self.resubscribe-timer = null
+    }
+  }
+
+  {method protected {channel-connect-handler event:ChannelConnectEvent}:void
+    {super.channel-connect-handler event}
+  }
+
+  {method protected {channel-disconnect-handler event:ChannelDisconnectEvent}:void
+    set self.subscribed? = false
+    {super.channel-disconnect-handler event}
+    {if self.should-be-subscribed? and not event.rejected? then
+        {self.start-resubscribe-timer}
+    }
+  }
+
+  {method protected {channel-fault-handler event:ChannelFaultEvent}:void
+    {if not event.channel.connected? then
+        set self.subscribed? = false
+    }
+
+    {super.channel-fault-handler event}
+
+    {if self.should-be-subscribed? and
+        not event.rejected? and
+        not event.channel.connected? and
+        not event.reconnecting?
+     then
+        {self.start-resubscribe-timer}
+    }
+  }
+
+  {method protected {message-handler event:MessageEvent}:void
+    def message = event.message
+    {type-switch message
+     case cm:CommandMessage do
+        {switch cm.operation
+         case CommandMessage.SUBSCRIPTION_INVALIDATE_OPERATION do
+            {type-switch self.channel-set.current-channel
+             case pc:PollingChannel do
+                {pc.disable-polling}
+            }
+            set self.subscribed? = false
+        }
+     else
+        {if message.timestamp > self.timestamp then
+            set self.timestamp = message.timestamp
+        }
+        {type-switch message
+         case err:ErrorMessage do
+            {self.enqueue-event
+                {MessageFaultEvent message = err}
+            }
+         else
+            {self.enqueue-event
+                {MessageEvent message = message}
+            }
+        }
+    }
+  }
+
+  {doc-next
+    {purpose
+        Maximum frequency of messages that that the {docref Consumer} wants to receive.
+    }
+    {notes
+        A server may or may not understand this.
+
+        A value of 0 means that the {docref Consumer} has no preference for the message rate.
+    }
+  }
+  {getter public {max-frequency}:Frequency
+    {return self._max-frequency}
+  }
+  {setter public {max-frequency mf:Frequency}:void
+    set self._max-frequency = mf
+  }
+}

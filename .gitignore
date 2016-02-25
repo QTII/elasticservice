@@ -1,0 +1,21 @@
+logs
+target
+.idea
+.idea_modules
+RUNNING_PID
+project/project
+project/target
+tmp
+dist
+.cache
+*.log
+
+# Scala-IDE specific
+.metadata
+.settings
+.cache-main
+.cache-tests
+.classpath
+.history
+.project
+.scala_dependencies

@@ -1,0 +1,400 @@
+{curl 8.0 applet}
+{curl-file-attributes character-encoding = "euc-kr"}
+{applet manifest = "manifest.mcurl",
+    {compiler-directives careful? = true}
+}
+
+{document-style PlainDocument}
+
+{import * from CURL.XML.SAX.HELPERS}
+{import * from CURL.XML.SAX.PARSER}
+
+{import * from ELASTIC.SUPPORT.UTILS}
+{import * from ELASTIC.SUPPORT.UTILS.AMF}
+{import * from ELASTIC.SUPPORT.UTILS.INAIR}
+
+{value
+    let grid:RecordGrid = 
+        {RecordGrid
+            width={make-elastic}, height={make-elastic}
+        }
+    
+    let tab:TabContainer =
+        {TabContainer
+            width={make-elastic}, height={make-elastic}
+        }
+    
+    let loc:TextField =
+        {TextField width={make-elastic},
+            value="http://localhost:8080/elastic/main"
+        }
+    
+    let in:TextArea =
+        {TextArea width={make-elastic}, height={make-elastic},
+            value=login-data-built-in
+        }
+    
+    let res:TextArea =
+        {TextArea width={make-elastic}, height={make-elastic},
+            value=""
+        }
+    
+    let button:CommandButton =
+        {CommandButton label="Submit", width=100px,
+            {on Action do
+                {with-busy-cursor
+                    let query-url:Url = {url loc.value}                
+                    let (lines:StringBuf, error?:bool, message:String) =
+                        {gp-async-post-method-normal
+                            query-url,
+                            {PlusHttpFormStringParam "", in.value}
+                        }
+                    
+                    {if error? then
+                        set res.value = message
+                     else
+                        set res.value = {lines.to-String}
+                    }
+                }
+                
+            }
+        }
+    
+    let outer:VBox = {VBox width={make-elastic}, height={make-elastic}}
+    let body:Frame = {Frame width={make-elastic}, height={make-elastic}}
+    
+    let inair:VBox =
+        {VBox width={make-elastic}, height={make-elastic},
+            spacing=5px,
+            
+            {HBox valign="center",
+                "URL",
+                loc
+            },
+            {HBox valign="bottom",
+                {GroupBox label="input",
+                    width={make-elastic}, height=250px, ||{make-elastic},
+                    in
+                },
+                button
+            },
+||--        {Fill height=15px},
+||--        {HBox valign="center", {Fill}, button, {Fill}},
+            
+            {HBox valign="center", width={make-elastic}, height={make-elastic},
+                
+                {GroupBox label="output",
+                    width={make-elastic}, height={make-elastic},
+                    res
+                },
+                {VBox
+                    {CommandButton label="parsing CSV",
+                        {on Action do
+                            
+                            
+                            {tab.clear}
+                            
+                            let datas:String = res.value
+                            ||{popup-message datas}
+                            
+                            let lines:StringArray = {datas.split split-chars="\u0008"}
+                            {if lines.size <= 0 then
+                                {popup-message "There is no data."}
+                                {return}
+                            }
+                            
+                            let header:String = lines[0]
+                            ||{popup-message title="Header", header}
+                            {do
+                                set header = {header.trim-clone}
+                                let infos:StringArray = {header.split split-chars="\u0007"}
+                                {if infos.size != 5 then ||맨뒤는 빈 데이터
+                                    {popup-message "Wrong Header"}
+                                    {return}                                
+                                }
+                                {if infos[0] == "ME20" and infos[1] == "0" then
+                                 else
+                                    {popup-message infos[2]}
+                                    {return}
+                                }
+                                
+                                {do ||헤더정보 출력
+                                    let table:Table = {Table columns=4, "header", "code", "message", {Frame width={make-elastic}, "extra"}}
+                                    {table.add infos[0]}
+                                    {table.add infos[1]}
+                                    {table.add infos[2]}
+                                    {table.add {Frame width={make-elastic}, infos[3]}}
+                                    
+                                    {tab.add-pane
+                                        {TabPane label={Frame height=40px, valign="center", "Parameters"},
+                                            {ScrollBox width={make-elastic}, height={make-elastic},
+                                                hscroll?=false,
+                                                table
+                                            }
+                                        }
+                                    }                                
+                                }
+                            }                        
+                            
+                            let rvs:RecordViewHashTable = {RecordViewHashTable}
+                            
+                            let i:int = 1
+                            {while i < lines.size do
+                                let line:String = {lines[i].trim-clone}
+                                {if {line.prefix? "DATASET=", ignore-case?=true} then
+                                    let str:String = {line.substr 8, line.size - 8}
+                                    let infos:StringArray = {str.split split-chars="\u0007"}
+                                    
+                                    {if infos.size != 3 then ||맨뒤는 빈 데이터
+                                        {popup-message "잘못된 헤더"}
+                                        {return}                                
+                                    }
+                                    
+                                    ||헤더 처리
+                                    let name:String = infos[0]
+                                    let fnames:StringArray = {StringArray}
+                                    let types:StringArray = {StringArray}
+                                    let sizes:StringArray = {StringArray}
+                                    let captions:StringArray = {StringArray}
+                                    
+                                    let header-type:String = infos[1]                                
+                                    {if header-type == "FTSC" then
+                                        set fnames = {lines[i+1].split split-chars="\u0007"}
+                                        set types = {lines[i+2].split split-chars="\u0007"}
+                                        set sizes = {lines[i+3].split split-chars="\u0007"}
+                                        set captions = {lines[i+4].split split-chars="\u0007"}
+                                        
+                                        {if fnames.size != types.size or
+                                            fnames.size != sizes.size or
+                                            fnames.size != captions.size then
+                                            {popup-message "Wrong header of dataset"}
+                                            {return }
+                                        }
+                                    }
+                                    {inc i, header-type.size}
+                                    
+                                    {do ||레코드셋 생성
+                                        let fields:Array = {Array}
+                                        {for j:int=0 below fnames.size - 1 do ||맨뒤는 빈것
+                                            {fields.append
+                                                {RecordField fnames[j],
+                                                    domain={switch types[j] case "String", "stirng" do String else any},
+                                                    caption=captions[j]
+                                                }
+                                            }
+                                        }
+                                        
+                                        let rv:RecordView =
+                                            {RecordView
+                                                {RecordSet
+                                                    {RecordFields
+                                                        {splice fields}
+                                                    }
+                                                }
+                                            }
+                                        set rvs[name] = rv                                    
+                                    }
+                                    
+                                    
+                                    ||데이터 처리
+                                    {while i < lines.size do
+                                        let line:String = {lines[i].trim-clone}
+                                        {if {line.prefix? "DATASET=", ignore-case?=true} then
+                                            {break}
+                                         else
+                                            
+                                            let infos:StringArray = {line.split split-chars="\u0007"}
+                                            {if fnames.size != infos.size then
+                                                {dump "Wrong header of dataset"}
+                                                {inc i}
+                                                {continue}
+                                             else
+                                                let nr:Record = {rvs[name].new-record}
+                                                {for j:int=0 below fnames.size - 1 do ||맨뒤는 빈데이터
+                                                    let name:String = fnames[j]
+                                                    {switch types[j] ||todo - 보강필요
+                                                     case "String", "string" do
+                                                        set nr[name] = infos[j]
+                                                     else
+                                                        set nr[name] = infos[j]
+                                                    }                                                
+                                                }
+                                                {rvs[name].append nr}                                                
+                                            }
+                                            
+                                            {inc i}
+                                        }
+                                    }
+                                    
+                                    
+                                 else
+                                    {inc i}
+                                }                            
+                                
+                            }
+                            
+||--                        {dump rvs}
+                            
+                            {for rv:RecordView key name:String in rvs do
+                                {tab.add-pane
+                                    {TabPane label={Frame height=40px, valign="center", name},
+                                        {RecordGrid
+                                            width={make-elastic}, height={make-elastic},
+                                            record-source=rv
+                                        }
+                                    }
+                                }                            
+                            }                        
+                            
+                        }
+                    },
+                    {CommandButton label="parsing",
+                        {on Action do
+                            
+                            ||파서 세팅
+                            let xr:SAXParser = {SAXParser}
+                            let handler:PlusInAirParser = {PlusInAirParser} || extra-fields=extras}
+                            {xr.set-content-handler handler}
+                            {xr.set-error-handler handler}
+                            
+                            let xml:StringBuf = {StringBuf res.value}
+                            
+                            ||파싱
+                            let message:String = ""
+                            {with-busy-cursor
+                                {try                        
+                                    {xr.parse {InputSource character-stream = {xml.to-InputStream}}}
+                                 catch e:Exception do
+                                    set message = e.message
+                                }
+                            }
+                            
+                            {tab.clear}
+                            
+                            {if message != "" then
+                                {popup-message title="Error", message}
+                             else
+                                let table:Table = {Table columns=3, "id", "type", {Frame width={make-elastic}, "value"}}
+                                {for hash:StringStringTable key name:String in handler.params do
+                                    let value:String = {String {handler.get-param name, value="value"}}
+                                    {table.add name} ||{handler.get-param name, value="id"}}
+                                    {table.add {handler.get-param name, value="type"}}
+                                    {table.add {TextField width={make-elastic}, value=value}}
+                                    
+||--                            let value:String = ""
+||--                            {if {hash.key-exists? "value"} then set value = hash["value"]}
+||--                            
+||--                            {table.add name}
+||--                            {table.add hash["type"]}
+||--                            {table.add value}
+                                }
+                                
+                                {tab.add-pane
+                                    {TabPane label={Frame height=40px, valign="center", "Parameters"},
+                                        {ScrollBox width={make-elastic}, height={make-elastic},
+                                            hscroll?=false,
+                                            table
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            {for rv:RecordView key name:String in handler.rvs do
+                                {tab.add-pane
+                                    {TabPane label={Frame height=40px, valign="center", name},
+                                        {RecordGrid
+                                            width={make-elastic}, height={make-elastic},
+                                            record-source=rv
+                                        }
+                                    }
+                                }                            
+                            }
+                            
+||--                    {if-non-null handler.rs then
+||--                        set grid.record-source = {RecordView handler.rs asa RecordSet}
+||--                     else
+||--                        set grid.record-source = null
+||--                    }
+                            
+                        }
+                    }
+                },
+                
+                {GroupBox label="recordSet",
+                    width={make-elastic}, height={make-elastic},
+                    tab
+                }
+            }
+        }
+    
+    || 상단 버튼
+    {outer.add
+        {HBox margin=5px, background="silver", width={make-elastic},
+            spacing=5px,
+            {CommandButton label="Log in",
+                {on Action do
+                    {body.add replace?=true, inair}
+                    
+                    set loc.value = "http://localhost:8080/elastic/main"
+                    set in.value = login-data-built-in
+                    set res.value = ""
+                    set grid.record-source = null
+                    {tab.clear}
+                }
+            },
+            
+||--            {CommandButton label="로그인(User-Defined)",
+||--                {on Action do
+||--                    {body.add replace?=true, inair}
+                    
+||--                    set loc.value = "http://localhost:8080/elastic/main"
+||--                    set in.value = login-data-user-defined
+||--                    set res.value = ""
+||--                    set grid.record-source = null
+||--                    {tab.clear}
+||--                }
+||--            },
+            
+            {CommandButton label="Log out",
+                {on Action do
+                    {body.add replace?=true, inair}
+                    
+                    set loc.value = "http://localhost:8080/elastic/main"
+                    set in.value = logout-data-built-in
+                    set res.value = ""
+                    set grid.record-source = null
+                    {tab.clear}
+                }
+            },
+            
+            {CommandButton label="Binary response",
+                {on Action do
+                    let amfApplication:AMFApplication = {AMFApplication width={make-elastic}, height={make-elastic}}
+                    {body.add replace?=true, amfApplication}
+                }
+            },
+            
+            {CommandButton label="Any Test",
+                {on Action do
+                    {body.add replace?=true, inair}
+                    
+                    set loc.value = "http://localhost:8080/elastic/main"
+                    set in.value = basic-data
+                    set res.value = ""
+                    set grid.record-source = null
+                    {tab.clear}
+                }
+            }
+        }
+        
+    }
+    
+    {body.add replace?=true, 
+        inair
+    }
+    
+    {outer.add body}
+    
+    outer
+}
+

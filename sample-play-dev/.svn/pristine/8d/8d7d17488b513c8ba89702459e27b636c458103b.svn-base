@@ -1,0 +1,31 @@
+|| **********************************************************
+|| *** THIS FILE IS AUTOMATICALLY UPDATED BY THE CURL IDE ***
+|| ***              DO NOT MODIFY IT BY HAND              ***
+|| **********************************************************
+{project
+    version = 2,
+    manifest-location = "manifest.mcurl",
+    api-version = "6.0",
+    compiler-directives = "careful? = true",
+    use-style-sheets? = false,
+    {target
+        name = "deploy",
+        target-url-name = "C:/curl/CDK_DS_SAMPLES",
+        {assembly-transform "COM.CURL.CDK.DATA-SERVICES", relocate-path = "lib/COM.CURL.CDK.DATA-SERVICES.1.0/manifest.mcurl"},
+        {resource-transform "testdrive-101\u0000directory\u0000testdrive-101", copy? = true},
+        {resource-transform "CURL-LOGO\u0000file\u0000images/curllogo93x35_(R).gif", use-path? = true},
+        {resource-transform "README.txt\u0000file\u0000README.txt", copy? = true},
+        {package-transform "COM.CURL.CDK.SAMPLES-SUPPORT\u0000package\u0000load.scurl", copy? = true},
+        {resource-transform "testdrive-chat\u0000directory\u0000testdrive-chat", copy? = true},
+        {resource-transform "CDK-DS-SAMPLES-STYLE-SHEET\u0000file\u0000style-sheet.scurl", copy? = true},
+        {resource-transform "testdrive-datapush\u0000directory\u0000testdrive-datapush", copy? = true},
+        {resource-transform "images1\u0000directory\u0000images", copy? = true},
+        {resource-transform "testdrive-update\u0000directory\u0000testdrive-update", copy? = true},
+        {resource-transform "images\u0000directory\u0000images", copy? = true},
+        {resource-transform "testdrive.curl\u0000file\u0000testdrive.curl", copy? = true},
+        {resource-transform "testdrive-remoteobject\u0000directory\u0000testdrive-remoteobject", copy? = true},
+        {resource-transform "BLAZEDS-LOGO\u0000file\u0000images/blazeds.png", use-path? = true},
+        {resource-transform "start.curl\u0000file\u0000start.curl", copy? = true}
+    },
+    {file-setting "start.curl", start-file? = true}
+}

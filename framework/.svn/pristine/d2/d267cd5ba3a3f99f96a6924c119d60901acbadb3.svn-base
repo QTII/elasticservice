@@ -1,0 +1,30 @@
+lazy val commonSettings = Seq(
+  organization := "kr.co.qtii",
+  version := "0.1.1",
+  scalaVersion := "2.11.7",
+  name := "elasticservice"
+)
+
+scalacOptions += "-feature"
+
+testOptions in Test +=
+  Tests.Argument(
+    TestFrameworks.ScalaCheck,
+    "-maxDiscardRatio", "10",
+    "-minSuccessfulTests", "100"
+  )
+
+lazy val elasticservice = (project in file(".")).
+  settings(commonSettings: _*).
+  settings(
+    libraryDependencies ++= Seq(
+        "org.scala-lang.modules" %% "scala-xml" % "latest.integration",
+        "com.typesafe.play" %% "play" % "latest.integration",
+        "com.typesafe.scala-logging" %% "scala-logging" % "latest.integration",
+        
+        "org.scalacheck" %% "scalacheck" % "1.12.5" % Test,
+        
+        "javax.servlet" % "javax.servlet-api" % "latest.integration",
+        jdbc
+    )
+  )

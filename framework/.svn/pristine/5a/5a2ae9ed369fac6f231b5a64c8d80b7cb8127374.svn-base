@@ -1,0 +1,4 @@
+<update>
+INSERT INTO T_TEST (title, city, phone, fax, job, gender, created_on)
+VALUES (#{title}, #{city}, #{phone}, #{fax}, #{job}, #{gender}, CURDATE())
+</update>

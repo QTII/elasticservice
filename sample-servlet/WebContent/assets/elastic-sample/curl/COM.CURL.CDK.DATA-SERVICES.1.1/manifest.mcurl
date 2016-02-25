@@ -1,0 +1,45 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{curl 8.0 manifest}
+{manifest COM.CURL.CDK.DATA-SERVICES,
+    version = "1.1"}{component package COM.CURL.CDK.DATA-OBJECT,
+    location = "data-object/load.scurl"
+}{component package COM.CURL.CDK.RECORDSET-FOR,
+    location = "recordset-for/load.scurl"
+}{component package COM.CURL.CDK.AMF,
+    location = "amf/load.scurl"
+}{component package COM.CURL.CDK.IO,
+    location = "io/load.scurl"
+}{component package COM.CURL.CDK.RPC,
+    location = "rpc/load.scurl"
+}{component package COM.CURL.CDK.CONNECTION,
+    location = "connection/load.scurl"
+}{component package COM.CURL.CDK.MESSAGING,
+    location = "messaging/load.scurl"
+}{component package COM.CURL.CDK.MESSAGES,
+    location = "messages/load.scurl"
+}{component directory docs,
+    location = "docs"
+}{component directory resources,
+    location = "resources"
+}{component file project.cprj,
+    location = "project.cprj"
+}
+
+
+
+

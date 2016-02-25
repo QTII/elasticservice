@@ -1,0 +1,293 @@
+{curl-file-attributes character-encoding = "utf8"}
+
+{import * from CURL.XML.SAX.HELPERS}
+{import * from CURL.XML.SAX.PARSER}
+
+||--{import * from ELASTIC.SUPPORT.UTILS.AMF}
+
+
+||--{let public constant RecordViewHashTable:ParameterizedType = {HashTable-of String, RecordView}}
+||--{let public constant RecordViewArray:ParameterizedType = {Array-of RecordView}}
+||--{let public constant ParamHashTable:ParameterizedType = {HashTable-of String, StringStringTable}}
+
+
+{define-class public PlusInAirParser {inherits DefaultHandler}
+
+||--  field private output:VBox
+||--  field private nesting-depth:int
+
+||--  field public-get root:TXmlTreeNode = {TXmlTreeNode node-data="root"}
+||--  field protected _current:#TXmlTreeNode
+
+  ||파라미터
+  field public-get extra-fields:{Array-of RecordField}={{Array-of RecordField}}
+
+  ||
+  field public-get error-code:int=0
+  field public-get error-msg:String=""
+
+
+  field public-get params:ParamHashTable = {ParamHashTable}  
+  field protected fields:Array = {Array}
+
+  field public-get logs:StringArray = {StringArray}
+
+  field public-get rvs:RecordViewHashTable = {RecordViewHashTable}
+
+
+  ||레코드셋 생성용
+  field public-get rs-id:String=""
+  field public-get rs:#RecordView
+  
+
+  ||레코드 생성용
+  field tag:String = ""
+  field record:#Record = null
+  field field-name:String = ""
+  
+  field param-name:String = ""
+
+
+  |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+  {method public {get-param name:String, value:String="id"}:any
+    {if {self.params.key-exists? name} then
+        let hash:StringStringTable = self.params[name] ||"id", "type", "value"
+        {if {hash.key-exists? value} then
+            {return hash[value]}
+        }
+    }
+    {return ""}
+    
+||--    {for hash:StringStringTable key name:String in handler.params do
+||--        let value:String = ""
+||--        {if {hash.key-exists? "value"} then set value = hash["value"]}
+
+  }
+
+  |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+  {constructor public {default
+                          extra-fields:{Array-of RecordField}={{Array-of RecordField}}
+                      }
+    
+    set self.extra-fields = extra-fields
+    
+    {construct-super}
+  }
+
+  
+  |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+  {method public {start-document}:void
+||--    {self.root.clear}
+||--    set self._current = self.root
+    {self.rvs.clear}    
+    set self.error-code = 0
+    set self.error-msg = ""
+
+    set self.rs-id = ""
+    set self.rs = null
+    {self.fields.clear}
+  }
+
+  |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+  {method public {end-document}:void
+||--    set self._current = self.root
+    
+  }
+
+
+  |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+  {method public {start-element
+                     uri:String,
+                     name:String,
+                     qname:String,
+                     atts:Attributes
+                 }:void
+    
+||--    set self.nesting-depth = self.nesting-depth + 1
+
+||--    let node:TXmlTreeNode = {TXmlTreeNode node-data=name}
+||--    {self._current.append node}
+||--    set self._current = node
+
+||--    {self.logs.append name}
+    {switch name
+     case "Root" do
+     case "Parameters" do
+        
+     case "Parameter" do
+        let hash:StringStringTable = {StringStringTable}        
+        {for i:int=0 below {atts.get-length} do
+            let name:#String = {atts.get-local-name i}
+            let value:#String = {atts.get-value i}
+            {if-non-null name, value then
+                set hash[name] = value
+            }
+        }
+        
+        {if {hash.key-exists? "id"} then
+            let name:String = hash["id"]
+            set self.params[name] = hash
+            set self.param-name = name
+         else
+            set self.param-name = ""
+        }
+        
+||--        }
+     case "Dataset" do
+            {for i:int=0 below {atts.get-length} do
+                let name:#String = {atts.get-local-name i}
+                {if name == "id" then                    
+                    let value:#String = {atts.get-value i}
+                    {if-non-null value=value then                        
+                        set self.rs-id = value
+                     else
+                        set self.rs-id = ""
+                    }
+                }
+            }
+        
+     case "ColumnInfo" do
+     case "Column" do
+||--        {if self.tag == "ColumnInfo" then
+            let names:StringStringTable = {StringStringTable}
+            
+            {for i:int=0 below {atts.get-length} do
+                let name:#String = {atts.get-local-name i}
+                let value:#String = {atts.get-value i}
+                {if-non-null name, value then
+                    set names[name] = value
+                }
+            }
+            
+            {self.fields.append
+                {RecordField names["id"], domain={if names["type"] == "string" then String else any}}
+            }
+||--        }
+
+     case "Rows" do
+
+     case "RowsCsv" do
+        
+     case "Row" do
+        let nr:Record = {self.rs.new-record}
+        {self.rs.append nr}
+        set self.record = nr
+        
+     case "Col" do
+        let names:StringStringTable = {StringStringTable}        
+        {for i:int=0 below {atts.get-length} do
+            let name:#String = {atts.get-local-name i}
+            let value:#String = {atts.get-value i}
+            {if-non-null name, value then
+                set names[name] = value
+            }
+        }
+
+        let fname:String = names["id"]
+        set self.field-name = fname
+        
+       
+     else
+        
+    }
+
+    set self.tag = name    
+  }
+
+  
+
+  {method public {end-element
+                     uri:String,
+                     name:String,
+                     qname:String
+                 }:void
+    set self.tag = ""
+    {switch name
+     case "Root" do
+     case "Parameters" do        
+     case "Parameter" do
+        
+     case "Dataset" do
+        set self.rvs[self.rs-id] = {non-null self.rs}
+        set self.rs-id = ""
+        set self.rs = null
+
+        {self.fields.clear}        
+        
+     case "ColumnInfo" do
+        set self.rs =
+            {RecordView
+                {RecordSet
+                    {RecordFields
+                        {splice self.fields},
+                        {splice self.extra-fields}
+                    }
+                }
+            }
+        
+     case "Column" do
+
+     case "Rows" do        
+
+     case "RowsCsv" do
+        set self.record = null
+        
+     case "Row" do
+        set self.record = null
+        
+     case "Col" do
+        set self.field-name = ""
+        
+     else
+        
+    }    
+
+  }
+  
+  {method public {characters ch:StringBuf, start:int, length:int}:void
+    let data:String = {ch.substr start, length}
+    {if {data.trim-clone} == "" then {return}}
+
+    {if self.tag == "Parameter" then
+        {if self.param-name != "" then
+            let hash:StringStringTable = self.params[self.param-name]
+            set hash["value"] = {data.trim-clone}
+        }
+     elseif self.tag == "RowsCsv" then
+        let datas:StringBuf = {StringBuf {data.trim-clone}}
+        {datas.replace |"\u0007"|, "\u0007"}
+        {datas.replace |"\u0008"|, "\u0008"}        
+||--        {dump datas}
+        let lines:StringArray = {datas.split split-chars="\u0008\n"}
+        {for i:int=0 below lines.size do
+            {if lines[i] == "" then {continue}}
+            
+            let datas:StringArray = {lines[i].split split-chars="\u0007"}
+            let nr:Record = {self.rs.new-record}
+            {for j:int=0 below datas.size - 1 do ||뒤에 \u0007이 하나더 붙는다.
+                let fname:String = {self.rs.fields.get-by-index j}.name
+                set nr[fname] = datas[j]
+            }
+            {self.rs.append nr}
+        }        
+        
+     elseif self.record != null then
+        {if self.field-name != "" then
+            set self.record[self.field-name] = {data.trim-clone}
+        }
+    }
+  }
+  
+  {method public {error exception:SAXParseException}:void
+    {throw exception}
+  }
+  
+  {method public {fatal-error exception:SAXParseException}:void
+    {throw exception}
+  }
+  
+  {method public {warning exception:SAXParseException}:void
+    {throw exception}
+  }
+  
+}

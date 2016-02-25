@@ -1,0 +1,5 @@
+<update>
+	<![CDATA[
+insert into t_emp values (999999, #{EMP_NM}, 'trainee')
+	]]>
+</update>

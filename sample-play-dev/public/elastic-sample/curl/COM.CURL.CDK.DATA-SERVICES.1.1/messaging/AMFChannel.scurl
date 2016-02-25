@@ -1,0 +1,277 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{doc-next
+    {purpose {docref Channel} that can send and receive messages with a web server
+        using the AMF0 or AMF3 protocol.
+    }
+}
+{define-class public AMFChannel {inherits CurlConnectionChannel}
+  field private ignore-net-status-events?:bool = false
+
+  field public result-handler:{proc-type {msg:IMessage}:void} =
+      {uninitialized-value-for-type {proc-type {msg:IMessage}:void}}
+  field public fault-handler:{proc-type {msg:IMessage}:void} =
+      {uninitialized-value-for-type {proc-type {msg:IMessage}:void}}
+
+  {doc-next
+    {purpose
+        Construct an {docref AMFChannel} to be used in a {docref ChannelSet} by
+        a {docref RemoteObject}, {docref Consumer}, or a {docref Producer}.
+    }
+    {parameter id,
+        The endpoint id for the channel.
+    }
+    {parameter uri,
+        The URL of the server that this channel will talk to.
+    }
+    {parameter mapper,
+        The {docref AMFObjectAdapters} used for serializing and deserializing messages and
+        parameters to and from native data types.
+    }
+  }
+  {constructor public {default
+                          id:#String = null, uri:#Url = null,
+                          mapper:AMFObjectAdapters = AMFObjectAdapters.standard
+                      }
+    {construct-super id = id, uri = uri, mapper = mapper}
+    {self.init-handlers}
+  }
+
+  {getter public {polling?}:bool
+    {return self.poll-outstanding?}
+  }
+
+  {getter public {piggybacking-enabled?}:bool
+    {return super.piggybacking-enabled?}
+  }
+
+  {setter public {piggybacking-enabled? val:bool}:void
+    set super.piggybacking-enabled? = val
+  }
+
+  {getter public {polling-enabled?}:bool
+    {return super.polling-enabled?}
+  }
+
+  {setter public {polling-enabled? val:bool}:void
+    set super.polling-enabled? = val
+  }
+
+  {getter public {polling-interval}:Time
+    {return super.polling-interval}
+  }
+
+  {setter public {polling-interval val:Time}:void
+    set super.polling-interval = val
+  }
+
+  {method protected {internal-connect}:void
+    {super.internal-connect}
+    set self.ignore-net-status-events? = false
+
+    def message = {new CommandMessage}
+    {if-non-null self.credentials then
+        set message.operation = CommandMessage.LOGIN_OPERATION
+        set message.body = self.credentials
+     else
+        set message.operation = CommandMessage.CLIENT_PING_OPERATION
+    }
+
+    set message.headers[CommandMessage.MESSAGING_VERSION] =
+        self.messaging-version
+
+||--    {if {ServerConfig.needs-config? self} then
+||--        set message.headers[CommandMessage.NEEDS_CONFIG_HEADER] = true
+||--    }
+
+    {self.set-flex-client-id-on-message message}
+
+    def responder =
+        {new ConnectionResponder,
+            self.result-handler,
+            self.fault-handler
+        }
+    {self.connection.call command = null, responder = responder, message}
+  }
+
+  {method protected {internal-disconnect rejected?:bool = false}:void
+    {if not rejected? then
+        def command-message = {new CommandMessage}
+        set command-message.operation = CommandMessage.DISCONNECT_OPERATION
+        {self.internal-send
+            {new AMFFireAndForgetResponder, command-message}
+        }
+    }
+    set self.connected? = false
+    {super.internal-disconnect rejected? = rejected?}
+  }
+
+  {method protected {shutdown-net-connection}:void
+    || TODO:
+||--    {self._connection.remove-event-handler
+||--        SecurityErrorEvent.SecurityError,
+||--        self.security-error-handler
+||--    }
+||--    {self._connection.remove-event-handler
+||--        IOErrorEvent.IO_ERROR,
+||--        self.io-error-handler
+||--    }
+    set self.ignore-net-status-events? = true
+    {self.connection.close}
+  }
+
+  {method protected {init-handlers}:void
+    set self.result-handler =
+        {proc {msg:IMessage}:void
+            || TODO: Some ServerConfig stuff happens first.
+            def flex-client = {FlexClient.get-instance}
+            {if flex-client.id == null then
+                def (id, found?) =
+                    {msg.headers.get-if-exists
+                        AbstractMessage.FLEX_CLIENT_ID_HEADER
+                    }
+                {if found? then
+                    set flex-client.id = id asa String
+                }
+            }
+
+            def (version, found?) = {msg.headers.get-if-exists
+                                        CommandMessage.MESSAGING_VERSION
+                                    }
+            {if found? then
+                {self.handle-server-messaging-version (version asa double)}
+            }
+            
+            {self.connect-succeeded}
+            {type-switch msg
+             case err:ErrorMessage do
+                || Ignore
+             else
+                {if-non-null self.credentials then
+                    set self.authenticated? = true
+                }
+            }
+        }
+    set self.status-handler =
+        {proc {net-status-event:Event}:void
+            {if self.ignore-net-status-events? then
+                {return}
+            }
+||--            let channel-fault:#ChannelFaultEvent
+||--            let handled?:bool = true
+||--            {if-non-null net-status-event.info then
+||--                {if info.level == "error" then
+||--                    {if self.connected? then
+||--                        {if {info.code.find-string "Call.Failed"} != -1 then
+||--                            set channel-fault =
+||--                                {ChannelFaultEvent
+||--                                    channel = self,
+||--                                    code = "Channel.Call.Failed",
+||--                                    level = info.level,
+||--                                    description = info.description,
+||--                                    root-cause = info
+||--                                }
+||--                            {self.enqueue-event channel-fault}
+||--                        }
+||--                        {self.internal-disconnect}
+||--                     else
+||--                        set channel-fault =
+||--                            {ChannelFaultEvent
+||--                                channel = self,
+||--                                code = "Channel.Connect.Failed",
+||--                                level = info.level,
+||--                                description = info.description,
+||--                                root-cause = info
+||--                            }
+||--                        {self.connect-failed channel-fault}
+||--                    }
+||--                 else
+||--                    {if not self.connected? then
+||--                        set handled =
+||--                            (info.level == "status" and
+||--                             {info.code.find-string "Connect.Closed"} != -1)
+||--                     else
+||--                        set handled? = false
+||--                    }
+||--                }
+||--             else
+||--                set handled? = false
+||--            }
+||--            {if not handled? then
+                {self.connect-failed
+                    {ChannelFaultEvent
+                        channel = self,
+                        code = "Channel.Connect.Failed", ||""
+                        level = "error", ||""
+                        description = {lmessage Invalid Url '{value self.uri}.}
+                    }
+                }
+||--            }
+        }
+    set self.fault-handler =
+        {proc {msg:IMessage}:void
+            {type-switch msg
+             case err:ErrorMessage do
+                {if err.fault-code == "Client.Authentication" then ||""
+                    || Connection succeeded, but authentication failed.
+                    {self.result-handler err}
+                    {self.enqueue-event
+                        {ChannelFaultEvent
+                            channel = self,
+                            code = err.fault-code,
+                            level = "warn", ||""
+                            description = err.fault-detail,
+                            root-cause = err
+                        }
+                    }
+                 else
+                    {if {FlexClient.get-instance}.id == null and
+                        {msg.headers.key-exists?
+                            AbstractMessage.FLEX_CLIENT_ID_HEADER
+                        }
+                     then
+                        set {FlexClient.get-instance}.id =
+                            msg.headers[AbstractMessage.FLEX_CLIENT_ID_HEADER]
+                        asa String
+                    }
+                    || Process features advertised by the server endpoint.
+                    def (version, found?) = {msg.headers.get-if-exists
+                                                CommandMessage.MESSAGING_VERSION
+                                            }
+                    {if found? then
+                        {self.handle-server-messaging-version
+                            (version asa double)
+                        }
+                    }
+                    
+                    {self.connect-failed
+                        {ChannelFaultEvent
+                            channel = self,
+                            code = "Channel.Ping.Failed", ||""
+                            level = "error", ||""
+                            description =
+                                {lmessage {value err.fault-detail} Url: {value self.uri}},
+                            root-cause = err
+                        }
+                    }
+                }
+             else
+                {error {lmessage Unexpected message type.}}
+            }
+        }
+  }
+}

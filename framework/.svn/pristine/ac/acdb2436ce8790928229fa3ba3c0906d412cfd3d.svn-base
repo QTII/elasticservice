@@ -1,0 +1,48 @@
+5. Play Framework 2.3 운영모드 퀵 가이드
+
+
+------------------------
+stage 모드 (운영모드 준비 단계)
+------------------------
+
+자동화된 디플로이를 위해서는 'start' 명령어는 적합하지 않습니다. 'start' 명령을 실행한 다음에는 애플리케이션의 백그라운드 실행을 위해 Ctrl+D로 프로세스와의 연결을 끊어줘야 하기 때문입니다.
+
+o 실행을 위한 준비
+   $ activator clean stage
+
+   . 이것은 초기화, 컴파일, 필요한 디펜던시들을 수집하여 target/universal/stage 디렉토리에 복사를 합니다.
+   . 또한 bin/my-first-app 스크립트를 생성합니다.(my-first-app은 프로젝트 이름의 예)
+   . bin/my-first-app 스크립트는 Play 서버를 가동합니다. (Windows의 경우 my-first-app.bat)
+
+
+------------------------
+환경설정 파일
+------------------------
+
+o secret 생성하기
+   $ cd my-first-app
+   $ activator
+   [my-first-app] $ play-generate-secret   (Play Framework 2.4의 경우 playGenerateSecret)
+   [info] Generated new secret: QCYtAnfkaZiwrNwnxIlR6CTfG3gf90Latabg5241ABR5W1uDFNIkn
+   [success] Total time: 0 s, completed 28/03/2014 2:26:09 PM
+
+o 운영모드 전용 환경설정 파일 만들기
+   . 명시적으로 지정하지 않으면 classpath에서 application.conf를 찾습니다. application.conf은 개발모드에서만 사용하도록 하고 운영모드에서는 다른 파일을 사용하는 것이 좋습니다.
+
+   . 서버에 production.conf 파일을 생성합니다. 그리고 application.conf 파일을 'include' 합니다. 그런 다음 secret이나 password와 같은 중요한 것들을 다음과 같이 재설정 합니다:
+      include "application"
+
+      application.secret="QCYtAnfkaZiwrNwnxIlR6CTfG3gf90Latabg5241ABR5W1uDFNIkn"
+
+
+------------------------
+운영모드로 실행하기
+------------------------
+
+o 애플리케이션 실행
+   $ cd my-first-app
+   $ target/universal/stage/bin/my-first-app -Dconfig.file=/full/path/to/conf/production.conf
+   또는
+   $ target/universal/stage/bin/my-first-app -Dconfig.resource=production.conf
+
+

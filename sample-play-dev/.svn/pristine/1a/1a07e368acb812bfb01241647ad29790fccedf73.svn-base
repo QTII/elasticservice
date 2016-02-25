@@ -1,0 +1,6 @@
+<select>
+	SELECT 
+		#{AAA} AS AAA, 
+		#{BBB} AS BBB
+</select>
+

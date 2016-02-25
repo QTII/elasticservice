@@ -1,0 +1,95 @@
+ ||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{curl 8.0 applet}
+
+{applet manifest = "manifest.mcurl", locale = "en"}
+
+{include "../utils/guide-header.scurl"}
+{include "../utils/support.scurl"}
+
+{def samples-loc =
+    {url "samples/blazeds/curl-samples/"}
+}
+
+{chapter
+    index= {HeadingIndex primary-key="CDK Data Services Messaging"},
+    CDK Data Services Messaging
+}
+
+{summary    
+    The {docref COM.CURL.CDK.MESSAGING} package
+    provides a {docref Producer} and {docref Consumer} adapters
+    for exchange of messages with AMF service providers.
+
+    This allows Curl applications to participate in
+    Publish / Subscribe message exchange.
+}
+|| ====================
+{heading level=2,    
+    Producer and Consumer
+}
+{paragraph
+    Use {ctext Producer} and {ctext Consumer}
+    to participate in pub/sub messaging conversations.
+
+    {itemize
+        {item {docref Consumer} represents a source of messages.  
+            It receives messages from topics to which the appalication is subscribed.
+            Use {docref Consumer.subscribe} to subscribe to a server message source.}
+        
+        {item {docref Producer} represents a sink of messages.
+            It is used to send messages to other subscribed consumers.
+            Use {docref Producer.send} to send a message.}
+        
+        {item Identify the service for {ctext Consumer}s and {ctext Producrer}s
+            by specifying the {ctext endpoint} Url
+            and the {ctext destination}}
+
+        {item Prepare for the response by adding event handlers to a {ctext Consumer}
+            {itemize
+                {item {docref MessageEvent} represents an incoming message,
+                    and contains its content.}
+||--                {item {docref FaultEvent} indicates a failure condition
+||--                    and contains information about the fault}
+            }}
+
+        {item The content of messages can be any 
+            {link href = {url "cdk-ds-overview.curl#amf-protocol"}, AMF Protocol}
+            datatype, depending on the requirements of the messaging application.
+            Messages usually are {docref DataObject} instances.}
+    }
+}
+{paragraph    
+    The {bold Data Push} and {bold Collaboration}
+    samples illustrate these techniques.
+
+    Editable source code is available in the
+    {link href = {url "cdk-ds-overview.curl#samples-project"}, sample applications}.
+}
+{x-code-ref title = {message Data Push Sample},
+    background = "beige",
+    {samples-loc.merge "testdrive-datapush/s-datapush.curl"}
+}
+
+{x-code-ref title = {message Collaboration Sample},
+    background = "beige",
+    {samples-loc.merge "testdrive-chat/s-chat.curl"}
+}
+
+|| ====================
+{curl-copyright}
+

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app id="WebApp_1">
+
+	<!-- 
+		elasticservice 설정 시작 
+	-->
+	<context-param>
+		<param-name>esConfig</param-name>
+		<param-value>WEB-INF/elasticservice.xml</param-value>
+	</context-param>
+
+	<listener>
+		<listener-class>elasticservice.web.servlet.ServletConfigListener</listener-class>
+	</listener>
+	
+	<servlet id="DefaultServlet">
+		<servlet-name>DefaultServlet</servlet-name>
+		<servlet-class>elasticservice.web.servlet.DefaultServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DefaultServlet</servlet-name>
+		<url-pattern>/elastic</url-pattern>
+	</servlet-mapping>
+	<!-- elasticservice 설정 끝 -->
+
+	<mime-mapping>
+		<extension>gif</extension>
+		<mime-type>image/gif</mime-type>
+	</mime-mapping>
+
+	<mime-mapping>
+		<extension>jpeg</extension>
+		<mime-type>image/jpeg</mime-type>
+	</mime-mapping>
+
+	<mime-mapping>
+		<extension>png</extension>
+		<mime-type>image/png</mime-type>
+	</mime-mapping>
+
+	<mime-mapping>
+		<extension>curl</extension>
+		<mime-type>text/vnd.curl</mime-type>
+	</mime-mapping>
+
+	<mime-mapping>
+		<extension>dcurl</extension>
+		<mime-type>text/vnd.curl.dcurl</mime-type>
+	</mime-mapping>
+
+	<mime-mapping>
+		<extension>scurl</extension>
+		<mime-type>text/vnd.curl.scurl</mime-type>
+	</mime-mapping>
+
+	<mime-mapping>
+		<extension>mcurl</extension>
+		<mime-type>text/vnd.curl.mcurl</mime-type>
+	</mime-mapping>
+
+	<mime-mapping>
+		<extension>pcurl</extension>
+		<mime-type>application/vnd.curl.pcurl</mime-type>
+	</mime-mapping>
+
+	<mime-mapping>
+		<extension>car</extension>
+		<mime-type>application/vnd.curl</mime-type>
+	</mime-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.htm</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
+		<welcome-file>default.html</welcome-file>
+		<welcome-file>default.htm</welcome-file>
+		<welcome-file>default.jsp</welcome-file>
+	</welcome-file-list>
+
+</web-app>

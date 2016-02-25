@@ -1,0 +1,256 @@
+1. Play Framework 2.3 개발모드
+
+* 참조: https://playframework.com/documentation/2.3.x
+
+
+------------------------
+Play Framework 2.3 설치
+------------------------
+
+o Prerequisites
+   . JDK 6 이상 버전 필요
+
+o Typesafe Activator 설치
+   . Activator에 Play가 포함되어 있습니다. 
+   . Activator는 템플릿 및 튜토리얼 엔진으로서 개발자들이 쉽게 개발을 시작할 수 있는 많은 템플릿들을 제공합니다.
+   . 읽기와 쓰기 권한이 있는 위치에 설치해야 합니다.
+   . Activator download: https://www.typesafe.com/activator/download
+
+o 시스템 PATH에 activator 스크립트 등록
+   . UNIX
+      export PATH=$PATH:/relativePath/to/activator
+
+   . UNIX의 경우 activator 스크립트가 실행가능해야 합니다.
+      bash chmod a+x activator
+
+   . Proxy 뒤에 있을 경우
+      - Windows
+      set HTTP_PROXY=http://<host>:<port>
+	  
+      - UNIX
+	  export HTTP_PROXY=http://<host>:<port>
+	  
+	  
+------------------------
+새 플레이 애플리케이션 만들기
+------------------------
+
+o 새 애플리케이션 만들기
+   . 아래의 my-first-app은 애플리케이션의 디렉토리 명으로 사용됩니다. 이름은 아무 것으로나 정하면 됩니다.
+   
+   . Play Scala 애플리케이션 만들기
+      $ activator new my-first-app play-scala
+   
+   . Play Java 애플리케이션 만들기
+      $ activator new my-first-app play-java
+   
+   . 또는 
+      $ activator new
+   
+   . Activator UI에서 새 애플리케이션 만들기
+      $ activator u
+	  
+   . Activator 없이 sbt로 새 애플리케이션 만들기
+      - sbt download: http://www.scala-sbt.org/
+	  
+	  - 새 애플리케이션을 위한 디렉토리 생성, 예: my-first-app
+	  
+	  - my-first-app/plugins.sbt에 다음 두가지를 추가하고 2.3.x 부분을 사용하길 원하는 정확한 버전번호로 수정해야 합니다.
+         // The Typesafe repository
+         resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
+
+         // Use the Play sbt plugin for Play projects
+         addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.x")
+
+      - 적절한 버전의 sbt를 사용하고 있는지 확인하려면 my-first-app/build.properties 파일에 다음의 내용이 있는지 봐야한다.
+         sbt.version=0.13.5
+
+      - Java 프로젝트 build.sbt:
+         name := "my-first-app"
+         version := "1.0"
+         lazy val root = (project in file(".")).enablePlugins(PlayJava)
+		 
+      - Scala 프로젝트 build.sbt:
+         name := "my-first-app"
+         version := "1.0.0-SNAPSHOT"
+         lazy val root = (project in file(".")).enablePlugins(PlayScala)
+
+      - sbt 콘솔 실행
+         $ cd my-first-app
+         $ sbt  <--- 프로젝트를 로드하고 dependency를 다운로드할 것입니다.	 
+
+
+------------------------
+애플리케이션 표준 레이아웃
+------------------------
+
+   app                      → 애플리케이션 소스 파일들
+    └ assets                → 컴파일된 asset 소스 파일들
+       └ stylesheets        → 일반적으로 LESS CSS 소스 파일들
+       └ javascripts        → 일반적으로 CoffeeScript 소스 파일들
+    └ controllers           → 애플리케이션 컨트롤러들
+    └ models                → 애플리케이션 비즈니스 레이어
+    └ views                 → 템플릿 파일들
+   build.sbt                → 애플리케이션 빌드 스크립트
+   conf                     → 환경설정 파일들과 컴파일되지 않는 리소스들
+    └ application.conf      → 메인 환경설정 파일
+    └ routes                → 라우트 정의
+   public                   → Public assets
+    └ stylesheets           → CSS 파일들
+    └ javascripts           → Javascript 파일들
+    └ images                → 이미지 파일들
+   project                  → sbt 환경설정 파일
+    └ build.properties      → sbt 프로젝트 프러퍼티
+    └ plugins.sbt           → Play를 위한 선언을 포함한 sbt 플러그인들
+   lib                      → 디펜던시 관리 대상이 아닌 라이브러리들
+   logs                     → 표준 로그 폴더
+    └ application.log       → 기본 로그 파일
+   target                   → 각종 생성 파일들
+    └ scala-2.10.0            
+       └ cache              
+       └ classes            → 컴파일된 클래스 파일들
+       └ classes_managed    → 관리되는 클래스 파일들 (templates, ...)
+       └ resource_managed   → 관리되는 리소스 파일들 (less, ...)
+       └ src_managed        → 생성된 소스 파일들 (templates, ...)
+   test                     → 단위 또는 기능 테스트를 위한 소스 파일 폴더
+
+o 전형적인 .gitignore 파일
+   . 자동생성된 폴더들은 버전관리 시스템에서 제외되어야 합니다. 아래의 내용을 .gitignore 파일에 입력하세요.
+
+   logs
+   project/project
+   project/target
+   target
+   tmp
+   dist
+   .cache
+
+
+------------------------
+Play 콘솔 사용하기
+------------------------
+
+Play 콘솔은 sbt 기반이며 Play 애플리케이션의 전체 개발주기의 관리를 가능하게 합니다.
+
+o Play 콘솔 실행
+   $ cd my-first-app
+   $ activator
+
+o 개발모드로 애플리케이션 가동하기
+   . 개발모드에서는 auto-reload 기능이 활성화됩니다. 요청이 있을 때마다 프로젝트를 확인하고 변경된 소스파일은 재컴파일을 합니다. 필요시에는 애플리케이션을 자동으로 재시작합니다.
+   컴파일 에러가 발생할 경우에는 브라우저에 에러 정보가 보여지게 됩니다.
+   
+   [my-first-app] $ run
+
+o 애플리케이션 중단하기
+   . Crtl+D 키를 누르면 Play 콘솔 프롬프트로 돌아오게 됩니다.
+
+o 컴파일
+   [my-first-app] $ compile
+
+o 인터렉티브 콘솔 사용하기
+   . 소스코드를 인터렉티브하게 테스트할 수 있습니다.
+   
+   . 인터렉티브 콘솔 실행
+   [my-first-app] $ console
+   
+   . 소스코드 실행해 보기
+   bash scala> new play.core.StaticApplication(new java.io.File("."))
+
+o 디버깅
+   . Play 콘솔을 실행시 JPDA 디버그 포트를 활성화 시킬 수 있습니다.
+   . 자바 디버거를 이용해서 이 포트에 접속할 수 있습니다.
+   . 다음의 명령으로 실행하세요. (예, 디버깅 포트번호 9999)
+   $ activator -jvm-debug 9999
+   
+   . JPDA 포트가 활성화되면 JVM은 다음의 로그를 기록할 것입니다.
+   Listening for transport dt_socket at address: 9999
+   
+o 그외 sbt의 기능
+   . 소스코드 수정시 자동으로 컴파일(triggered compilation)
+   [my-first-app] $ ~ compile
+
+   . 개발모드의 애플리케이션을 가동시 triggered compilation이 활성화 됩니다. (즉, 파일에 변경되면 자동으로 컴파일을 합니다. 만일 '~' 없이 'run'을 실행하면 변경된 파일의 컴파일을 위해 브라우저에서 'Refresh'를 매번 해야 합니다.)
+   [my-first-app] $ ~ run
+
+   . 소스코드를 수정시 자동으로 프로젝트를 테스트합니다.
+   [my-first-app] $ ~ test
+   
+o Play 콘솔에 들어가지 않고 Play 명령어를 직접 실행하기
+   $ activator run
+   [info] Loading project definition from /Users/jroper/tmp/my-first-app/project
+   [info] Set current project to my-first-app (in build file:/Users/jroper/tmp/my-first-app/)
+
+   --- (Running the application from SBT, auto-reloading is enabled) ---
+
+   [info] play - Listening for HTTP on /0:0:0:0:0:0:0:0:9000
+
+   (Server started, use Ctrl+D to stop and go back to the console...)
+
+
+------------------------
+브라우저에서 애플리케이션에 접속하기
+------------------------
+
+o http://localhost:9000
+
+
+------------------------
+Eclipse 설정하기
+------------------------
+
+o 환경설정 파일 생성
+   . Play 애플리케이션을 Eclipse 프로젝트로 변환하기
+   $ cd my-first-app
+   $ activator
+   [my-first-app] $ eclipse
+   
+   . “Not a valid project ID: eclipse” 에러 발생시 project/plugins.sbt에 다음 라인을 추가한다.
+      addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "4.0.0")
+	
+   . 하부 프로젝트를 사용할 때는 build.sbt에 skipParents를 적절히 설정해야 합니다.
+      - build.sbt 파일에 추가하는 방법: 
+         import com.typesafe.sbteclipse.core.EclipsePlugin.EclipseKeys
+
+         EclipseKeys.skipParents in ThisBuild := false
+		 
+      - 또는 Play 콘솔에서 실행하는 방법: 
+         [my-first-app] $ eclipse skip-parents=false
+
+o 환경설정 파일 재생성
+   . classpath와 같이 중요한 변경을 가했을 경우에는 'eclipse' 명령을 다시 실행해야 합니다.
+
+o 주의: 팀으로 개발시에는 Eclipse의 환경설정 파일들은 버전관리시스템에 커밋하지 말것
+   . 생성된 환경설정 파일들은 개발자 개인의 환경에 고유한 경로들을 가지고 있으므로 커밋하지 않는 것이 좋습니다.
+
+o Eclipse에서 애플리케이션 불러오기(import)
+   . File/Import/General/Existing project… 메뉴
+
+o 디버깅
+   . 애플리케이션을 다음 명령으로 실행합니다. (예, 디버깅 포트번호 9999)
+   $ activator -jvm-debug 9999
+   
+   . Eclipse 프로젝트를 우클릭, 'Debug As', 'Debug Configurations'를 선택합니다.
+   
+   . Debug Configurations 창에서 'Remote Java Application'을 우클릭하고 'New'를 선택합니다.
+   
+   . 포트번호를 9999로 수정 후 'Apply'를 클릭합니다.
+   
+   . 이제는 'Debug'를 클릭하면 가동중인 애플리케이션에 연결이 됩니다.
+   
+   . 디버깅 세션을 중단하여도 애플리케이션은 중단되지 않습니다.
+
+
+------------------------
+Scala Plugin 링크
+------------------------
+Scala는 IDE의 내장된 기능이 아니며 플러그인의 형태로 제공됩니다.
+
+o Eclipse Scala IDE: http://scala-ide.org/
+o NetBeans Scala Plugin: https://java.net/projects/nbscala
+o IntelliJ IDEA Scala Plugin: http://confluence.jetbrains.net/display/SCA/Scala+Plugin+for+IntelliJ+IDEA
+o IntelliJ IDEA의 플러그인은 개발이 계속 진행중인 상태입니다. 따라서 약간의 수고로움의 감수하더라도 nightly build를 사용하면 추가적인 기능을 제공 받을 수 있습니다.
+o Nika (11.x) Plugin Repository: http://www.jetbrains.com/idea/plugins/scala-nightly-nika.xml
+o Leda (12.x) Plugin Repository: http://www.jetbrains.com/idea/plugins/scala-nightly-leda.xml
+o IntelliJ IDEA Play plugin (available only for Leda 12.x): http://plugins.intellij.net/plugin/?idea&pluginId=7080
+o ENSIME - Scala IDE Mode for Emacs: https://github.com/aemoncannon/ensime

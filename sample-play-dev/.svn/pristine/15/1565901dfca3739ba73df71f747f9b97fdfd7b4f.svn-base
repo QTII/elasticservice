@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Config>
+	<xmlEnv>
+		<variable name="variableName" value="variableValue" />
+	</xmlEnv>
+	
+	<charset>UTF-8</charset>
+	
+	<sqlRepo>sqlrepo</sqlRepo>
+
+	<dataTypeMap>
+		<type name="char" class="char" />
+		<type name="Character" class="java.lang.Character" />
+		<type name="Char" class="java.lang.Character" />
+		<type name="CHAR" class="java.lang.Character" />
+		<type name="int" class="int" />
+		<type name="Integer" class="java.lang.Integer" />
+		<type name="INT" class="java.lang.Integer" />
+		<type name="INTEGER" class="java.lang.Integer" />
+		<type name="long" class="long" />
+		<type name="Long" class="java.lang.Long" />
+		<type name="LONG" class="java.lang.Long" />
+		<type name="BigDecimal" class="java.math.BigDecimal" />
+		<type name="bigdecimal" class="java.math.BigDecimal" />
+		<type name="BIGDECIMAL" class="java.math.BigDecimal" />
+		<type name="double" class="double" />
+		<type name="Double" class="java.lang.Double" />
+		<type name="DOUBLE" class="java.lang.Double" />
+		<type name="float" class="float" />
+		<type name="Float" class="java.lang.Float" />
+		<type name="FLOAT" class="java.lang.Float" />
+		<type name="boolean" class="boolean" />
+		<type name="Boolean" class="java.lang.Boolean" />
+		<type name="BOOLEAN" class="java.lang.Boolean" />
+		<type name="String" class="String" />
+		<type name="string" class="java.lang.String" />
+		<type name="STRING" class="java.lang.String" />
+		<type name="Date" class="java.util.Date" />
+		<type name="File" class="java.io.File" />
+		<type name="Map" class="java.util.HashMap" />
+		<type name="HashMap" class="java.util.HashMap" />
+		<type name="List" class="java.util.ArrayList" />
+		<type name="ArrayList" class="java.util.ArrayList" />
+	</dataTypeMap>
+
+	<webSocket port="8887"
+		class="elasticservice.web.websocket.ElasticWebSocketServer">
+		<inMessageEventHandler maxThreads="100" />
+	</webSocket>
+	
+</Config>

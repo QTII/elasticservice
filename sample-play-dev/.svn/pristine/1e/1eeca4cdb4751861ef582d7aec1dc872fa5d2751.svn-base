@@ -1,0 +1,14 @@
+<select>
+SELECT * FROM T_TEST
+	<dynamic>
+		<isNotEmpty property="CITY">
+WHERE 
+	CITY = #{CITY}
+		</isNotEmpty>
+		<isNotEmpty property="LIMIT">
+			<isNotEqual property="LIMIT" compareValue="0">
+	LIMIT ${LIMIT}
+			</isNotEqual>
+		</isNotEmpty>
+	</dynamic>
+</select>

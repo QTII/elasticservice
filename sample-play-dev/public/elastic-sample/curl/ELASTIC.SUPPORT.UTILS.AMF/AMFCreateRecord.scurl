@@ -1,0 +1,211 @@
+
+{curl-file-attributes character-encoding = "utf8"}
+
+
+{import * from COM.CURL.CDK.DATA-OBJECT}  || amf 관련
+{import * from COM.CURL.CDK.AMF}
+
+{define-proc public {proc-present-amf-with-single-record-set items:ArrayCollection}:#RecordView
+    let rv:#RecordView 
+    
+    let start-dt:DateTime = {DateTime}
+    
+    {if items.size > 0 then
+        || specify recordset
+        def typical = items[0] asa DataObject
+        def traits = typical.traits
+        def rs = {DataObjectRecordSet traits, type-info = typical}
+
+        let start-dt:DateTime = {DateTime}
+
+||--        let new-rs:RecordSet =
+||--            {RecordSet
+||--                {RecordFields
+||--                    {splice rs.fields},
+||--                    {splice {gp-get-extra-fields}}
+||--                }
+||--            }
+||--        
+||--        let new-rv:RecordView = {RecordView new-rs}
+
+        || populate recordset
+        {for x in items do
+            def item = x asa DataObject
+||--            let a:{HashTable-of String, any} = {item.to-HashTable }
+||--            set a["kkk"] = "11"
+||--            let new-item:StandardDataObject   = {StandardDataObject   traits, default-values= a  }
+||--            
+||--            {dump "11"}
+            {rs.append item}
+
+||--            || 부가 필드 추가하기 위해 레코드셋을 만듬
+||--            let r:Record = {new-rs.new-record}
+||--            let org-values:StringBuf = {StringBuf}
+||--            {with-compiler-directives allow-any-calls? = true do
+||--                {for value key field-name in {item.to-HashTable} do
+||--                    set r[field-name] = value
+||--                }
+||--                ||{org-values.concat {String value} &" \u0007" }
+||--            }
+||--
+||--            || extra-fields
+||--            set r["_status_"] = "O"
+||--            set r["_sort-index_"] = new-rs.size
+||--            set r["_origin-value_"] = {String org-values}
+||--            
+||--            {new-rs.append r}
+        }
+        {rs.commit}
+        ||{new-rs.commit}
+        set rv = {RecordView rs}
+
+        let end-dt:DateTime = {DateTime}
+       def message = {lformat "레코드 생성시간:%s", {String end-dt - start-dt}}
+||--        let fields:RecordFields =
+||--            {RecordFields
+||--                {splice rs.fields},
+||--                {splice {gp-get-extra-fields}}
+||--            }
+||--        
+||--        set self._rv = {RecordView rs}
+||--
+||--        let start-dt:DateTime = {DateTime}
+||--        let new-rs:RecordSet =
+||--            {RecordSet
+||--                fields
+||--            }
+||--        let new-rv:RecordView = {RecordView new-rs}
+||--        
+||--        {for i:int=0 below self._rv.size do
+||--            let r:Record = {new-rv.new-record}
+||--            {for j:int=0 below self._rv.fields.size do
+||--                let field-name:String = {self._rv.fields.get-by-index j}.name
+||--
+||--                
+||--                set r[field-name] = self._rv[i][field-name]
+||--
+||--            }
+||--        }
+||--        let end-dt:DateTime = {DateTime}
+||--        set self._message = self._message &  {format "레코드생성 시간:%s", {String end-dt - start-dt}}
+
+
+        {rv.add-event-handler
+            {on e:RecordFieldAdded at rs:RecordSet do
+                
+            }
+        }
+        
+        || refresh display
+||--        {do
+||--            {if-non-null rv then
+||--                {popup-message
+||--                    {RecordGrid record-source = rv asa RecordView}
+||--                }
+||--             else
+||--                {popup-message
+||--                    "RecordView 생성에 실패했습니다."
+||--                }
+||--            }
+||--||--            let start-dt:DateTime = {DateTime}
+||--||--
+||--||--            let end-dt:DateTime = {DateTime}
+||--||--            set self._message = self._message & "\       " & {lformat "그리드 갱신시간 :%s", {String end-dt - start-dt}}
+||--        }
+
+    }
+    {return rv}
+}
+
+{define-proc public {proc-present-amf-with-multi-record-set result:SealedDataObject}:void
+
+    let hs-rvs:{HashTable-of String,#RecordView} = {{HashTable-of String,#RecordView}}
+    
+    let start-dt:DateTime = {DateTime}
+    let end-dt:DateTime = {DateTime}
+    
+    let a:{Iterator-of String} = {result.keys-to-Iterator}
+    {for key name in result do
+        let items:ArrayCollection = {result.get name}
+        {if items.size < 0 then {continue}}
+
+        || specify recordset
+        def typical = items[0] asa DataObject
+        def traits = typical.traits
+        def rs = {DataObjectRecordSet traits, type-info = typical}
+        
+        || populate recordset
+        {for x in items do
+            def item = x asa DataObject
+            {rs.append item}
+        }
+
+        {rs.commit}
+        let rv:RecordView =  {RecordView rs}
+
+        || extra-field추가
+        let new-rs:RecordSet =
+            {RecordSet
+                {RecordFields
+                    {splice rs.fields}
+||--                    ,
+||--                    {splice {gp-get-extra-fields}}
+                }
+            }
+
+        {for i:int=0 below rv.size do
+            let r:Record = {new-rs.new-record}
+            {for j:int=0 below rv.fields.size do
+                let field-name:String = {rv.fields.get-by-index j}.name
+
+                set r[field-name] = rv[i][field-name]
+            }
+            
+||--            set r["_sort_index"] = i + 1
+||--            set r["_status"] = "O"
+||--            set r["_origin_value"] = {gp-get-prev-data r}
+
+            {new-rs.append r}
+        }
+        {new-rs.commit}
+        let new-rv:RecordView = {RecordView new-rs}
+
+||--        {new-rv.add-event-handler
+||--            {on e:RecordModified at rv:RecordView do
+||--                ||{if g-record-lock? then {return}}
+||--                let rc:Record = e.record
+||--                || {if {gp-get-prev-data rc} != rc["_origin_value"] then
+||--                {gp-record-changed rc, e.index}
+||--                ||}
+||--
+||--                ||{dispatch-events false}
+||--                || tab change
+||--                {after 0s do
+||--                    {self.change-tab-select-mode rv}
+||--                }
+||--                
+||--            }
+||--        }
+
+        
+        set hs-rvs[name & "s"] =  new-rv
+    }
+    set end-dt = {DateTime}
+    def message = {lformat "레코드 생성시간:%s", {String end-dt - start-dt}}
+    
+||--    || 그리드 갱신
+||--    let items:StringArray = {StringArray}
+||--    {for i:int=0 below 7 do
+||--        {items.append {format "grid%d", i+1}}
+||--    }
+||--    
+||--    {self.refresh-controls}
+    {for key name:String  in  hs-rvs do
+        {popup-message
+            {VBox
+                name,
+                {RecordGrid record-source = hs-rvs[name]}
+            }
+        }
+    }
+  }

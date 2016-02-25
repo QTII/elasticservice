@@ -1,0 +1,25 @@
+package sample.elasticservice.service
+
+import java.io.File
+
+import scala.util.Try
+
+import elasticservice.ElasticConfigurator
+import elasticservice.ElasticService
+import elasticservice.ElasticServiceUtil
+import elasticservice.util.ep.ElasticParams
+
+class DelFile extends ElasticService {
+  def execute(req: ElasticParams): Try[ElasticParams] = {
+    Try {
+      ifMissingThrow("path", req).foreach(throw _)
+
+      val path = req.get("path").get
+      val f = ElasticConfigurator.RootPath.getOrElse("") + File.separator + path
+      if (new File(f).delete)
+        ElasticServiceUtil.epWithCodeMessage(0, "deleted " + f)
+      else
+        ElasticServiceUtil.epWithCodeMessage(999, "failed to delete " + f)
+    }
+  }
+}

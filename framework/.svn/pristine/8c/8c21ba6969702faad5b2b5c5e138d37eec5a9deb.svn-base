@@ -1,0 +1,85 @@
+4. Play Framework 2.3 운영모드
+2016-01-07, 이재희
+
+* 참조: https://www.playframework.com/documentation/2.3.x/Production
+
+
+운영모드에서는 'run' 명령어를 사용하면 않됩니다. 'run' 명령을 사용할 경우에는 클라이언트의 요청 마다 Play는 sbt를 이용해 변경된 파일이 있는지 확인하게 됩니다. 이는 성능에 중대한 영향을 미칠 수 있습니다.
+
+
+------------------------
+start 명령어 사용
+------------------------
+
+* 주의: 자동 디플로이 방식의 운영환경에서는 'start' 명령은 부적합 합니다.(자세한 사항은 아래의 'stage 모드' 참조)
+
+o 서버에 Play를 설치합니다.
+
+o Play 콘솔에서 'start' 명령어 실행
+   $ cd my-first-app
+   $ activator
+   [my-first-app] $ start -Dapplication.secret=abcdefghijk
+
+   * 주의: application.secret을 명령줄에 입력하면 노출이 되므로 운영환경에서는 부적합 합니다. (자세한 사항은 'Play Framework 2.3 secret 설정' 문서 참조)
+
+o 쉘에서 start 명령어 실행   
+   $ activator start -Dapplication.secret="abcdefghijk"
+
+   * 주의: application.secret을 명령줄에 입력하면 노출이 되므로 운영환경에서는 부적합 합니다. (자세한 사항은 'Play Framework 2.3 secret 설정' 문서 참조)
+
+o 프로세스 아이디는 RUNNING_PID 파일에 저장됩니다.
+
+o Play 콘솔 중지, 애플리케이션은 백그라운드에서 실행 계속
+   Ctrl+C
+
+o Play 콘솔 및 애플리케이션 둘다 중지
+   Ctrl+C
+
+
+------------------------
+stage 모드 (운영모드 준비 단계)
+------------------------
+
+자동화된 디플로이를 위해서는 'start' 명령어는 적합하지 않습니다. 'start' 명령을 실행한 다음에는 애플리케이션의 백그라운드 실행을 위해 Ctrl+D로 프로세스와의 연결을 끊어줘야 하기 때문입니다.
+
+o 실행을 위한 준비
+   $ activator clean stage
+
+   . 이것은 초기화, 컴파일, 필요한 디펜던시들을 수집하여 target/universal/stage 디렉토리에 복사를 합니다.
+   . 또한 bin/my-first-app 스크립트를 생성합니다.(my-first-app은 프로젝트 이름의 예)
+   . bin/my-first-app 스크립트는 Play 서버를 가동합니다. (Windows의 경우 my-first-app.bat)
+
+
+------------------------
+환경설정 파일
+------------------------
+
+o 운영모드 전용 환경설정 파일 만들기
+   . 명시적으로 지정하지 않으면 classpath에서 application.conf를 찾습니다. application.conf은 개발모드에서만 사용하도록 하고 운영모드에서는 다른 파일을 사용하는 것이 좋습니다.
+
+   . 서버에 production.conf 파일을 생성합니다. 그리고 application.conf 파일을 'include' 합니다. 그런 다음 secret이나 password와 같은 중요한 것들을 다음과 같이 재설정 합니다:
+      include "application"
+
+      application.secret="QCY?tAnfk?aZ?iwrNwnxIlR6CTf:G3gf:90Latabg@5241AB`R5W:1uDFN];Ik@n"
+
+o 환경설정 파일 지정하기
+   . -Dconfig.resource: classpath에서 환경설정 파일을 찾습니다. 일반적으로 환경설정 파일은 conf/ 디렉토리에 둡니다.
+      $ target/universal/stage/bin/my-first-app -Dconfig.resource=production.conf
+
+   . -Dconfig.file: 디렉토리 경로를 직접 지정합니다. 따라서 classpath에 없어도 됩니다.
+      $ target/universal/stage/bin/my-first-app -Dconfig.file=/opt/conf/production.conf
+
+   . -Dconfig.url: URL로부터 로딩할 수도 있습니다.
+      $ target/universal/stage/bin/my-first-app -Dconfig.url=http://conf.mycompany.com/conf/production.conf
+
+
+------------------------
+운영모드로 실행하기
+------------------------
+
+o 애플리케이션 실행
+   $ cd my-first-app
+   $ target/universal/stage/bin/my-first-app -Dconfig.file=/full/path/to/conf/production.conf
+
+   * 주의: production.conf 파일의 설정은 'Play Framework 2.3 secret 설정' 문서를 참조 바랍니다.
+

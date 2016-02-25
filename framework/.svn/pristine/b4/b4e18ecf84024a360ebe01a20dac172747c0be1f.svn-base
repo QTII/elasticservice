@@ -1,0 +1,9 @@
+<select>
+   	<![CDATA[
+SELECT
+	* 
+FROM ${TNAME} /* 주석 */
+WHERE
+	ORD_SEQNO = #{ORD_SEQNO}
+   	]]>
+</select>

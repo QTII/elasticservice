@@ -1,0 +1,72 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{define-class public open ArrayCollection {inherits Array, Externalizable}
+
+  def public traits =
+      {DataObjectTraits
+        "flex.messaging.io.ArrayCollection", ||""
+        {StringArray},
+        dynamic? = false,
+        externalizable? = true}
+  
+  {constructor public {default ...}
+    {construct-super.Array {splice ...}}
+    {construct-super.Externalizable}
+  }
+
+  {method public open {read-externalizable deserializer:AMFDeserializer}:void
+    def obj = {deserializer.read-one}
+    {type-switch obj 
+     case a:Array do
+        {self.clear}
+        set self.efficient-size = a.size
+        {self.concat a}
+    }
+  }
+
+  {method public open {write-externalizable serializer:AMFSerializer}:void
+    || NOTE: this avoids infinite loop on Externalizable
+    def array = {Array.from-FastArray self.underlying-FastArray}
+    {serializer.write-one array}
+  }
+}
+
+
+|| Note: not actually used yet.
+||--{define-class public open ObjectProxy {inherits {HashTable-of String, any}, Externalizable}
+||--
+||--  {constructor public {default ...}
+||--    {construct-super.{HashTable-of String, any} {splice ...}}
+||--    {construct-super.Externalizable}
+||--  }
+||--
+||--  {method public open {read-externalizable deserializer:AMFDeserializer}:void
+||--    def obj = {deserializer.read-one}
+||--    {type-switch obj 
+||--     case a:{HashTable-of String, any} do
+||--        {self.clear}
+||--        set self.efficient-size = a.size
+||--        {for v key k in a do
+||--            {self.set k, v}
+||--        }
+||--    }
+||--  }
+||--
+||--  {method public open {write-externalizable serializer:AMFSerializer}:void
+||--||--    {serializer.write-hash self}
+||--  }
+||--}

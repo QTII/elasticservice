@@ -1,0 +1,74 @@
+||| Copyright (C) 1998-2009, Sumisho Computer Systems Corp.  All Rights Reserved.
+|||
+||| An OpenCurl project.
+
+||| Licensed under the Apache License, Version 2.0 (the "License");
+||| you may not use this file except in compliance with the License.
+||| You may obtain a copy of the License at
+||| 
+|||     http://www.apache.org/licenses/LICENSE-2.0
+||| 
+||| Unless required by applicable law or agreed to in writing, software
+||| distributed under the License is distributed on an "AS IS" BASIS,
+||| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+||| See the License for the specific language governing permissions and
+||| limitations under the License.
+
+{define-class public AsyncToken {inherits EventTarget}
+  field private _message:IMessage
+  field private responders:#{Array-of IResponder}
+  field public-get private-set result:any
+
+  {constructor public {default message:IMessage}
+    set self._message = message
+  }
+
+  {getter public {message}:IMessage
+    {return self._message}
+  }
+
+  {setter public {message msg:IMessage}:void
+    set self._message = msg
+  }
+
+  {method public {add-responder responder:IResponder}:void
+    {if-non-null responders = self.responders then
+        {if {self.responders.find responder} < 0 then
+            {self.responders.append responder}
+        }
+     else
+        set self.responders = {new {Array-of IResponder}, responder}
+    }
+  }
+
+  {method public {has-responder?}:bool
+    {return self.responders != null and self.responders.size > 0}
+  }
+
+  {method protected {apply-result event:ResultEvent}:void
+    {self.set-result event.result}
+    {if-non-null responders = self.responders then
+        {for responder in responders do
+            {responder.result event}
+        }
+    }
+  }
+
+  {method protected {set-result result:any}:void
+    {if self.result != result then
+        def event = {PropertyChangeEvent.create-update-event
+                        self, "result", self.result, result
+                    }
+        set self.result = result
+        {self.enqueue-event event}
+    }
+  }
+
+  {method protected {apply-fault event:FaultEvent}:void
+    {if-non-null responders = self.responders then
+        {for responder in responders do
+            {responder.fault event}
+        }
+    }
+  }
+}
