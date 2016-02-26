@@ -11,6 +11,7 @@ dist
 *.log
 
 # Scala-IDE specific
+bin
 .settings
 .cache-main
 .cache-tests
