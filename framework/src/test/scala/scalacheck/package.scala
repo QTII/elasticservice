@@ -9,6 +9,7 @@ import elasticservice.util.ep.ElasticParams
 import elasticservice.util.ep.ElasticParams
 import elasticservice.util.ep.Record
 
+// TEST
 package object scalacheck {
   implicit val arbClass: Arbitrary[Class[_]] = 
 		Arbitrary(oneOf(
