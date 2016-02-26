@@ -1,4 +1,0 @@
-<select>
-SELECT * FROM T_TEST
-WHERE CITY = #{CITY}
-</select>

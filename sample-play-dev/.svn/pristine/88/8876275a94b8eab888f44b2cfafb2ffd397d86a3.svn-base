@@ -1,6 +1,0 @@
-<update>
-UPDATE T_TEST
-	SET title = #{title}
-WHERE
-	city = #{city}
-</update>

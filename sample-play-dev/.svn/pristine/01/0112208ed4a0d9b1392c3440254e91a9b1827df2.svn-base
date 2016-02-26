@@ -1,3 +1,0 @@
-<select>
-SELECT COUNT(*) FROM T_TEST
-</select>
