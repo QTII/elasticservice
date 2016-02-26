@@ -21,3 +21,6 @@ dist
 .scala_dependencies
 
 .svn
+framework/bin
+sample-play-dev/bin
+
