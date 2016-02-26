@@ -19,3 +19,5 @@ dist
 .history
 .project
 .scala_dependencies
+
+.svn
