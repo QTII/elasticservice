@@ -4,13 +4,13 @@ Elastic Service is coded in Scala, Play Framework. Developers save SQL statement
 
 ### Folders
 
-- framework - Elastic Service source
-- sample-play-dev - Sample source in Play
-- sample-play-prod - Sample binary in Play on production mode
-- sample-servlet - Sample servlet
-- esConfig - Configuration file and SQL XML files
+- framework/ - Elastic Service source project
+- sample-play-dev/ - Sample source project in Play
+- sample-play-prod/ - Sample binary in Play on production mode
+- sample-servlet/ - Sample servlet project
+- esConfig/ - Configuration file and SQL XML files
 
-### framework
+### framework/
 
 ```
 $ cd framework
@@ -19,7 +19,7 @@ $ sbt
 > package   -> generates target\scala-2.11\elasticservice_2.11-0.1.1.jar
 ```
 
-### sample-play-dev
+### sample-play-dev/
 
 Copy framework\generates target\scala-2.11\elasticservice_2.11-0.1.1.jar to sample-play-dev\lib
 
@@ -30,7 +30,26 @@ $ activator
 [sample-play-dev] $ ~ run
 ```
 
-To test, connect with http://localhost:9000/assets/index.html
+In order to test this sample application, database should be initialized first.
+H2 databse is used here therefore if you do not have H2 in your computer, please download H2 from http://www.h2database.com/html/cheatSheet.html. You can download jar file(such as h2-1.4.190.jar) from there then save it wherever you want and then in command line, move to that folder and run following command: 
+```
+  $ java -jar h2-1.4.190.jar
+```
+
+You will be connected with H2 console automatically in browser. On the console create database file. There are several ways to create it. Here we will explain the way in which the file is created in the OS user's home directory like following:
+   1) Fill in the JDBC URL 'jdbc:h2:~/test'
+   2) Press 'Connect' button
+   3) Check out test.mv.db file created in your home directory
+
+Configure in conf/application.conf file like following:
+      db.default.driver=org.h2.Driver
+      db.default.url="jdbc:h2:~/test"
+      #db.default.url="jdbc:h2:tcp://localhost/~/test"
+      db.default.username= sa
+      db.default.password=""
+	  
+Then you are ready to test this sample application.
+Connect with http://localhost:9000/assets/index.html
 
 To shutdown, press Ctrl+D
 
@@ -60,7 +79,7 @@ $ activator clean stage
 
 Command above generates target/universal/stage directory.
 
-### sample-play-prod
+### sample-play-prod/
 
 Copy all files in target/universal/stage directory to in ..\sample-play-prod
 
@@ -79,7 +98,7 @@ To test, connect with http://localhost:9090/assets/index.html
 
 To shutdown, press Ctrl+C
 
-### sample-servlet
+### sample-servlet/
 
 Copy all files in sample-play-dev\public into sample-servlet\WebContent\assets.
 

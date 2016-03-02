@@ -23,4 +23,5 @@ dist
 .svn
 framework/bin
 sample-play-dev/bin
-
+sample-play-dev/.worksheet
+sample-play-dev/test/jake
