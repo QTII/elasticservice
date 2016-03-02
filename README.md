@@ -33,11 +33,13 @@ You will be connected with H2 console automatically in browser. On the console c
    - Check out test.mv.db file created in your home directory
 
 Configure in conf/application.conf file like following:
+```
       db.default.driver=org.h2.Driver
       db.default.url="jdbc:h2:~/test"
       #db.default.url="jdbc:h2:tcp://localhost/~/test"
       db.default.username= sa
       db.default.password=""
+```
 
 Then you have done all you have to do for usig database.	  
 
