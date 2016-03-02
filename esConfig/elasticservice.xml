@@ -42,10 +42,5 @@
 		<type name="List" class="java.util.ArrayList" />
 		<type name="ArrayList" class="java.util.ArrayList" />
 	</dataTypeMap>
-
-	<webSocket port="8887"
-		class="elasticservice.web.websocket.ElasticWebSocketServer">
-		<inMessageEventHandler maxThreads="100" />
-	</webSocket>
 	
 </Config>
