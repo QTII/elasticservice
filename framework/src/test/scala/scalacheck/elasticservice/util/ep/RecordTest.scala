@@ -12,7 +12,7 @@ import elasticservice.util.ep.ElasticParams
 import elasticservice.util.ep.Record
 import scalacheck._
 
-
+   
 object RecordTest extends Properties("Record"){
   
   property("apply") = forAll {
