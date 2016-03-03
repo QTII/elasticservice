@@ -1,0 +1,8 @@
+<update>
+CREATE TABLE t_emp (
+	seqno INT AUTO_INCREMENT PRIMARY KEY,
+	emp_no INT NULL,
+	emp_name VARCHAR(50) NULL,
+	role VARCHAR(50) NULL
+)
+</update>

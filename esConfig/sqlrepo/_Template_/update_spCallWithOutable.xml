@@ -1,0 +1,10 @@
+<update>
+  	<![CDATA[
+{
+	CALL Some_Stored_Procedure(
+			#{param1}, /* Parameter */
+			#{param2?OUT:VARCHAR} /* Parameter param2 will be set in VARCHAR by procudure */
+		)
+}
+	]]>
+</update>

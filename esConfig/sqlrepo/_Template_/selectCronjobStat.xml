@@ -1,6 +1,0 @@
-<select>
-SELECT STAT, UPDT_DT FROM T_CRONJOB_STAT 
-WHERE 
-	JOB_ID = #{JOB_ID}
-	AND STAT = #{stAt}
-</select>

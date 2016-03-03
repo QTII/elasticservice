@@ -24,8 +24,8 @@ class QueryService extends ElasticService with LazyLogging {
       ifNotAccessibleThrow.foreach(throw _)
       ifMissingThrow("sqlId", req).foreach(throw _)
 
-      val fullSqlIds = req.get("s").orElse(req.get("sqlId")).getOrElse("").toString
-      val transaction = req.get("t").orElse(req.get("transaction")).getOrElse("false").toString.toBoolean
+      val fullSqlIds = req.get("sqlId").getOrElse("").toString
+      val transaction = req.get("tx").getOrElse("false").toString.toBoolean
 
       val sqlsTry = toSqlList(fullSqlIds)
       ifFailThrow(sqlsTry).foreach(throw _)

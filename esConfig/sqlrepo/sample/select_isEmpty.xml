@@ -1,0 +1,17 @@
+<select>
+SELECT * FROM t_emp
+WHERE 
+	<dynamic>
+		<isEmpty property="role">
+	role = "manager"
+		</isEmpty>
+		<isNotEmpty property="role">
+	role = #{role}
+		</isNotEmpty>
+		<isNotEmpty property="limit">
+			<isNotEqual property="LIMIT" compareValue="0">
+	LIMIT ${limit}
+			</isNotEqual>
+		</isNotEmpty>
+	</dynamic>
+</select>

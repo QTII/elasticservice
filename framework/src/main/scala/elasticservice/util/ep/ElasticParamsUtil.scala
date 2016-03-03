@@ -3,9 +3,11 @@ package elasticservice.util.ep
 import com.typesafe.scalalogging.LazyLogging
 
 import elasticservice.util.ep.json12.GenFromJSON12
+import elasticservice.util.ep.json12.GenFromJSONP12
 import elasticservice.util.ep.json12.GenToJSON12
 import elasticservice.util.ep.json12.GenToJSONP12
 import elasticservice.util.ep.json13.GenFromJSON13
+import elasticservice.util.ep.json13.GenFromJSONP13
 import elasticservice.util.ep.json13.GenToJSON13
 import elasticservice.util.ep.json13.GenToJSONP13
 import elasticservice.util.ep.urlparams.GenFromURLParams
@@ -20,32 +22,64 @@ import play.api.libs.json.JsValue.jsValueToJsLookup
 object ElasticParamsUtil extends LazyLogging {
   def detectGenFrom(contentType: String, text: String): Option[GenFrom] = contentType.toLowerCase match {
     case c if c.contains("multipart/form-data") => Some(GenFromURLParams)
-    case c if c.contains("application/json")    => detectGenFromInJSON(text)
-    case c if c.contains("text/json")           => detectGenFromInJSON(text)
+    case c if c.contains("application/json")    => detectGenFromJSON(text)
+    case c if c.contains("text/json")           => detectGenFromJSON(text)
     case c if c.contains("application/xml")     => Some(GenFromXML)
     case c if c.contains("text/xml")            => Some(GenFromXML)
     case c if c.contains("application/x-www-form-urlencoded") =>
       if (text.startsWith("<?xml "))
         Some(GenFromXML)
       else if (text.contains("_jsonpKey_="))
-        detectGenFromInJSON(text)
+        detectGenFromJSONP(text)
       else
         Some(GenFromURLParams)
-    case "" | null =>
+    case "" =>
       if (text.contains("_jsonpKey_="))
-        detectGenFromInJSON(text)
+        detectGenFromJSONP(text)
       else
         Some(GenFromURLParams)
     case _ => None
   }
 
-  private def detectGenFromInJSON(bodyText: String): Option[GenFrom] = {
+  private def detectGenFromJSON(bodyText: String): Option[GenFrom] = {
     detectEPTypeInJSON(bodyText).map { epType =>
+      logger.trace("epType: " + epType)
+
       epType.toLowerCase match {
-        case "json12" => GenFromJSON12
-        case "json13" => GenFromJSON13
+        case "json12"  => GenFromJSON12
+        case "json13"  => GenFromJSON13
+        case "jsonp12" => GenFromJSON12
+        case "jsonp13" => GenFromJSON13
       }
     }
+  }
+
+  private def detectGenFromJSONP(bodyText: String): Option[GenFrom] = {
+    detectEPTypeInJSON(bodyText).map { epType =>
+      logger.trace("epType: " + epType)
+
+      epType.toLowerCase match {
+        case "json12"  => GenFromJSONP12
+        case "json13"  => GenFromJSONP13
+        case "jsonp12" => GenFromJSONP12
+        case "jsonp13" => GenFromJSONP13
+      }
+    }
+  }
+
+  private def detectEPTypeInJSON(jsonText: String): Option[String] = {
+    def epType(q: String): Option[String] = {
+      val filter = q + "epType" + q + ":" + q
+      jsonText.indexOf(filter) match {
+        case -1 => None
+        case i =>
+          jsonText.indexOf(q, i + filter.size) match {
+            case -1 => None
+            case i2 => Some(jsonText.substring(i + filter.size, i2))
+          }
+      }
+    }
+    epType("%22").orElse(epType("\""))
   }
 
   def detectGenFrom(json: JsValue): Option[GenFrom] = {
@@ -56,18 +90,6 @@ object ElasticParamsUtil extends LazyLogging {
         logger.error(err.toString)
         None
       case _ => None
-    }
-  }
-
-  private def detectEPTypeInJSON(jsonText: String): Option[String] = {
-    val filter = "\"epType\":\""
-    jsonText.indexOf(filter) match {
-      case -1 => None
-      case i =>
-        jsonText.indexOf("\"", i + filter.size) match {
-          case -1 => None
-          case i2 => Some(jsonText.substring(i + filter.size, i2))
-        }
     }
   }
 

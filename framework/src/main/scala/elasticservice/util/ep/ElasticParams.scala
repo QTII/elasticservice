@@ -9,7 +9,7 @@ case class ElasticParams(implicit ms: MkString) {
   /**
    * 다수의 파라미터들을 추가
    */
-  def ++=(map: Map[String, Any]) { _params = Record[Any](map)(ms) }
+  def ++=(map: Map[String, Any]) { _params ++= Record[Any](map)(ms) }
 
   /**
    * 하나의 파라미터를 추가

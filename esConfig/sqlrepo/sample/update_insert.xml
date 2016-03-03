@@ -1,0 +1,8 @@
+<update>
+insert into t_emp values (
+		#{emp_no},
+		#{emp_name}, 
+		#{role}
+	)
+
+</update>

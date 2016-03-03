@@ -1,5 +1,0 @@
-<update>
-  	<![CDATA[
-{CALL UP_DEPT_POS_R_CHK(#{POS_ip_ADDR}, #{OUTPUT_CHK?OUT:VARCHAR})}
-	]]>
-</update>

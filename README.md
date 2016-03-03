@@ -43,7 +43,7 @@ Configure in conf/application.conf file like following:
 
 Then you have done all you have to do for usig database.	  
 
-Copy framework\generates target\scala-2.11\elasticservice_2.11-0.1.1.jar to sample-play-dev\lib
+Copy framework\target\scala-2.11\elasticservice_2.11-0.1.1.jar to sample-play-dev\lib
 
 ```
 $ cd sample-play-dev

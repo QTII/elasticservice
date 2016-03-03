@@ -1,0 +1,13 @@
+<select>
+select * from t_emp
+where 
+	1 = 1
+	<dynamic>
+		<isNull property="role">
+	role = "manager"
+		</isNull>
+		<isNotNull property="role">
+	role = #{role}
+		</isNotNull>
+	</dynamic>
+</select>

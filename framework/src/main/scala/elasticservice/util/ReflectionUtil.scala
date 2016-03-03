@@ -6,9 +6,9 @@ object ReflectionUtil {
 
   /**
    * Example:
-   * case class MyClass(id:Long,name:String)
-   * val list = List[AnyRef](new java.lang.Long(1),"a name")
-   * val result = instantiate[MyClass](list)
+   * case class MyClass(id:Long, name:String)
+   * val list = List[AnyRef](new java.lang.Long(1), "a name")
+   * val result = newInstance[MyClass](list)
    * println(result.id)
    */
   def newInstance[T](classArgs: List[AnyRef])(implicit m: Manifest[T]): T = {
@@ -22,7 +22,9 @@ object ReflectionUtil {
   }
 
   def newInstance(className: String, classArgs: List[AnyRef]): Any = {
-    newInstance(Class.forName(className), classArgs)
+    val cl = Thread.currentThread().getContextClassLoader
+    val clazz = Class.forName(className, true, cl)
+    newInstance(clazz, classArgs)
   }
 
   def invokeMethod(instance: AnyRef, methodName: String)(args: Any*): Any = {

@@ -1,7 +1,6 @@
 package sample.elasticservice.service
 
 import scala.util.Try
-
 import elasticservice.ElasticService
 import elasticservice.epMkString
 import elasticservice.service.QueryService
@@ -14,6 +13,7 @@ import elasticservice.service.sqlrepo.SaveSql
 import elasticservice.service.sqlrepo.TemplatePkgIds
 import elasticservice.service.sqlrepo.TemplateSqlIds
 import elasticservice.util.ep.ElasticParams
+import elasticservice.ElasticServiceUtil
 
 class LoginService extends ElasticService {
   def execute(req: ElasticParams): Try[ElasticParams] = {
@@ -36,6 +36,8 @@ class LoginService extends ElasticService {
       session.setAccessibleService(classOf[TextFileReaderService])
 
       val res = ElasticParams()
+      res += "code" -> 0
+      res += "message" -> "logged in successfully"
       res ++= session.all
       res
     }

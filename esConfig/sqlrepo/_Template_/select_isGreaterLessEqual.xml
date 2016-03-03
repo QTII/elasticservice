@@ -1,0 +1,18 @@
+<select>
+select * from t_emp
+where 
+	1 = 1
+	<dynamic>
+		<isLessEqual property="emp_no" compareValue="10">
+	role = 'manager'
+		</isLessEqual>
+		<isGreaterEqual property="emp_no" compareValue="11">
+			<isLessEqual property="emp_no" compareValue="20">
+	role = 'developer'
+			</isLessEqual>
+			<isGreaterEqual property="emp_no" compareValue="21">
+	role = 'marketer'
+			</isGreaterEqual>
+		</isGreaterEqual>
+	</dynamic>
+</select>

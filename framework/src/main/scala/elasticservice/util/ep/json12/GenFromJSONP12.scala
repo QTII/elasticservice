@@ -26,8 +26,10 @@ object GenFromJSONP12 extends GenFrom {
     }
   }
 
-  def parseJsonpKey(inText: String, encodingOpt: Option[String]): String =
-    URLParamsUtil.queryStringToMap(
+  def parseJsonpKey(inText: String, encodingOpt: Option[String]): String = {
+    val params = URLParamsUtil.queryStringToMap(
       inText,
-      encodingOpt.getOrElse(DefaultVal.Charset)).getOrElse("_jsonpKey_", "").toString
+      encodingOpt.getOrElse(DefaultVal.Charset))
+    params.getOrElse("_jsonpKey_", Seq(""))(0)
+  }
 }

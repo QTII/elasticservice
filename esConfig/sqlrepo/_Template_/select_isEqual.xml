@@ -1,0 +1,12 @@
+<select>
+select * from t_emp
+where 
+	1 = 1
+	<dynamic>
+		<isEqual prepend="AND" property="emp_name" compareValue="jake">
+   			<![CDATA[
+	emp_name = #{emp_name}
+ 			]]>
+		</isEqual>
+	</dynamic>
+</select>

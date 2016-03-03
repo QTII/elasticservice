@@ -1,0 +1,6 @@
+<update>
+UPDATE t_emp
+	SET emp_name = #{emp_name}
+WHERE
+	emp_no = #{emp_no}
+</update>
