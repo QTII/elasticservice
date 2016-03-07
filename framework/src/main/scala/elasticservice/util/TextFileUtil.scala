@@ -1,14 +1,16 @@
 package elasticservice.util
 
+import java.io.BufferedInputStream
 import java.io.BufferedReader
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
-import scala.io.Source
+
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-import elasticservice.Key
+
 import elasticservice.DefaultVal
 
 object TextFileUtil {
@@ -96,26 +98,53 @@ object TextFileUtil {
     }
   }
 
-  def bytesFromFile(fpath: String, size: Int): Array[Byte] =
-    bytesFromFile(new File(fpath), size)
-
-  def bytesFromFile(file: File, size: Int): Array[Byte] = {
-    val is = new FileInputStream(file)
-    try {
-      val cnt = if (size > 0) is.available else size
-      val bytes = Array.ofDim[Byte](cnt)
-      is.read(bytes)
-      bytes
-    } finally is.close()
+  def bytesFrom(file: File, max: Int): Array[Byte] = {
+    val in = new BufferedInputStream(new FileInputStream(file))
+    val t = Try {
+      val baos = new ByteArrayOutputStream()
+      var cnt = 0
+      var b = -1
+      var end = false
+      while (!end) {
+        b = in.read()
+        if (b != -1) {
+          baos.write(b)
+          cnt += 1
+          if (cnt == max) end = true
+        } else {
+          end = true
+        }
+      }
+      baos.close()
+      baos.toByteArray()
+    }
+    in.close()
+    t match {
+      case Success(a) => a
+      case Failure(e) => Array.emptyByteArray
+    }
   }
 
-  def bytesFromFile(fpath: String): Array[Byte] = bytesFromFile(fpath, -1)
+  def bytesFrom(file: File): Array[Byte] = bytesFrom(file, -1)
 
-  def bytesFromFile(file: File): Array[Byte] = bytesFromFile(file, -1)
+  def detectEncodingOfFile(file: File): Option[String] = detectEncoding(bytesFrom(file, 5))
 
-  def detectEncodingOfFile(fpath: String): Option[String] = detectEncoding(bytesFromFile(fpath, 5))
-
-  def detectEncodingOfFile(file: File): Option[String] = detectEncoding(bytesFromFile(file, 5))
+  def textFrom(file: File, encodingOp: Option[String]): Try[String] = {
+    val bytes = bytesFrom(file)
+    Try {
+      encodingOp match {
+        case Some(e) => new String(bytes, e)
+        case _ =>
+          detectEncodingOfFile(file) match {
+            case Some(e2) => new String(bytes, e2)
+            case _        => new String(bytes)
+          }
+      }
+    } match {
+      case Success(s) => Success(s)
+      case Failure(e) => Try { new String(bytes, DefaultVal.Charset) }
+    }
+  }
 
   def detectEncoding(firstLineBytes: Array[Byte]): Option[String] = {
     if (equalsBOM(BOM_UTF_8, firstLineBytes))
@@ -136,7 +165,7 @@ object TextFileUtil {
 
   def firstLineFromFile(file: File): String = {
     if (!file.exists() || file.isDirectory())
-      return null
+      return ""
 
     var br = new BufferedReader(new InputStreamReader(new FileInputStream(file)))
     try {
@@ -163,21 +192,5 @@ object TextFileUtil {
       BOM_UTF_32LE.length
     else
       0
-  }
-
-  def textFrom(file: File, encodingOp: Option[String]): Try[String] = {
-    Try {
-      encodingOp match {
-        case Some(e) => Source.fromFile(file, e).mkString
-        case _ =>
-          detectEncodingOfFile(file) match {
-            case Some(e) => Source.fromFile(file, e).mkString
-            case _       => Source.fromFile(file).mkString
-          }
-      }
-    } match {
-      case Success(s) => Success(s)
-      case Failure(e) => Try { Source.fromFile(file, DefaultVal.Charset).mkString }
-    }
   }
 }

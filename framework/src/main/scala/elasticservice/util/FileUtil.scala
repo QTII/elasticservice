@@ -76,37 +76,38 @@ object FileUtil extends LazyLogging {
   }
 
   def removeFile(file: File): Boolean = {
-    val suc = if (file.exists()) file.delete() else true
+    val f = if (file.exists) new File(file.getCanonicalPath) else file
+    val suc = if (f.exists) f.delete() else true
     if (suc)
-      logger.trace("removed " + (if (file.isDirectory()) "directory" else "file") + ": " + file.getAbsolutePath)
+      logger.trace("removed " + (if (f.isDirectory()) "directory" else "file") + ": " + f.getAbsolutePath)
     else
-      logger.trace("failed to remove " + (if (file.isDirectory()) "directory" else "file") + ": " + file.getAbsolutePath)
+      logger.trace("failed to remove " + (if (f.isDirectory()) "directory" else "file") + ": " + f.getAbsolutePath)
     suc
   }
 
   def makeDirs(dir: File): Boolean = if (dir.exists()) true else dir.mkdirs()
 
   def renameDir(srcDir: File, dstDir: File): Boolean = {
-    logger.trace("renameDir " + srcDir.getAbsolutePath + " to " + dstDir.getAbsolutePath)
+    logger.trace("renameDir " + srcDir.getCanonicalPath + " to " + dstDir.getCanonicalPath)
     if (srcDir == dstDir) return true
 
     if (!srcDir.exists) {
-      logger.warn("file not found: " + srcDir.getAbsolutePath)
+      logger.warn("file not found: " + srcDir.getCanonicalPath)
       false
     } else if (srcDir.isFile) {
-      logger.warn("not directory: " + srcDir.getAbsolutePath)
+      logger.warn("not directory: " + srcDir.getCanonicalPath)
       false
     } else if (dstDir.exists) {
-      logger.warn("directory already exists: " + dstDir.getAbsolutePath)
+      logger.warn("directory already exists: " + dstDir.getCanonicalPath)
       false
     } else {
       if (!makeDirs(dstDir)) return false
       listFilesRecursively(srcDir).foreach { s =>
-        if (!dstDir.getAbsolutePath.startsWith(s.getAbsolutePath))
+        if (!dstDir.getCanonicalPath.startsWith(s.getCanonicalPath))
           if (!(moveToUnderDir(s, dstDir)))
             return false
       }
-      if (!dstDir.getAbsolutePath.startsWith(srcDir.getAbsolutePath))
+      if (!dstDir.getCanonicalPath.startsWith(srcDir.getCanonicalPath))
         removeDirs(srcDir)
       else
         true
@@ -114,21 +115,21 @@ object FileUtil extends LazyLogging {
   }
 
   def moveToUnderDir(src: File, dstDir: File): Boolean = {
-    logger.trace("moveToUnderDir " + src.getAbsolutePath + " to " + dstDir.getAbsolutePath)
+    logger.trace("moveToUnderDir " + src.getCanonicalPath + " to " + dstDir.getCanonicalPath)
 
     if (!src.exists) {
-      logger.warn("file not found: " + src.getAbsolutePath)
+      logger.warn("file not found: " + src.getCanonicalPath)
       false
     } else if (src.isFile) {
-      renameFile(src, new File(dstDir.getAbsolutePath + File.separator + src.getName))
+      renameFile(src, new File(dstDir.getCanonicalPath + File.separator + src.getName))
     } else {
-      val newDir = new File(dstDir.getAbsolutePath + File.separator + src.getName)
+      val newDir = new File(dstDir.getCanonicalPath + File.separator + src.getName)
       if (!makeDirs(newDir)) return false
       listFilesRecursively(src).foreach { s =>
-        if (!dstDir.getAbsolutePath.startsWith(s.getAbsolutePath))
+        if (!dstDir.getCanonicalPath.startsWith(s.getCanonicalPath))
           if (!(moveToUnderDir(s, newDir))) return false
       }
-      if (!dstDir.getAbsolutePath.startsWith(src.getAbsolutePath))
+      if (!dstDir.getCanonicalPath.startsWith(src.getCanonicalPath))
         removeDirs(src)
       else
         true
@@ -136,13 +137,13 @@ object FileUtil extends LazyLogging {
   }
 
   def renameFile(srcFile: File, dstFile: File): Boolean = {
-    logger.trace("moveFile " + srcFile.getAbsolutePath + " to " + dstFile.getAbsolutePath)
+    logger.trace("moveFile " + srcFile.getCanonicalPath + " to " + dstFile.getCanonicalPath)
     if (srcFile == dstFile) return true
 
     if (dstFile.exists)
       removeFile(dstFile)
 
-    if (!srcFile.renameTo(dstFile))
+    if (!srcFile.getCanonicalFile.renameTo(dstFile.getCanonicalFile))
       if (!copyAndDeleteFile(srcFile, dstFile))
         return false
 
@@ -150,7 +151,7 @@ object FileUtil extends LazyLogging {
   }
 
   def copyAndDeleteFile(srcFile: File, dstFile: File): Boolean = {
-    logger.trace("copyAndDeleteFile " + srcFile.getAbsolutePath + " to " + dstFile.getAbsolutePath)
+    logger.trace("copyAndDeleteFile " + srcFile.getCanonicalPath + " to " + dstFile.getCanonicalPath)
     if (srcFile == dstFile) return true
 
     try {
@@ -168,7 +169,7 @@ object FileUtil extends LazyLogging {
   }
 
   def copyFile(srcFile: File, dstFile: File): Boolean = {
-    logger.trace("copyFile " + srcFile.getAbsolutePath + " to " + dstFile.getAbsolutePath)
+    logger.trace("copyFile " + srcFile.getCanonicalPath + " to " + dstFile.getCanonicalPath)
     if (srcFile == dstFile) return true
 
     makeDirs(new File(FilePathUtil.getBasePath(dstFile)))

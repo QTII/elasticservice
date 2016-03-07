@@ -6,7 +6,7 @@ final class StringW(val underlying: String) extends AnyVal {
   /**
    * @return true if a string is null, empty or contains only whitespace
    */
-  def isBlank = underlying == null || underlying.isEmpty || underlying.forall(Character.isWhitespace)
+  def isBlank = StringUtil.isBlank(underlying)
 
   /**
    * @return true if string contains non-whitespace characters

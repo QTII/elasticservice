@@ -1,7 +1,8 @@
 <update>
-insert into t_emp values (
-		#{emp_no}, /* emp_no */
-		#{emp_name}, /* emp_name */
-		#{role} /* role */
-	)
+insert into t_emp (emp_no, emp_name, role) 
+values (
+	#{emp_no}, /* emp_no */
+	#{emp_name}, /* emp_name */
+	#{role} /* role */
+)
 </update>

@@ -14,6 +14,7 @@ import scala.xml.Text
 import com.typesafe.scalalogging.LazyLogging
 
 import elasticservice.util.GenXML
+import elasticservice.util.StringUtil
 import elasticservice.util.TextUtil
 import elasticservice.util.XMLUtil
 import elasticservice.util.ep.ColumnAttributes
@@ -66,7 +67,7 @@ class SqlXmlLoader extends LazyLogging {
       sql.sqlType = SqlType.forName(stmtNode.label)
 
       parseStmtPart(sql, stmtNode) match {
-        case Success(p) => sql.multiPart_=(p)
+        case Success(p) => sql.setMultiPart(p)
         case Failure(e) => throw e
       }
       sql
@@ -114,7 +115,8 @@ class SqlXmlLoader extends LazyLogging {
       for (c <- stmtNode.child) {
         c match {
           case t: Text =>
-            multiPart += parseTextPart(sql, t.text, multiPart.isInstanceOf[DynaText])
+            if (StringUtil.indexOfNonSpace(t.text) != -1)
+              multiPart += parseTextPart(sql, t.text, multiPart.isInstanceOf[DynaText])
           case e: Elem =>
             parseStmtPart(sql, e) match {
               case Success(subMultiPart) => multiPart += subMultiPart
@@ -132,52 +134,48 @@ class SqlXmlLoader extends LazyLogging {
     val altBuf = Buffer[String]()
     val textBuf = Buffer[Any]()
 
-    val text = TextUtil.removeComment(srcText, "--", "/*", "*/");
+    val text = TextUtil.removeComment(srcText, "--", "/*", "*/")
     val lines = text.split("\n")
 
     for (line <- lines) {
-      val c = TextUtil.indexOfNonSpace(line);
-      if (c == -1) {
-        textBuf += line
-      } else {
-        if (c > 0)
-          textBuf += line.substring(0, c)
-        val targetLine = XMLUtil.unescape(line)
-        var sb = new StringBuilder()
-        var pos = 0
-        while (pos < targetLine.size) {
-          if (compileVer1(targetLine, pos, '#')
-            || compileVer2(targetLine, pos, '#')) {
-            val col = DatasetUtil.parseColumnExpression(compile_detectedVar.toUpperCase)
-            col.inDynaText = dynaText
-            colInfoBuf += col
-            if (col.containsAttr(ColumnAttributes.OUT)) {
-              sql.sqlType = SqlType.toCallable(sql.sqlType)
-            }
+      val c = StringUtil.indexOfNonSpace(line) match {
+        case -1 =>
+        case c =>
+          val targetLine = XMLUtil.unescape(StringUtil.trimBack(line))
+          var sb = new StringBuilder()
+          var pos = 0
+          while (pos < targetLine.size) {
+            if (compileVer1(targetLine, pos, '#')
+              || compileVer2(targetLine, pos, '#')) {
+              val col = DatasetUtil.parseColumnExpression(compile_detectedVar.toUpperCase)
+              col.inDynaText = dynaText
+              colInfoBuf += col
+              if (col.containsAttr(ColumnAttributes.OUT)) {
+                sql.sqlType = SqlType.toCallable(sql.sqlType)
+              }
 
-            if (!sb.isEmpty) {
-              textBuf += sb.toString
-              sb = new StringBuilder()
+              if (!sb.isEmpty) {
+                textBuf += sb.toString
+                sb = new StringBuilder()
+              }
+              textBuf += SqlXmlLoader.CD_SQL_PARAM
+              pos = compile_nextPos
+            } else if (compileVer1(targetLine, pos, '$')
+              || compileVer2(targetLine, pos, '$')) {
+              altBuf += compile_detectedVar.toUpperCase()
+              if (!sb.isEmpty) {
+                textBuf += sb.toString
+                sb = new StringBuilder()
+              }
+              textBuf += SqlXmlLoader.CD_TEXT_SUBSTITUTION
+              pos = compile_nextPos
+            } else {
+              sb.append(targetLine.charAt(pos))
+              pos += 1
             }
-            textBuf += SqlXmlLoader.CD_SQL_PARAM
-            pos = compile_nextPos
-          } else if (compileVer1(targetLine, pos, '$')
-            || compileVer2(targetLine, pos, '$')) {
-            altBuf += compile_detectedVar.toUpperCase()
-            if (sb.length() > 0) {
-              textBuf += sb.toString
-              sb = new StringBuilder()
-            }
-            textBuf += SqlXmlLoader.CD_TEXT_SUBSTITUTION
-            pos = compile_nextPos
-          } else {
-            sb.append(targetLine.charAt(pos))
-            pos += 1
           }
-        }
-        if (sb.length() > 0)
-          textBuf += sb.toString
-        textBuf += "\n"
+          if (!sb.isEmpty)
+            textBuf += (if (!textBuf.isEmpty) "\n" + sb.toString else sb.toString)
       }
     }
 

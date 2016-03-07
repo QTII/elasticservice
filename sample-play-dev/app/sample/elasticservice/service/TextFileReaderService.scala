@@ -16,7 +16,7 @@ import elasticservice.util.ep.ElasticParams
 class TextFileReaderService extends ElasticService {
   def execute(req: ElasticParams): Try[ElasticParams] = {
     Try {
-      ifNotAccessibleThrow.foreach(throw _)
+      //ifNotAccessibleThrow.foreach(throw _)
       ifMissingThrow("path", req).foreach(throw _)
 
       val path = req.get("path").get

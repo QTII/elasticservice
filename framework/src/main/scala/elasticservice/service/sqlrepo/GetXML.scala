@@ -23,7 +23,7 @@ class GetXML extends ElasticService with LazyLogging {
 
       val fullSqlId = req.get("sqlId").getOrElse("").toString
       val xmlPath = SqlRepo.filePath(SqlRepo.pkgAndIdFromFullSqlId(fullSqlId))
-      val encodingOpt = TextFileUtil.detectEncodingOfFile(xmlPath)
+      val encodingOpt = TextFileUtil.detectEncodingOfFile(new File(xmlPath))
 
       TextFileUtil.textFrom(new File(xmlPath), encodingOpt) match {
         case Success(xmlText) =>

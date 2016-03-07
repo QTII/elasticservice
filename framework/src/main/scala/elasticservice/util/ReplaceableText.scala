@@ -1,6 +1,8 @@
 package elasticservice.util
 
 import scala.collection.mutable.Buffer
+
+import elasticservice.epMkString
 import elasticservice.util.ep.Record
 
 class ReplaceableText(val srcText: String) {
@@ -71,7 +73,7 @@ class ReplaceableText(val srcText: String) {
 
     var lineIdx = 0
     for (line <- lines) {
-      val c = TextUtil.indexOfNonSpace(line);
+      val c = StringUtil.indexOfNonSpace(line);
 
       if (c == -1) {
         textsBuf += line

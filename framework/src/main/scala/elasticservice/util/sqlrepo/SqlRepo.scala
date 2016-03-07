@@ -27,7 +27,7 @@ object SqlRepo extends LazyLogging {
 
   setTimer()
 
-  def sync() { baseDirOpt.foreach(init) }
+  private def sync() { baseDirOpt.foreach(init) }
 
   def init(baseDir: String) {
     baseDirOpt = Some(baseDir)
@@ -39,6 +39,8 @@ object SqlRepo extends LazyLogging {
       }
     }
 
+    logger.trace("scanning " + baseDir)
+    
     val sqlIds = allIdsFromDisk()
 
     sqlIds.foreach {
@@ -81,6 +83,8 @@ object SqlRepo extends LazyLogging {
         }
       }
     }
+    
+    logger.trace("scanning is done")
   }
 
   def allPkgIdsFromDisk(): Seq[String] = {
@@ -183,14 +187,14 @@ object SqlRepo extends LazyLogging {
       (if (DataValid.isEmpty(sqlId)) "" else File.separator + sqlId + ".xml")
 
   def renamePackage(src: Option[String], dst: Option[String]): Boolean = {
-    val ret = (src, dst) match {
+    val suc = (src, dst) match {
       case (None, None)       => false
       case (None, Some(d))    => FileUtil.makeDirs(file(d, ""))
       case (Some(s), None)    => FileUtil.removeDirs(file(s, ""))
       case (Some(s), Some(d)) => FileUtil.renameDir(file(s, ""), file(d, ""))
     }
-    sync()
-    ret
+    if (suc) sync()
+    suc
   }
 
   def saveSql(fullSqlId: String, xml: String): Option[Throwable] = {
@@ -204,9 +208,9 @@ object SqlRepo extends LazyLogging {
   }
 
   def removeSql(fullSqlId: String): Boolean = {
-    val ret = FileUtil.removeFile(file(pkgAndIdFromFullSqlId(fullSqlId)))
-    sync()
-    ret
+    val suc = FileUtil.removeFile(file(pkgAndIdFromFullSqlId(fullSqlId)))
+    if (suc) sync()
+    suc
   }
 
   private def setTimer() {

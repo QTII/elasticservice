@@ -1,6 +1,6 @@
 <select>
 SELECT * FROM t_emp
-WHERE 
+WHERE
 	<dynamic>
 		<isEmpty property="role">
 	role = "manager"

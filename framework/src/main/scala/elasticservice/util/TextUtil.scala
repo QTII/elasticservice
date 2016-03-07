@@ -57,9 +57,4 @@ object TextUtil {
     }
     return sb.toString()
   }
-
-  def indexOfNonSpace(text: String): Int = {
-    if (StringW.isBlank(text)) -1
-    else text.indexWhere { x => !x.isSpaceChar && !x.isWhitespace }
-  }
 }

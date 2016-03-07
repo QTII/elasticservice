@@ -15,7 +15,7 @@ class Sample_MultiInsertService extends ElasticService {
   def execute(ep: ElasticParams): Try[ElasticParams] = {
     Try {
       val loop = ep.get("loop").getOrElse("1").toString.toInt
-      val transaction = ep.get("t").orElse(ep.get("transaction")).getOrElse("false").toString.toBoolean
+      val transaction = ep.get("tx").getOrElse("false").toString.toBoolean
 
       val conn: Connection = DB.getConnection("default", !transaction)
       val sqlConn = SqlConn(conn)

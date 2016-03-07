@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
   specs2 % Test,
         "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
         //"ch.qos.logback" % "logback-classic" % "1.1.5"
-        //"org.slf4j" % "slf4j-log4j12" % "1.7.16",
+        //"org.slf4j" % "slf4j-log4j12" % "1.7.16"
         //"org.slf4j" % "slf4j-simple" % "1.7.16",
         //"javax.servlet" % "javax.servlet-api" % "4.0.0-b01"
 )

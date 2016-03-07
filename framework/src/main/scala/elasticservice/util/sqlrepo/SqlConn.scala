@@ -19,12 +19,12 @@ import elasticservice.epMkString
 import elasticservice.util.DataTypeUtil
 import elasticservice.util.DataValid
 import elasticservice.util.ExceptionDetail
-import elasticservice.util.ep.Record
 import elasticservice.util.TextUtil
 import elasticservice.util.ep.ColumnAttributes
 import elasticservice.util.ep.ColumnInfo
 import elasticservice.util.ep.Dataset
 import elasticservice.util.ep.DatasetUtil
+import elasticservice.util.ep.Record
 import elasticservice.util.sqlrepo.sql.Sql
 import elasticservice.util.sqlrepo.sql.SqlType
 
@@ -119,9 +119,12 @@ case class SqlConn(conn: Connection) extends LazyLogging {
       sb.append("resultOf ").append(sqlId).append(": ")
       sb.append("(").append(ds.rows.size).append("rows/").append(commaNumber(elapsed)).append("ms)")
       if (logger.underlying.isTraceEnabled) {
-        ds.rows.foreach { m =>
+        val max = 10
+        ds.rows.take(max).foreach { m =>
           sb.append(TextUtil.LineSeparator).append(m.mkString("{", ", ", "}")).append(",")
         }
+        if (ds.rows.size > max)
+          sb.append(TextUtil.LineSeparator).append("...")
       }
       sb.append(TextUtil.LineSeparator).toString
     }
@@ -171,6 +174,8 @@ case class SqlConn(conn: Connection) extends LazyLogging {
   private def $select(sql: Sql, record: Map[String, Any]): Try[Dataset] = {
     val r = if (DataValid.isNotEmpty(record)) record else Map.empty[String, Any]
     val query = sql.toText(r, true)
+
+    log(sql, record)
     var stmt = conn.prepareStatement(query)
     var rs: ResultSet = null
 
@@ -180,7 +185,6 @@ case class SqlConn(conn: Connection) extends LazyLogging {
       if (DataValid.isNotEmpty(cols))
         SqlConn.setColumns(stmt, cols, r)
 
-      log(sql, record)
       sTime = System.currentTimeMillis()
       rs = stmt.executeQuery()
 
@@ -207,6 +211,8 @@ case class SqlConn(conn: Connection) extends LazyLogging {
   private def $update(sql: Sql, record: Map[String, Any]): Try[Dataset] = {
     val r = if (DataValid.isNotEmpty(record)) record else Map.empty[String, Any]
     val queryStr = sql.toText(r, true)
+
+    log(sql, record)
     val stmt = conn.prepareStatement(queryStr)
 
     var sTime = 0L
@@ -215,7 +221,6 @@ case class SqlConn(conn: Connection) extends LazyLogging {
       if (DataValid.isNotEmpty(cols))
         SqlConn.setColumns(stmt, cols, r)
 
-      log(sql, record)
       sTime = System.currentTimeMillis()
       val rowCount = stmt.executeUpdate()
 
@@ -240,10 +245,11 @@ case class SqlConn(conn: Connection) extends LazyLogging {
     var rs: ResultSet = null
 
     var sTime = 0L
+    log(sql, record)
+
     val t = Try {
       val staticQStr = sql.toText(r, false)
 
-      log(sql, record)
       sTime = System.currentTimeMillis()
       val rowCount = stmt.executeUpdate(staticQStr, Statement.RETURN_GENERATED_KEYS)
 
@@ -272,15 +278,16 @@ case class SqlConn(conn: Connection) extends LazyLogging {
    */
   private def $queryCallable(sql: Sql, record: Map[String, Any]): Try[Dataset] = {
     val query = sql.toText(record, true)
-    val stmt = conn.prepareCall(query)
-    var sTime = 0L
 
+    log(sql, record)
+    val stmt = conn.prepareCall(query)
+
+    var sTime = 0L
     val t = Try {
       val cols = sql.getCols(record)
       if (DataValid.isNotEmpty(cols))
         SqlConn.setColumns(stmt, cols, record)
 
-      log(sql, record)
       sTime = System.currentTimeMillis()
 
       if (sql.sqlType == SqlType.SelectCallable)
@@ -415,7 +422,7 @@ object SqlConn {
           v =>
             v.asInstanceOf[List[Any]].foreach {
               _ match {
-                case x: Map[String, _] @unchecked => 
+                case x: Map[String, _] @unchecked =>
                   if (!col.isSubColumnInfosEmpty) {
                     val subCols = col.getSubColumnInfos
                     for (subCol <- subCols) {

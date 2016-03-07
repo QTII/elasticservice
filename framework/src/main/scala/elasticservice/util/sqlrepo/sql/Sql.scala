@@ -56,7 +56,7 @@ class Sql {
   def lastModified = _lastModified
   def lastModified_=(lastModified: Long) { _lastModified = lastModified }
 
-  def multiPart_=(p: MultiPart) { root = p }
+  def setMultiPart(p: MultiPart) { root = p }
   private def multiPart = root
 
   def selectKeyPart = _selectKeyPart

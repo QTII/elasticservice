@@ -1,5 +1,0 @@
-<update>
-   	<![CDATA[
-insert into t_emp values (123 /*  aaa */,'jay','trainee')
-  	]]>
-</update>

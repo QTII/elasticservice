@@ -1,3 +1,5 @@
+val scalaVersionMajor = "2.11"
+
 lazy val commonSettings = Seq(
   organization := "kr.co.qtii",
   name := "elasticservice",
@@ -23,7 +25,7 @@ lazy val elasticservice = (project in file(".")).
         "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
         "com.typesafe.play" %% "play" % "2.4.6",
         "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
-        //"ch.qos.logback" % "logback-classic" % "1.1.5",
+        // "ch.qos.logback" % "logback-classic" % "1.1.5",
         
         "org.scalacheck" %% "scalacheck" % "1.12.5" % Test,
         
@@ -33,3 +35,12 @@ lazy val elasticservice = (project in file(".")).
   )
   
 //retrieveManaged := true
+
+lazy val cpJar = TaskKey[Unit]("cpJar")
+def cpJarDef = cpJar <<= (crossTarget, scalaVersion, name, version) map {
+  (out, scalaVer, n, v) =>
+    val fname = (n+"_" + scalaVersionMajor + "-" + v + ".jar")
+    val jarFile = out / fname
+    IO.copyFile(jarFile, file("../sample-play-dev/lib") / fname, preserveLastModified = true)
+}
+cpJarDef

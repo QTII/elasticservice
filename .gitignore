@@ -21,6 +21,7 @@ dist
 .scala_dependencies
 
 .svn
+bin
 framework/bin
 sample-play-dev/bin
 sample-play-dev/.worksheet

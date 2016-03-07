@@ -2,6 +2,7 @@ package elasticservice.util.sqlrepo.sql
 
 import scala.collection.mutable.MutableList
 
+import elasticservice.util.StringUtil
 import elasticservice.util.ep.ColumnInfo
 
 trait MultiPart {
@@ -35,23 +36,28 @@ trait MultiPart {
 
   private def getColsFrom(sub: Any, record: Map[String, Any]): Array[ColumnInfo] =
     sub match {
-      case a: MultiPart       => a.getCols(record)
-      case a: TextPart        => a.cols
-      case _                  => Array()
+      case a: MultiPart => a.getCols(record)
+      case a: TextPart  => a.cols
+      case _            => Array()
     }
 
   def toText(record: Map[String, Any], preparedStmt: Boolean): String =
     if (!visiable(record))
       return ""
     else
-      partList.foldLeft("")((b, part) => b + toTextFrom(part, record, preparedStmt))
+      partList.foldLeft("") { (b, part) =>
+        b + (toTextFrom(part, record, preparedStmt) match {
+          case "" => ""
+          case s  => if (StringUtil.isBlank(b)) s else "\n" + s
+        })
+      }
 
   private def toTextFrom(part: Any, record: Map[String, Any], preparedStmt: Boolean): String = {
     part match {
-      case a: MultiPart       => a.toText(record, preparedStmt)
-      case a: TextPart        => a.text(record, preparedStmt)
-      case a: String          => a
-      case _                  => ""
+      case a: MultiPart => a.toText(record, preparedStmt)
+      case a: TextPart  => a.text(record, preparedStmt)
+      case a: String    => a
+      case _            => ""
     }
   }
 
