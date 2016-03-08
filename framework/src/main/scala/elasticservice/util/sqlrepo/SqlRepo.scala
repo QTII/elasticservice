@@ -39,7 +39,7 @@ object SqlRepo extends LazyLogging {
       }
     }
 
-    logger.trace("scanning " + baseDir)
+    // logger.trace("scanning " + baseDir)
     
     val sqlIds = allIdsFromDisk()
 
@@ -84,7 +84,7 @@ object SqlRepo extends LazyLogging {
       }
     }
     
-    logger.trace("scanning is done")
+    // logger.trace("scanning is done")
   }
 
   def allPkgIdsFromDisk(): Seq[String] = {

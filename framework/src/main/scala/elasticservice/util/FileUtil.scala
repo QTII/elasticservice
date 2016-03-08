@@ -76,12 +76,12 @@ object FileUtil extends LazyLogging {
   }
 
   def removeFile(file: File): Boolean = {
-    val f = if (file.exists) new File(file.getCanonicalPath) else file
-    val suc = if (f.exists) f.delete() else true
+    val suc = if (file.exists) file.getCanonicalFile.delete() else true
+    def fileType = if (file.isDirectory()) "directory" else "file"
     if (suc)
-      logger.trace("removed " + (if (f.isDirectory()) "directory" else "file") + ": " + f.getAbsolutePath)
+      logger.trace("removed " + fileType + ": " + file.getCanonicalPath)
     else
-      logger.trace("failed to remove " + (if (f.isDirectory()) "directory" else "file") + ": " + f.getAbsolutePath)
+      logger.trace("failed to remove " + fileType + ": " + file.getCanonicalPath)
     suc
   }
 
