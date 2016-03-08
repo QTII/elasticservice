@@ -58,8 +58,8 @@ function requestService(btn) {
 <BODY onload="loadSrc()">
 	<div data-role="page">
 		<div data-role="header">
-			<h2>Execute two queries in transaction</h2>
-			<a href="index.html" data-theme="a" data-ajax="false">Home</a>
+			<h2>Execute two queries</h2>
+			<a href="index.html" data-theme="a" data-ajax="false">Example Home</a>
 		</div>
 		
 		<div data-role="content">
@@ -84,6 +84,12 @@ function requestService(btn) {
 					</div>
 					<div data-role="fieldcontain">
 					&S1COL_ROLE=<INPUT TYPE=TEXT NAME='S1COL_ROLE' VALUE="developer" ><BR>
+					</div>
+					<div data-role="fieldcontain">
+					&S2COL_EMP_NO=<INPUT TYPE=TEXT NAME='S2COL_EMP_NO' VALUE="10" ><BR>
+					</div>
+					<div data-role="fieldcontain">
+					&S2COL_EMP_NAME=<INPUT TYPE=TEXT NAME='S2COL_EMP_NAME' VALUE="kang" ><BR>
 					</div>
 					 <button id="btn" onclick="requestService(this)">Submit</button>
 					 <button onClick="$('#request').html('');$('#response').html('')">Clear Result</button>

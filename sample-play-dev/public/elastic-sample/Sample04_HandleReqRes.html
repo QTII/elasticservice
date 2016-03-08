@@ -45,8 +45,8 @@ function requestService(btn) {
 <BODY onload="loadSrc()">
 	<div data-role="page">
 		<div data-role="header">
-			<h2>andle request data and response data</h2>
-			<a href="index.html" data-theme="a" data-ajax="false">Home</a>
+			<h2>Handle request and response data</h2>
+			<a href="index.html" data-theme="a" data-ajax="false">Example Home</a>
 		</div>
 		
 		<div data-role="content">
@@ -55,7 +55,7 @@ function requestService(btn) {
 				<FORM METHOD="GET" ID="form1">
 					<B>주소 :</B> <script>document.write(elastic_baseUrl())</script><BR> 
 					<div data-role="fieldcontain"> 
-					?service=<INPUT TYPE=TEXT NAME='service' VALUE="sample.elasticservice.service.Sample04_ElasticParamsService" ><BR>
+					?service=<INPUT TYPE=TEXT NAME='service' VALUE="sample.elasticservice.service.Sample04_ElasticParamsService" size=50><BR>
 					</div>
 					<div data-role="fieldcontain"> 
 					&service.resType=<SELECT NAME="service.resType">

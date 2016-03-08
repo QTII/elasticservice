@@ -185,10 +185,14 @@ ElasticParams.prototype = {
 		dataset.rows[0][colName] = value;
 	},
 	getParameter: function(paramName) {
-		if (this.datasrc != undefined) 
-			return this.datasrc.parameters[paramName];
-		else 
+		if (this.datasrc != undefined) {
+			if (this.datasrc.constructor == Object)
+				return this.datasrc.parameters[paramName];
+			else if (this.datasrc.constructor == XMLDocument)
+				return undefined;
+		} else { 
 			return undefined;
+		}
 	},
 	getDataset: function(dsName) {
 		if (this.datasrc.parameters.epType.toLowerCase() == "json12") {
