@@ -1,4 +1,6 @@
-### sample-play-prod/
+## Sample Application of Elastic Service
+
+### Database Preperation
 
 In order to test this sample application, database should be initialized first.
 H2 databse is used here therefore if you do not have H2 in your computer, please download H2 from http://www.h2database.com/html/cheatSheet.html. You can download jar file(such as h2-1.4.190.jar) from there then save it wherever you want and then in command line, move to that folder and run following command: 
@@ -21,6 +23,8 @@ Configure in conf/application.conf file like following:
 ```
 
 Then you have done all you have to do for usig database.	  
+
+### To run
 
 ```
 $ cd sample-play-prod
