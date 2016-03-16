@@ -111,7 +111,7 @@ ElasticParams.prototype = {
 		for (i = 0; i < formData.length; i++) {
 			var name = formData[i]["name"];
 			var value = formData[i]["value"];
-			if(/^S[1-9]\d*COL_[a-zA-Z][0-9a-zA-Z]*$/.test(name)) {
+			if(/^S[1-9]\d*COL_[a-zA-Z][0-9a-zA-Z]*/.test(name)) {
 				var dsName = name.match(/[1-9]\d*/)[0];
 				var colName = name.substring(dsName.length + 5);
 				this.setRowColumn(dsName, colName, value)
@@ -185,10 +185,14 @@ ElasticParams.prototype = {
 		dataset.rows[0][colName] = value;
 	},
 	getParameter: function(paramName) {
-		if (this.datasrc != undefined) 
-			return this.datasrc.parameters[paramName];
-		else 
+		if (this.datasrc != undefined) {
+			if (this.datasrc.constructor == Object)
+				return this.datasrc.parameters[paramName];
+			else if (this.datasrc.constructor == XMLDocument)
+				return undefined;
+		} else { 
 			return undefined;
+		}
 	},
 	getDataset: function(dsName) {
 		if (this.datasrc.parameters.epType.toLowerCase() == "json12") {

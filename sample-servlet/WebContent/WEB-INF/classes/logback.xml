@@ -12,7 +12,7 @@
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>C:/logs/elasticservice/app.log</file>
 		<encoder>
-            <pattern>%date{HH:mm:ss} %-5level %logger - %msg%n</pattern>
+            <pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger - %msg%n</pattern>
         </encoder>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>C:/logs/elasticservice/app-%d{yyyy-MM-dd_HH_mm}.log</fileNamePattern>
@@ -51,11 +51,13 @@
 	   . DEBUG: detailed for update, brief for select queries
 	   . TRACE: detailed for all queries
 	-->
-	<logger name="elasticservice.util.sqlmgr.SqlConn" level="TRACE" additivity="false">
+	<logger name="elasticservice.util.sqlrepo.SqlConn" level="TRACE" additivity="false">
 		<appender-ref ref="SQL" />
 	</logger>
 	
+	<!-- 
 	<logger name="elasticservice" level="TRACE" />
+	 -->
 
 	<root level="TRACE">
 		<appender-ref ref="STDOUT" />

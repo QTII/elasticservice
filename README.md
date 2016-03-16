@@ -71,7 +71,7 @@ To generate secret
 [info] Generated new secret: QCYtAnfkaZiwrNwnxIlR6CTfG3gf90Latabg5241ABR5W1uDFNIkn
 ```
 
-Copy the secret above and paste in conf/production.conf as the value of application.secret
+Copy the secret above and paste in conf/production.conf as the value of application.secret.
 For example:
 ```
 application.secret="QCYtAnfkaZiwrNwnxIlR6CTfG3gf90Latabg5241ABR5W1uDFNIkn"
@@ -89,13 +89,13 @@ Copy all files in target/universal/stage directory to in ..\sample-play-prod
 
 ```
 $ cd sample-play-prod
-$ bin\sample.bat -Dconfig.resource=production.conf
+$ bin\elasticservice-sample.bat -Dconfig.resource=production.conf
 ```
 
 To assign certain port and IP address. Default port is 9000.
 
 ```
-$ bin\sample.bat -Dconfig.resource=production.conf -Dhttp.port=9090 -Dhttp.address=127.0.0.1
+$ bin\elasticservice-sample.bat -Dconfig.resource=production.conf -Dhttp.port=9090 -Dhttp.address=127.0.0.1
 ```
 
 To test, connect with http://localhost:9090/assets/index.html
@@ -110,7 +110,7 @@ Copy sample-play-dev\target\scala-2.11\classes into sample-servlet\WebContent\WE
 
 Copy all files in sample-play-prod\lib into sample-servlet\WebContent\WEB-INF\lib.
 
-Delete sample.sample-0.1-SNAPSHOT-assets.jar, sample.sample-0.1-SNAPSHOT-sans-externalized.jar files from sample-servlet\WebContent\WEB-INF\lib.
+Delete elasticservice-sample.elasticservice-sample-0.1-SNAPSHOT-assets.jar, elasticservice-sample.elasticservice-sample-0.1-SNAPSHOT-sans-externalized.jar files from sample-servlet\WebContent\WEB-INF\lib.
 
 Deploy sample-servlet\WebContent directory in any Web Application Server.
 

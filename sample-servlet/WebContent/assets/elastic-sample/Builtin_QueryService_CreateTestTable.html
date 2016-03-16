@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		
+<script src="../html5/jq/jquery-1.9.1.min.js"></script>
+<script src="../html5/elastic-util-1.5.js"></script>
+
+<script type="text/javascript">
+
+function loadSrc() {
+	var ep = new ElasticParams();
+	ep.setParameters({
+		service: "sample.elasticservice.service.TextFileReaderService",
+		path: "../esConfig/sqlrepo/sample/update_createTable.xml"
+	});
+	elastic_ajax(elastic_baseUrl(), ep, function(resEP) {$('#sql').html(htmlEncode(resEP.getParameter("text")))}, null)
+}
+		
+function requestService(btn) {
+	$(document).ajaxStart(function() {
+		$(btn).prop('disabled', true);
+	}).ajaxStop(function() {
+		$(btn).prop('disabled', false);
+	});
+
+	var reqEP = new ElasticParams($("#form1"));
+	$('#request').html("<xmp>" + reqEP + "</xmp>");
+	
+	elastic_ajax(
+		elastic_baseUrl(), 
+		reqEP,
+		function(resEP) {
+			$('#response').html("<xmp>" + resEP + "</xmp>");
+		}, 
+		function(resEP) {
+			$('#response').html("<xmp>" + resEP + "</xmp>");
+			//$('#response').html("ERROR-" + resEP.getCode() + ": " + resEP.getMessage());
+		}
+	)
+}
+</script>
+</head>
+
+<BODY onload="loadSrc()">
+	<div data-role="page">
+		<div data-role="header">
+			<h2>Create test table t_emp by calling built-in service named QueryService</h2>
+			<a href="index.html" data-theme="a" data-ajax="false">Example Home</a>
+		</div>
+
+		<div data-role="content">
+		<UL>
+			<LI>
+				<FORM METHOD="GET" ID="form1" >
+					<B>URL :</B> <script>document.write(elastic_baseUrl())</script><BR> 
+					<div data-role="fieldcontain"> 
+					?service=<INPUT TYPE=TEXT NAME='service' VALUE="elasticservice.service.QueryService" size=50 READONLY><BR>
+					</div>
+					<div data-role="fieldcontain"> 
+					&service.resType=<SELECT NAME="service.resType">
+						<OPTION VALUE="PlatformXml" selected>XML</OPTION>
+						<OPTION VALUE="JSON13" selected>JSON13</OPTION>
+						</SELECT><BR>
+					</div>
+					<div data-role="fieldcontain"> 
+					&sqlId=<INPUT TYPE=TEXT NAME='sqlId' VALUE="sample.update_createTable" ><BR>
+					</div>
+					 <button id="btn" onclick="requestService(this)">Submit</button>
+					 <button onClick="$('#request').html('');$('#response').html('')">Clear Result</button>
+				</FORM>
+			</LI>
+			<P>
+			<LI><B>Request:</B> <div id="request"></div></LI>
+			<P>
+			<LI><B>Response:</B> <div id="response"></div></LI>
+			<P>
+			<LI><B>SQL XML:</B> esConfig/sqlrepo/sample/update_createTable.xml<BR>
+				<pre><div id="sql"></div></pre>
+			</LI>
+		</UL>
+		</div>
+	</div>
+</BODY>
+</HTML>

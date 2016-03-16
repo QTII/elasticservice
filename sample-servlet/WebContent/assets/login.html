@@ -13,55 +13,80 @@
 
 <script type="text/javascript">
 
-function login(btn) {
+function loadSrc() {
+	var ep = new ElasticParams();
+	ep.setParameters({
+		service: "sample.elasticservice.service.TextFileReaderService",
+		path: "app/sample/elasticservice/service/LoginService.scala"
+	});
+	elastic_ajax(elastic_baseUrl(), ep, function(resEP) {$('#src').html(resEP.getParameter("text"))}, null)
+}
+
+function requestService(btn) {
 	$(document).ajaxStart(function() {
 		$(btn).prop('disabled', true);
 	}).ajaxStop(function() {
 		$(btn).prop('disabled', false);
 	});
 	
-	var reqEP = new ElasticParams($('#form1'));
+	if ($("#id").val() == "") {
+		alert("ID is required");
+		return false;
+	}
+	if ($("#pw").val() == "") {
+		alert("Password is required");
+		return false;
+	}
+
+	var reqEP = new ElasticParams($("#form1"));
 	reqEP.addParameters({
 		"service": "sample.elasticservice.service.LoginService",
 		"service.resType": "json13"
 	});
+
+	$('#request').html("<xmp>" + reqEP + "</xmp>");
 	
 	elastic_ajax(
 		elastic_baseUrl(), 
 		reqEP,
 		function(resEP) {
-			alert(resEP.getMessage());
+			$('#response').html("<xmp>" + resEP + "</xmp>");
 		}, 
 		function(resEP) {
-			alert("ERROR-" + resEP.getCode() + ": " + resEP.getMessage());
+			$('#response').html("<xmp>" + resEP + "</xmp>");
+			//$('#response').html("ERROR-" + resEP.getCode() + ": " + resEP.getMessage());
 		}
 	)
 }
 </script>
 </head>
 
-<BODY>
+<BODY onload="loadSrc()">
 	<div data-role="page">
 		<div data-role="header">
-			<h1>Login</h1>
+			<h2>Login</h2>
 			<a href="index.html" data-theme="a" data-ajax="false">Home</a>
 		</div>
 		<br>
 		
 		<div data-role="content">
-			<table>
-			<tr valign="top">
-				<td valign="top">
-					<form id="form1" method="POST">
-					<table>
-					<tr valign="top"><td>ID:</td><td><input type="text" name="id" id="id"></td></tr>
-					<tr valign="top"><td>Password:</td><td><input type="password" name="pw" id="pw"></td></tr>
-					<tr align="center"><td colspan=2><button id="btn" onclick="login(this)">Login</button></td></tr>
-					</table>
-					</form>
-				</td>
-			</tr>
-			</table>
+		<table>
+			<form id="form1" method="POST">
+			<tr valign="top"><td>ID:</td><td><input type="text" name="id" id="id"></td></tr>
+			<tr valign="top"><td>Password:</td><td><input type="password" name="pw" id="pw"></td></tr>
+			</form>
+			<tr align="center"><td colspan=2><button id="btn" onclick="requestService(this)">Login</button></td></tr>
+		</table>
+		<UL>
+			<P>
+			<LI><B>Request:</B> <div id="request"></div></LI>
+			<P>
+			<LI><B>Response:</B> <div id="response"></div></LI>
+			<P>
+			<LI><B>Scala Source:</B> sample.elasticservice.service.LoginService.scala<BR>
+				<pre><div id="src"></div></pre>
+			</LI>
+		</UL>
 		</div>
 	</div>
 </BODY>
