@@ -1,5 +1,7 @@
 package elasticservice.util.ep
 
+import scala.util.Try
+
 import com.typesafe.scalalogging.LazyLogging
 
 import elasticservice.util.ep.json12.GenFromJSON12
@@ -22,10 +24,10 @@ import play.api.libs.json.JsValue.jsValueToJsLookup
 object ElasticParamsUtil extends LazyLogging {
   def detectGenFrom(contentType: String, text: String): Option[GenFrom] = contentType.toLowerCase match {
     case c if c.contains("multipart/form-data") => Some(GenFromURLParams)
-    case c if c.contains("application/json")    => detectGenFromJSON(text)
-    case c if c.contains("text/json")           => detectGenFromJSON(text)
-    case c if c.contains("application/xml")     => Some(GenFromXML)
-    case c if c.contains("text/xml")            => Some(GenFromXML)
+    case c if c.contains("application/json") => detectGenFromJSON(text)
+    case c if c.contains("text/json") => detectGenFromJSON(text)
+    case c if c.contains("application/xml") => Some(GenFromXML)
+    case c if c.contains("text/xml") => Some(GenFromXML)
     case c if c.contains("application/x-www-form-urlencoded") =>
       if (text.startsWith("<?xml "))
         Some(GenFromXML)
@@ -46,8 +48,8 @@ object ElasticParamsUtil extends LazyLogging {
       logger.trace("epType: " + epType)
 
       epType.toLowerCase match {
-        case "json12"  => GenFromJSON12
-        case "json13"  => GenFromJSON13
+        case "json12" => GenFromJSON12
+        case "json13" => GenFromJSON13
         case "jsonp12" => GenFromJSON12
         case "jsonp13" => GenFromJSON13
       }
@@ -59,8 +61,8 @@ object ElasticParamsUtil extends LazyLogging {
       logger.trace("epType: " + epType)
 
       epType.toLowerCase match {
-        case "json12"  => GenFromJSONP12
-        case "json13"  => GenFromJSONP13
+        case "json12" => GenFromJSONP12
+        case "json13" => GenFromJSONP13
         case "jsonp12" => GenFromJSONP12
         case "jsonp13" => GenFromJSONP13
       }
@@ -93,12 +95,15 @@ object ElasticParamsUtil extends LazyLogging {
     }
   }
 
+  def tryDetectGenTo(resType: String): Try[GenTo] =
+    Try { detectGenTo(resType).getOrElse(throw new Exception("unknown GenTo name")) }
+
   def detectGenTo(resType: String): Option[GenTo] = resType.toLowerCase match {
-    case "json12"      => Some(GenToJSON12)
-    case "jsonp12"     => Some(GenToJSONP12)
-    case "json13"      => Some(GenToJSON13)
-    case "jsonp13"     => Some(GenToJSONP13)
+    case "json12" => Some(GenToJSON12)
+    case "jsonp12" => Some(GenToJSONP12)
+    case "json13" => Some(GenToJSON13)
+    case "jsonp13" => Some(GenToJSONP13)
     case "platformxml" => Some(GenToXML)
-    case _             => None
+    case _ => None
   }
 }

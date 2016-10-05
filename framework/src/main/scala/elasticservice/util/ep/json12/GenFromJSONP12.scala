@@ -1,12 +1,12 @@
 package elasticservice.util.ep.json12
 
 import java.net.URLDecoder
-import elasticservice.Key
+
+import elasticservice.DefaultVal
 import elasticservice.util.URLParamsUtil
 import elasticservice.util.ep.ElasticParams
 import elasticservice.util.ep.GenFrom
 import play.api.libs.json.Json
-import elasticservice.DefaultVal
 
 object GenFromJSONP12 extends GenFrom {
   def gen(inText: String, encodingOpt: Option[String]): ElasticParams = {
@@ -22,14 +22,12 @@ object GenFromJSONP12 extends GenFrom {
     val jsonFilter = """.*&(.+)&.*""".r
     qStr match {
       case jsonFilter(a) => a
-      case _             => ""
+      case _ => ""
     }
   }
 
   def parseJsonpKey(inText: String, encodingOpt: Option[String]): String = {
-    val params = URLParamsUtil.queryStringToMap(
-      inText,
-      encodingOpt.getOrElse(DefaultVal.Charset))
+    val params = URLParamsUtil.queryStringToMap(inText, encodingOpt)
     params.getOrElse("_jsonpKey_", Seq(""))(0)
   }
 }

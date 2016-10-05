@@ -1,0 +1,32 @@
+﻿URL 설정 방법
+
+1. 접속 URL의 구조
+    o http://{Server-Address}:{Port}/{Context-Path}{URL-Pattern}
+
+2. Tomcat 6에 디플로이할 경우 URL 관련 설정
+    o 설정
+        . Context-Path, Port 설정
+	        - {Tomcat-Home}/conf/server.xml
+
+	    . URL-Pattern 설정
+	        - Web Application의 WEB-INF/web.xml
+
+	o 예제
+	    . URL: http://localhost:8080/elastic
+	
+	    . Port: server.xml
+	        <Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="8443"
+
+	    . Context-Path: server.xml
+            <Host name="localhost" appBase="webapps" unpackWARs="true" autoDeploy="true" 
+                xmlValidation="false" xmlNamespaceAware="false">
+                    <Context docBase="C:\ServerElastic\workspace\server-elastic-1.5\WebContent" path="/elastic" reloadable="true" />
+			</Host>
+	
+	    . URL-Pattern: web.xml
+	        <servlet-mapping>
+	            <servlet-name>MainServlet</servlet-name>
+	            <url-pattern>/main</url-pattern>
+	        </servlet-mapping>
+
+이상.

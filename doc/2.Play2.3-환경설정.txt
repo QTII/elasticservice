@@ -1,0 +1,71 @@
+2. Play Framework 2.3 환경설정
+2016-01-07, 이재희
+
+* 참조: https://www.playframework.com/documentation/2.3.x/ProductionConfiguration
+
+
+* 주의: 애플리케이션 실행 스크립트 my-first-app(Windows는 my-first-app.bat)는 쉘 명령행에서 'activator clean stage' 명령으로 생성합니다.
+   $ cd my-first-app
+   $ activator clean stage
+
+
+------------------------
+환경설정 파일
+------------------------
+
+o 운영모드 전용 환경설정 파일 만들기
+   . 명시적으로 지정하지 않으면 classpath에서 application.conf를 찾습니다. application.conf은 개발모드에서만 사용하도록 하고 운영모드에서는 다른 파일을 사용하는 것이 좋습니다.
+
+   . 서버에 production.conf 파일을 생성합니다. 그리고 application.conf 파일을 'include' 합니다. 그런 다음 secret이나 password와 같은 중요한 것들을 다음과 같이 재설정 합니다:
+      include "application"
+
+      application.secret="QCY?tAnfk?aZ?iwrNwnxIlR6CTf:G3gf:90Latabg@5241AB`R5W:1uDFN];Ik@n"
+
+   * application.secret은 'Play Framework 2.3 secret 설정' 문서를 참조바랍니다.
+
+o 환경설정 파일 지정하기
+   . -Dconfig.resource: classpath에서 환경설정 파일을 찾습니다. 일반적으로 환경설정 파일은 conf/ 디렉토리에 둡니다.
+      $ target/universal/stage/bin/my-first-app -Dconfig.resource=production.conf
+
+   . -Dconfig.file: 디렉토리 경로를 직접 지정합니다. 따라서 classpath에 없어도 됩니다.
+      $ target/universal/stage/bin/my-first-app -Dconfig.file=/opt/conf/production.conf
+
+   . -Dconfig.url: URL로부터 로딩할 수도 있습니다.
+      $ target/universal/stage/bin/my-first-app -Dconfig.url=http://conf.mycompany.com/conf/production.conf
+
+
+-----------------------
+logback 환경설정 파일
+------------------------
+
+o 환경설정 파일 지정하기
+   . -Dlogger.resource: classpath에서 파일을 찾습니다. 일반적으로 환경설정 파일은 conf/ 디렉토리에 둡니다.
+      $ target/universal/stage/bin/my-first-app -Dlogger.resource=conf/prod-logger.xml
+
+   . -Dlogger.file: 디렉토리 경로를 직접 지정합니다. 따라서 classpath에 없어도 됩니다.
+      $ target/universal/stage/bin/my-first-app -Dlogger.file=/opt/prod/prod-logger.xml
+
+   . -Dlogger.url: URL로부터 로딩할 수도 있습니다.
+      $ target/universal/stage/bin/my-first-app -Dlogger.url=http://conf.mycompany.com/logger.xml
+
+
+------------------------
+기타 실행 옵션
+------------------------
+
+o 포트(기본 9000) 및 서버주소 지정하여 실행하기
+   $ target/universal/stage/bin/my-first-app -Dhttp.port=1234 -Dhttp.address=127.0.0.1
+
+o JVM 옵션
+   $ target/universal/stage/bin/my-first-app -J-Xms128M -J-Xmx512m -J-server
+
+   . 편의를 위해 min, max, permgen의 경우에는 간단히 아래와 같이 설정할 수 있습니다.
+      $ target/universal/stage/bin/my-first-app -mem 512 -J-server
+
+o RUNNING_PID 파일 경로 변경
+   . 시스템 재시작시 자동으로 정리가 되는 디렉토리(예 /var/run)에 RUNNING_PID 파일이 생성되게 할 수 있습니다.
+      $ target/universal/stage/bin/my-first-app -Dpidfile.path=/var/run/play.pid
+
+   . 다음과 같이 kill 명령어를 활용하여 애플리케이션을 중지할 수 있습니다.
+      $ kill $(cat /var/run/play.pid)
+

@@ -7,8 +7,8 @@ import elasticservice.util.ep.GenTo
 object GenToJSON12 extends GenTo {
   def gen(ep: ElasticParams): String = ep.toString(JSON12MkString)
 
-  def contentType = ElasticConfigurator.Charset match {
-    case Some(c) => "text/json; charset=" + c
-    case None    => "text/json"
+  def contentType: Option[String] = ElasticConfigurator.Charset match {
+    case Some(c) => Some("text/json; charset=" + c)
+    case None    => Some("text/json")
   }
 }

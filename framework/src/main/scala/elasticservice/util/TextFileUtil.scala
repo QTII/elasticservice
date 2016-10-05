@@ -98,34 +98,7 @@ object TextFileUtil {
     }
   }
 
-  def bytesFrom(file: File, max: Int): Array[Byte] = {
-    val in = new BufferedInputStream(new FileInputStream(file))
-    val t = Try {
-      val baos = new ByteArrayOutputStream()
-      var cnt = 0
-      var b = -1
-      var end = false
-      while (!end) {
-        b = in.read()
-        if (b != -1) {
-          baos.write(b)
-          cnt += 1
-          if (cnt == max) end = true
-        } else {
-          end = true
-        }
-      }
-      baos.close()
-      baos.toByteArray()
-    }
-    in.close()
-    t match {
-      case Success(a) => a
-      case Failure(e) => Array.emptyByteArray
-    }
-  }
-
-  def bytesFrom(file: File): Array[Byte] = bytesFrom(file, -1)
+  def bytesFrom(file: File, max: Int = 0): Array[Byte] = FileUtil.bytesFrom(file, max)
 
   def detectEncodingOfFile(file: File): Option[String] = detectEncoding(bytesFrom(file, 5))
 

@@ -26,17 +26,16 @@ Then you have done all you have to do for usig database.
 
 ### To run
 
-```
-$ cd sample-play-prod
-$ bin\elasticservice-sample.bat -Dconfig.resource=production.conf
-```
-
-To assign certain port and IP address. Default port is 9000.
+Copy framework\target\scala-2.11\elasticservice_2.11-0.1.1.jar to sample-play-dev\lib
 
 ```
-$ bin\elasticservice-sample.bat -Dconfig.resource=production.conf -Dhttp.port=9090 -Dhttp.address=127.0.0.1
+$ cd sample-play-dev
+$ activator
+[sample-play-dev] $ compile
+[sample-play-dev] $ ~ run
 ```
 
-To test, connect with http://localhost:9090/assets/index.html
+Then you are ready to test this sample application.
+Connect with http://localhost:9000/assets/index.html
 
-To shutdown, press Ctrl+C
+To shutdown, press Ctrl+D

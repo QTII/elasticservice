@@ -1,13 +1,14 @@
 package elasticservice.util.ep.urlparams
 
+import scala.annotation.migration
+
 import com.typesafe.scalalogging.LazyLogging
-import elasticservice.Key
+
 import elasticservice.epMkString
 import elasticservice.util.URLParamsUtil
 import elasticservice.util.ep.DatasetUtil
 import elasticservice.util.ep.ElasticParams
 import elasticservice.util.ep.GenFrom
-import elasticservice.DefaultVal
 
 object GenFromURLParams extends GenFrom with LazyLogging {
 
@@ -29,18 +30,18 @@ object GenFromURLParams extends GenFrom with LazyLogging {
     val filter = """^S(\d+)COL_(.+)""".r
     paramName match {
       case filter(index, colExpr) => Some(index.toInt, colExpr)
-      case _                      => None
+      case _ => None
     }
   }
 
   def gen(text: String, encodingOpt: Option[String]): ElasticParams = {
     val ep = ElasticParams()
-    val urlParams = URLParamsUtil.queryStringToMap(text, encodingOpt.getOrElse(DefaultVal.Charset))
+    val urlParams = URLParamsUtil.queryStringToMap(text, encodingOpt)
 
     urlParams.keys.foreach { name =>
       urlParams.get(name).foreach { value =>
         parseParamName(name) match {
-          case None    => value.foreach { setEpParam(ep, name, _) }
+          case None => value.foreach { setEpParam(ep, name, _) }
           case Some(e) => value.foreach { setEpDataset(ep, e._1, e._2, _) }
         }
       }

@@ -14,7 +14,7 @@ object IgnoreCaseOrdering extends Ordering[String] {
 
 class Record[T] private (m: TreeMap[String, T])
     extends Map[String, T]
-    with MapLike[String, T, Record[T]] {
+    with MapLike[String, T, Record[T]] with Serializable {
 
   private implicit val ord: Ordering[String] = IgnoreCaseOrdering
   private implicit var ms: MkString = elasticservice.epMkString

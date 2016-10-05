@@ -69,7 +69,7 @@ abstract class ElasticService extends LazyLogging {
   }
 
   def ifNotAccessibleThrow(): Option[Throwable] = {
-    if (!session.isNotAccessibleService(getClass)) None
+    if (!ElasticConfigurator.LoginRequiredOpt.getOrElse(false) || !session.isNotAccessibleService(getClass)) None
     else Some(new Exception("Access denied to " + getClass.getName))
   }
 

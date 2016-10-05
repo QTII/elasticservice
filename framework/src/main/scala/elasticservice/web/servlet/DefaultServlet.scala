@@ -51,16 +51,16 @@ class DefaultServlet extends HttpServlet with LazyLogging {
 
     val ssMap = toMap(request.getSession(false))
 
-    val (svcOpt, resText, cTypeOpt) = ElasticServiceUtil.execService(inSrc, ssMap)
+    val (svc, resText, cTypeOpt) = ElasticServiceUtil.execService(inSrc, ssMap)
 
-    svcOpt.foreach { svc =>
-      if (svc.session.isEmpty) {
+    svc.foreach { s =>
+      if (s.session.isEmpty) {
         val httpSession = request.getSession(false)
         if (httpSession != null) httpSession.invalidate()
       } else {
         val httpSession = request.getSession(true)
-        svc.session.deleted.foreach { httpSession.removeAttribute(_) }
-        svc.session.all.foreach { kv => httpSession.setAttribute(kv._1, kv._2) }
+        s.session.deleted.foreach { httpSession.removeAttribute(_) }
+        s.session.all.foreach { kv => httpSession.setAttribute(kv._1, kv._2) }
       }
     }
 

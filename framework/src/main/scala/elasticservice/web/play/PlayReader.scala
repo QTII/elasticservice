@@ -1,10 +1,9 @@
 package elasticservice.web.play
 
 import com.typesafe.scalalogging.LazyLogging
-
 import elasticservice.DefaultVal
 import elasticservice.ElasticConfigurator
-import elasticservice.util.DataValid
+import elasticservice.util.{DataValid, FileUtil}
 import elasticservice.util.ep.ElasticParamsReader
 import elasticservice.util.ep.InputSourceMeta
 import play.api.mvc.RawBuffer
@@ -19,7 +18,7 @@ case class PlayReader(request: Request[RawBuffer]) extends ElasticParamsReader w
     // Play 2.5
     // val bytes = request.body.initialData.asByteBuffer.array()
     // Play 2.4
-    val bytes = request.body.asBytes(10000L).getOrElse(Array.empty[Byte])
+    val bytes = request.body.asBytes().getOrElse(FileUtil.bytesFrom(request.body.asFile))
     val text = if (DataValid.isNotEmpty(request.rawQueryString))
       request.rawQueryString
     else

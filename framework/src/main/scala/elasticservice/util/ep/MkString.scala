@@ -1,6 +1,6 @@
 package elasticservice.util.ep
 
-trait MkString {
+trait MkString extends Serializable {
   def mkString(ep: ElasticParams): String
   
   def mkStringFromParameters(m: Map[String, Any]): String

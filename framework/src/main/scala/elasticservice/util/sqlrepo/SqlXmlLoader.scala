@@ -129,7 +129,6 @@ class SqlXmlLoader extends LazyLogging {
   }
 
   private def parseTextPart(sql: Sql, srcText: String, dynaText: Boolean): TextPart = {
-    var colIdx, subIdx = 0
     val colInfoBuf = Buffer[ColumnInfo]()
     val altBuf = Buffer[String]()
     val textBuf = Buffer[Any]()
@@ -138,7 +137,7 @@ class SqlXmlLoader extends LazyLogging {
     val lines = text.split("\n")
 
     for (line <- lines) {
-      val c = StringUtil.indexOfNonSpace(line) match {
+      StringUtil.indexOfNonSpace(line) match {
         case -1 =>
         case c =>
           val targetLine = XMLUtil.unescape(StringUtil.trimBack(line))
@@ -174,9 +173,9 @@ class SqlXmlLoader extends LazyLogging {
               pos += 1
             }
           }
-          if (!sb.isEmpty)
-            textBuf += (if (!textBuf.isEmpty) "\n" + sb.toString else sb.toString)
+          if (!sb.isEmpty) textBuf += sb.toString
       }
+      textBuf += SqlXmlLoader.CdNewLine
     }
 
     TextPart(textBuf.toList, colInfoBuf.toArray, altBuf.toArray)
@@ -218,8 +217,9 @@ class SqlXmlLoader extends LazyLogging {
 }
 
 object SqlXmlLoader {
-  val CD_SQL_PARAM = 0;
-  val CD_TEXT_SUBSTITUTION = 1;
+  val CD_SQL_PARAM = 0
+  val CD_TEXT_SUBSTITUTION = 1
+  val CdNewLine = 2
 
   private def validVariableName(str: String): Boolean = {
     validVariableName(str, 0, str.size)

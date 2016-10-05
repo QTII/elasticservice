@@ -4,12 +4,8 @@ import java.sql.Connection
 
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
-
 import com.typesafe.scalalogging.LazyLogging
-
-import elasticservice.ElasticService
-import elasticservice.ElasticServiceUtil
-import elasticservice.epMkString
+import elasticservice.{ElasticConfigurator, ElasticService, ElasticServiceUtil, epMkString}
 import elasticservice.util.ep.Dataset
 import elasticservice.util.ep.ElasticParams
 import elasticservice.util.sqlrepo.SqlConn

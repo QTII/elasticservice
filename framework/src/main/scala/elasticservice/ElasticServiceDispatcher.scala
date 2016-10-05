@@ -1,10 +1,9 @@
 package elasticservice
 
-import scala.xml.Elem
-import com.typesafe.scalalogging.LazyLogging
+import scala.util.Try
+
 import elasticservice.util.ReflectionUtil
 import elasticservice.util.ep.ElasticParams
-import scala.util.Try
 
 object ElasticServiceDispatcher {
 

@@ -1,0 +1,70 @@
+﻿WAS를 실행하고 다음의 주소를 접속한다.
+http://localhost:8080/elastic
+
+- 기타 메모 - 
+
+o 일반 파라미터 테스트
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&aa=aaaa&aa=111111
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&aa=aaaa&aa=111111&cmd.resType=PlatformXml
+
+
+o COL_ 파라미터 테스트
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&S1COL_aa=aaaa&S1COL_aa=111111&S1COL_bb=bbbbbbb&
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&S1COL_aa=aaaa&S1COL_aa=111111&S1COL_bb=bbbbbbb&cmd.resType=json11
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&S1COL_aa=aaaa&S1COL_aa=111111&S1COL_bb=bbbbbbb&cmd.resType=PlatformXml
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&S1COL_aa=aaaa&S1COL_aa=111111&S1COL_bb=bbbbbbb&cmd.resType=ME20
+
+
+o S#COL_, 파라미터 테스트
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&S1COL_aa=aaaa&S1COL_aa=111111&S1COL_bb=bbbbbbb&cmd.resType=PlatformXml
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&S1COL_aa=aaaa&S1COL_aa=111111&S2COL_bb=bbbbbbb&cmd.resType=PlatformXml
+
+
+o TobeSoft XPlatform Xml type 응답 요청
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&a=AAA&cmd.resType=PlatformXml&S1COL_abc=ABC
+    o 응답: 
+<?xml version="1.0" encoding="EUC-KR"?>
+<Root>
+	<Parameters>
+		<Parameter id="cmd">EchoService</Parameter>
+		<Parameter id="a">AAA</Parameter>
+		<Parameter id="cmd.resType">PlatformXml</Parameter>
+	</Parameters>
+	<Dataset id="__NRL__">
+		<ColumnInfo>
+			<Column id="abc" type="String" />
+		</ColumnInfo>
+		<Rows>
+			<Row>
+				<Col id="abc">ABC</Col>
+			</Row>
+		</Rows>
+	</Dataset>
+</Root>
+
+
+o json10 type 응답 요청
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&a=AAA&cmd.resType=json10&S1COL_abc=ABC
+    o 응답: 
+{	"HEADER":{
+	"VERSION":"json10","SUCCESS CODE":"000","CHARSET":"EUC-KR","NULL EXPRESSION":" "
+},	"RESPONSE":{
+	"RETURN MESSAGE":"SUCCESS","RETURN CODE":"000"
+},	"TYPE":{"abc":"String"}
+,	"DATA":[
+		{"abc":"ABC"
+}	]
+}
+
+
+o json11 type 응답 요청(웰스토리 TOMS SDS에서 사용중, 2014년 7월 4일 현재)
+    o 주소: http://localhost:8080/elastic/main?cmd=EchoService&a=AAA&cmd.resType=json11&S1COL_abc=ABC
+    o 응답: 
+{	"FORMAT":{
+	"ENCODING":"EUC-KR","VERSION":"json11","SUCCESS CODE":"000"
+},	"RESULT":{
+	"RESULT CODE":"000","RESULT MESSAGE":"SUCCESS"
+},	"COLUMNS":{"abc":"String"}
+}
+{"abc":"ABC"
+}

@@ -6,70 +6,54 @@ import scala.util.Try
 
 import com.typesafe.scalalogging.LazyLogging
 
-import elasticservice.util.ExceptionDetail
 import elasticservice.util.ep.ElasticParams
 import elasticservice.util.ep.ElasticParamsUtil
 import elasticservice.util.ep.GenTo
 import elasticservice.util.ep.InputSourceMeta
-import elasticservice.util.ep.json12.GenToJSON12
+import elasticservice.util.ep.json13.GenToJSON13
 
 object ElasticServiceUtil extends LazyLogging {
   def logRequest(inSrc: InputSourceMeta) {
-    logger.info("request[" + inSrc.contentType + "]: " + inSrc.text)
+    logger.info("request[" + inSrc.contentType + "]: " + shorten(inSrc.text))
   }
 
   def logResponse(resText: String, cTypeOpt: Option[String]) {
-    logger.info("response[" + cTypeOpt.getOrElse("") + "]: " + resText)
+    logger.info("response[" + cTypeOpt.getOrElse("") + "]: " + shorten(resText))
   }
 
-  private def copySessionToService(sessionMap: Map[String, String], svc: ElasticService) {
-    svc.session ++= sessionMap
-  }
+  private def shorten(msg: String, max: Int = 200) = if (msg.size > max) msg.substring(0, max) + "..." else msg
 
-  def execService(inSrc: InputSourceMeta, ssMap: Map[String, String]): (Option[ElasticService], String, Option[String]) = {
-    var genToOpt: Option[GenTo] = None
-    var svcOpt: Option[ElasticService] = None
-
-    val resTextTry: Try[String] = Try {
-      val genFromOpt = ElasticParamsUtil.detectGenFrom(inSrc.contentType, inSrc.text)
-      if (genFromOpt == None)
-        throw new Exception("unknown request format")
-
-      val reqEP = genFromOpt.get.gen(inSrc.text, inSrc.encodingOpt)
-
-      val resType = ElasticServiceUtil.getResponseType(reqEP).getOrElse("json13")
-      genToOpt = ElasticParamsUtil.detectGenTo(resType)
-
-      ElasticServiceDispatcher.loadService(reqEP) match {
-        case Success(svc) =>
-          svcOpt = Some(svc)
-          copySessionToService(ssMap, svc)
-          val svcTry = svc.execute(reqEP)
-          val resEP = ElasticServiceUtil.getElasticParams(svcTry)
-
-          genToOpt match {
-            case Some(genTo) => genTo.gen(resEP)
-            case None        => resEP.toString
-          }
-        case Failure(e) => throw e
-      }
+  def tryGenFrom(inSrc: InputSourceMeta): Try[ElasticParams] =
+    Try {
+      ElasticParamsUtil.detectGenFrom(inSrc.contentType, inSrc.text).
+        getOrElse(throw new Exception("unknown request format")).
+        gen(inSrc.text, inSrc.encodingOpt)
     }
 
-    val (resText, cTypeOpt) = resTextTry match {
-      case Success(resText) =>
-        genToOpt match {
-          case Some(genTo) => (resText, Some(genTo.contentType))
-          case None        => (resText, None)
-        }
-      case Failure(e) =>
-        logger.error(ExceptionDetail.getDetail(e))
-        genToOpt match {
-          case Some(genTo) => (genTo.gen(ElasticServiceUtil.epWithCodeMessage(999, e.toString)), Some(genTo.contentType))
-          case None        => (GenToJSON12.gen(ElasticServiceUtil.epWithCodeMessage(999, e.toString)), Some(GenToJSON12.contentType))
-        }
-    }
+  def tryDetectGenTo(reqEP: ElasticParams): Try[GenTo] =
+    ElasticServiceUtil.getResponseType(reqEP).
+      orElse(Try { "json13" }).
+      flatMap { ElasticParamsUtil.tryDetectGenTo }
 
-    (svcOpt, resText, cTypeOpt)
+  val DefaultGenTo = GenToJSON13
+
+  def execService(inSrc: InputSourceMeta, ssMap: Map[String, String]): (Try[ElasticService], String, Option[String]) = {
+    tryGenFrom(inSrc) match {
+      case Success(reqEP) =>
+        val svc = ElasticServiceDispatcher.loadService(reqEP)
+        svc.foreach { s => s.session ++= ssMap }
+
+        val genTo = tryDetectGenTo(reqEP) match {
+          case Success(genTo) => genTo
+          case Failure(e) => DefaultGenTo
+        }
+
+        svc.flatMap { s => s.execute(reqEP) } match {
+          case Success(resEP) => (svc, genTo.gen(resEP), genTo.contentType)
+          case Failure(e) => (svc, genTo.gen(ElasticServiceUtil.epWithCodeMessage(999, e.toString)), genTo.contentType)
+        }
+      case Failure(e) => (new Failure(e), DefaultGenTo.gen(ElasticServiceUtil.epWithCodeMessage(999, e.toString)), DefaultGenTo.contentType)
+    }
   }
 
   /**
@@ -78,7 +62,7 @@ object ElasticServiceUtil extends LazyLogging {
   def getServiceName(req: ElasticParams): Try[String] = {
     req.get(ParamKey.KEY_SERVICE) match {
       case Some(svcName) => Success(svcName.asInstanceOf[String])
-      case None          => Failure(new Exception("missing parameter '" + ParamKey.KEY_SERVICE + "'"))
+      case None => Failure(new Exception("missing parameter '" + ParamKey.KEY_SERVICE + "'"))
     }
   }
 
@@ -88,7 +72,7 @@ object ElasticServiceUtil extends LazyLogging {
   def getResponseType(req: ElasticParams): Try[String] = {
     req.get(ParamKey.KEY_SERVICE_RES_TYPE) match {
       case Some(resType) => Success(resType.asInstanceOf[String])
-      case None          => Failure(new Exception("missing parameter '" + ParamKey.KEY_SERVICE_RES_TYPE + "'"))
+      case None => Failure(new Exception("missing parameter '" + ParamKey.KEY_SERVICE_RES_TYPE + "'"))
     }
   }
 
@@ -100,7 +84,7 @@ object ElasticServiceUtil extends LazyLogging {
     ep += "code" -> code
     ep += "message" -> message
   }
-
+  /*
   def getElasticParams(svcTry: Try[ElasticParams]): ElasticParams = {
     svcTry match {
       case Success(res) => res
@@ -109,7 +93,7 @@ object ElasticServiceUtil extends LazyLogging {
         epWithCodeMessage(999, e.getMessage)
     }
   }
-
+*/
   def epWithCodeMessage(code: Int, message: String): ElasticParams = {
     val ep = ElasticParams() //ElasticParams.empty
     ElasticServiceUtil.setCodeAndMsg(ep, code, message)

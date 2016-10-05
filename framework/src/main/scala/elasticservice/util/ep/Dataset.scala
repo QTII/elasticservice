@@ -36,7 +36,7 @@ case class Dataset(var name: String, var _colInfos: List[ColumnInfo])(implicit v
    */
   def addColInfo(colInfo: ColumnInfo) {
     if (colInfos.exists { c => c.id == colInfo.id })
-      logger.warn("duplicated ColumnInfo: " + colInfo.id)
+      logger.debug("duplicated ColumnInfo: " + colInfo.id)
     else
       _colInfos = appendElemToList(_colInfos, colInfo)
   }
@@ -65,6 +65,10 @@ case class Dataset(var name: String, var _colInfos: List[ColumnInfo])(implicit v
    * 레코드 목록
    */
   def rows = rowsBuf.toList
+
+  def headOrElse(alternative: Record[Any]) =  if (rowsBuf.size > 0) rowsBuf(0) else alternative
+
+  def indexOrElse(idx: Int, alternative: Record[Any]) = if (rowsBuf.size > idx) rowsBuf(idx) else alternative
 
   /**
    * 레코드 목록을 새로 설정. 기존 레코드는 삭제된다.
@@ -98,21 +102,21 @@ case class Dataset(var name: String, var _colInfos: List[ColumnInfo])(implicit v
 
   /**
    * 주어진 칼럼(colInfo)이 없는 레코드를 찾아서 칼럼을 추가한다.
-   * 레코드가 없거나(nrOfRowss가 0인 경우)나 모든 레코드에 해당 칼럼이 있을 경우 새로운 레코드를 추가한다.
+   * 레코드가 없거나(nrOfRows가 0인 경우)나 모든 레코드에 해당 칼럼이 있을 경우 새로운 레코드를 추가한다.
    * (Mutable)
    */
   def +=(colInfo: ColumnInfo, value: Any) { +=(colInfo.id, value) }
 
   /**
    * 주어진 칼럼이 없는 레코드를 찾아서 칼럼을 추가한다.
-   * 레코드가 없거나(nrOfRowss가 0인 경우)나 모든 레코드에 해당 칼럼이 있을 경우 새로운 레코드를 추가한다.
+   * 레코드가 없거나(nrOfRows가 0인 경우)나 모든 레코드에 해당 칼럼이 있을 경우 새로운 레코드를 추가한다.
    * (Mutable)
    */
   def +=(col: (ColumnInfo, Any)) { +=(col._1, col._2) }
 
   /**
    * 주어진 칼럼 아이디(colId)이 없는 레코드를 찾아서 칼럼을 추가한다.
-   * 레코드가 없거나(nrOfRowss가 0인 경우)나 모든 레코드에 해당 칼럼이 있을 경우 새로운 레코드를 추가한다.
+   * 레코드가 없거나(nrOfRows가 0인 경우)나 모든 레코드에 해당 칼럼이 있을 경우 새로운 레코드를 추가한다.
    * (Mutable)
    */
   def +=(colId: String, value: Any) {
@@ -131,7 +135,7 @@ case class Dataset(var name: String, var _colInfos: List[ColumnInfo])(implicit v
   /**
    * 레코드 갯수
    */
-  def nrOfRowss: Int = rowsBuf.size
+  def nrOfRows: Int = rowsBuf.size
 
   def setMkString(ms: MkString): Dataset = {
     this.ms = ms

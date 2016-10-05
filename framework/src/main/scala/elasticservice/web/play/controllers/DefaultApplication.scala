@@ -13,24 +13,24 @@ class DefaultApplication extends Controller with LazyLogging {
     val inSrc = PlayReader(request).read
     ElasticServiceUtil.logRequest(inSrc)
 
-    val (svcOpt, resText, cTypeOpt) = ElasticServiceUtil.execService(
+    val (svc, resText, cTypeOpt) = ElasticServiceUtil.execService(
       inSrc,
       request.session.data.toMap)
 
     var result = cTypeOpt match {
       case Some(contentType) => Ok(resText).as(contentType)
-      case None              => Ok(resText)
+      case None => Ok(resText)
     }
 
-    svcOpt.foreach { svc =>
-      if (svc.session.isEmpty) {
+    svc.foreach { s =>
+      if (s.session.isEmpty) {
         result = result.withNewSession
       } else {
         result = result.withSession {
-          svc.session.deleted.foldLeft(request.session)((s, k) => s - k)
+          s.session.deleted.foldLeft(request.session)((ss, k) => ss - k)
         }
         result = result.withSession {
-          svc.session.all.foldLeft(request.session) { (s, kv) => s + kv }
+          s.session.all.foldLeft(request.session) { (ss, kv) => ss + kv }
         }
       }
     }

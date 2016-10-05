@@ -41,7 +41,7 @@ Configure in conf/application.conf file like following:
       db.default.password=""
 ```
 
-Then you have done all you have to do for usig database.	  
+Then you have done all you have to do for using database.	  
 
 Copy framework\target\scala-2.11\elasticservice_2.11-0.1.1.jar to sample-play-dev\lib
 

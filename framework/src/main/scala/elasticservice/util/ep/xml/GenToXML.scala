@@ -7,8 +7,8 @@ import elasticservice.ElasticConfigurator
 object GenToXML extends GenTo {
   def gen(ep: ElasticParams): String = ep.toString(XMLMkString)
 
-  def contentType = ElasticConfigurator.Charset match {
-    case Some(c) => "text/xml; charset=" + c
-    case None    => "text/xml"
+  def contentType: Option[String] = ElasticConfigurator.Charset match {
+    case Some(c) => Some("text/xml; charset=" + c)
+    case None    => Some("text/xml")
   }
 }

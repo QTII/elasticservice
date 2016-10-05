@@ -1,16 +1,10 @@
 package elasticservice.util
 
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.FileWriter
-import java.io.IOException
+import java.io.{ByteArrayOutputStream, _}
 import java.nio.channels.FileChannel
 
-import scala.util.Sorting
-import scala.util.Try
+import scala.util.{Failure, Sorting, Success, Try}
 import scala.util.matching.Regex
-
 import com.typesafe.scalalogging.LazyLogging
 
 object FileUtil extends LazyLogging {
@@ -205,5 +199,28 @@ object FileUtil extends LazyLogging {
         Try { inStream.close() }
     }
     true
+  }
+
+  def bytesFrom(file: File, max: Int = 0): Array[Byte] = {
+    val in = new BufferedInputStream(new FileInputStream(file))
+    val t = Try {
+      val baos = new ByteArrayOutputStream()
+      var cnt = 0
+      var b = 0
+      while ((max == 0 || cnt < max) && b != -1) {
+        b = in.read()
+        if (b != -1) {
+          baos.write(b)
+          cnt += 1
+        }
+      }
+      baos.close()
+      baos.toByteArray()
+    }
+    in.close()
+    t match {
+      case Success(a) => a
+      case Failure(e) => Array.emptyByteArray
+    }
   }
 }

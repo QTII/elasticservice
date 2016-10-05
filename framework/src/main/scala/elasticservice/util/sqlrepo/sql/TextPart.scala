@@ -27,6 +27,7 @@ case class TextPart(textList: List[Any], cols: Array[ColumnInfo], substitutions:
     textList.foreach { x =>
       x match {
         case s: String => sb ++= s
+        case SqlXmlLoader.CdNewLine => sb ++= "\n"
         case SqlXmlLoader.CD_TEXT_SUBSTITUTION => {
           if (isEmpty(record))
             sb ++= "${" + substitutions(altIdx) + "}"

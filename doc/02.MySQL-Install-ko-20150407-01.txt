@@ -1,0 +1,67 @@
+﻿MySQL 5.6 Installation Guide
+April 7, 2015
+Jake Lee (QTI International)
+
+1. Files/mysql-installer-community-5.6.23.0.msi 더블클릭
+
+2. License Agreement
+    . 'I accept the license terms' 체크
+    . 'Next' 클릭
+
+3. Choosing a Setup Type
+    . 'Custom' 클릭
+    . 'Next' 클릭
+
+4. Select Products and Features
+    . Available Products 상자에서 설치할 MySQL Server 선택
+        - 'MySql Servers' 펼치기
+        - 'MySQL Server' 펼치기
+        - 'MySQL Server 5.6' 펼치기
+        - 'MySQL Server 5.6.23 - X64' (또는 X86) 선택
+        - 오른쪽 방향 화살표를 클릭하여 'Products/Features To Be Installed' 상자에 등록
+
+    . Available Products 상자에서 Samples and Examples 선택
+        - 'Documentation' 펼치기
+        - 'Samples and Examples' 펼치기
+        - 'Samples and Examples 5.6' 펼치기
+        - 'Samples and Examples 5.6.23 - X86' 선택
+        - 오른쪽 방향 화살표를 클릭하여 'Products/Features To Be Installed' 상자에 등록
+
+    . 'Next' 클릭
+
+5. Installation
+    . MySQL Server 5.6.23을 선택한 후 'Execute' 버튼 클릭
+    . Status가 'Complete'이 되면 'Next' 버튼 클릭
+
+6. Product Configuration
+    . 'Next' 클릭
+
+7. Type and Networking
+    . 'Next' 클릭
+
+8. Accounts and Roles
+    . MySQL Root Password와 Repeat Password 항목에 root 입력
+    . 'Next' 클릭
+
+9. Windows Service
+    . MySQL 서비스를 수동으로 시작하려면 다음 항목의 체크를 해제해야 한다.
+        'Start the MySQL Server at System Startup'
+    . 'Next' 클릭
+
+10. Apply Server Configuration
+    . 'Execute' 클릭
+    . Configuration이 완료되면 'Finish' 클릭
+
+11. Connect To Server
+    . 'Check' 버튼을 클릭하여 MySQL 서버에 연결
+    . 'Connection succesful.' 메시지가 나오면 'Next' 클릭.
+
+12. Apply Server Configuration
+    . 'Execute' 클릭
+    . Configuration이 완료되면 'Finish' 클릭
+
+13. Product Configuration
+    . 'Next' 클릭
+
+14. Installation Complete
+    . 'Finish' 클릭.

@@ -20,6 +20,7 @@ object ElasticConfigurator extends LazyLogging {
   private var appRootPath: Option[String] = None
   private var xmlDirOpt: Option[String] = None
   private var charsetOpt: Option[String] = None
+  private var loginRequiredOpt: Option[Boolean] = None
 
   def init(xmlFile: File, appRootDir: Option[File]) {
     logger.info("************** elasticservice config file: " + xmlFile.getAbsolutePath)
@@ -34,18 +35,24 @@ object ElasticConfigurator extends LazyLogging {
         (_xml \\ "xmlEnv" \ "variable").foreach { node =>
           XmlEnv += (node \ "@name").text -> (node \ "@value").text.replace("&", "&amp;")
         }
+        XmlEnv.iterator.foreach { kv => logger.trace("XmlEnv(" + kv._1 + "): " + kv._2) }
 
         (_xml \\ "charset").foreach { node =>
           if (DataValid.isNotEmpty(node.text))
             charsetOpt = Some(node.text)
         }
-
-        XmlEnv.iterator.foreach { kv => logger.trace("XmlEnv(" + kv._1 + "): " + kv._2) }
         logger.trace("charsetOpt: " + charsetOpt)
+
+        (_xml \\ "loginRequired").foreach { node =>
+          if (DataValid.isNotEmpty(node.text))
+            loginRequiredOpt = Some(node.text.toBoolean)
+        }
+        logger.trace("loginRequiredOpt: " + loginRequiredOpt)
 
         (_xml \\ "sqlRepo").foreach { node =>
           SqlRepo.init(xmlDirOpt.get + File.separatorChar + node.text)
         }
+
       case Failure(e) => logger.error("file: " + xmlFile.getAbsolutePath + "\n" + ExceptionDetail.getDetail(e))
     }
   }
@@ -53,6 +60,8 @@ object ElasticConfigurator extends LazyLogging {
   def AppRootPath = appRootPath
 
   def Charset = charsetOpt
+
+  def LoginRequiredOpt = loginRequiredOpt
 
   def getXml: Elem = _xml
 }

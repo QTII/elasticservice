@@ -1,0 +1,195 @@
+﻿ServerElastic 1.5 Installation Guide
+Jul. 17, 2015
+Jake Lee (QTI International)
+
+본 설치안내서에서는 통합파일(ServerElastic-1.5-all.zip)을 이용하여 설치하는 경우와 개별파일들을 이용하여 설치하는 경우로 나누어서 설명한다.
+둘 중에서 하나의 방법으로만 설치하면 된다. 단, 통합 파일이란 MySQL을 제외한 모든 프로그램을 zip으로 묶은 것을 말한다.
+두 경우 모두 기본적인 설치위치는 C:\ServerElastic이다. 만일 설치위치를 변경고자 할 경우에는 '4. 설치 폴더를 변경할 경우'를 참조하여 작업해야 한다.
+
+------------------------
+1. 통합 파일로 설치할 경우
+------------------------
+  1.1. 테스트를 위한 MySQL 설치
+    o 02.MySQL-Install.txt 파일을 참조하여 설치한다.
+
+  1.2. ServerElastic-1.5-all.zip 파일을 아래의 위치에 압축을 푼다.
+    o C:\ServerElastic
+
+  1.3. '3. 실행' 항목으로 바로 이동.
+
+------------------------
+2. 개별 파일들로 설치할 경우
+------------------------
+  2.1. 테스트를 위한 MySQL 설치
+    o 02.MySQL-Install.txt 파일을 참조하여 설치한다.
+
+  2.2. ServerElastic Web Application 설치
+    o server-elastic-1.5.zip 파일을 아래의 위치에 압축을 푼다.
+      . C:\ServerElastic\workspace\server-elastic-1.5
+
+      . 하부 폴더의 구조는 다음과 같다.
+        .settings/
+        src/
+        WebContent/
+        .classpath
+        .project
+
+    o DB Connection 설정
+      . C:/ServerElastic/workspace/server-elastic-1.5/WebContent/WEB-INF/elastic.xml 편집
+        <!-- 
+            db.url 항목에서 sakila는 데이터베이스 이름이다. 연결하고자 하는 데이터베이스 이름을 설정하면 된다.
+            db.username: 데이터베이스 계정 아이디
+            db.password: 데이터베이스 계정 비밀번호
+         -->
+        <variable name="db.driverClassName" value="com.mysql.jdbc.Driver" />
+        <variable name="db.url" value="jdbc:mysql://localhost:3306/sakila" />
+        <variable name="db.username" value="root" />
+        <variable name="db.password" value="root" />
+
+    o Log 위치 설정
+        . C:/ServerElastic/workspace/server-elastic-1.5/WebContent/WEB-INF/elastic.xml 편집
+        <xmlEnv>
+            <variable name="log.dir" value="C:/ServerElastic_logs" />
+        </xmlEnv>
+
+  2.3. Java 설치
+    o jdk1.6.0_45.zip 파일을 아래의 위치에 압축을 푼다.
+      . C:\ServerElastic\Java\jdk1.6.0_45
+
+      . 하부 폴더의 구조는 다음과 같다.
+        bin/
+        include/
+        jre/
+        lib/
+
+  2.4. Tomcat 설치
+    o apache-tomcat-6.0.32.zip 파일을 아래의 위치에 압축을 푼다.
+      . C:\ServerElastic\apache-tomcat-6.0.32
+
+      . 하부 폴더의 구조는 다음과 같다.
+        backup/
+        bin/
+        conf/
+        lib/
+        ... 생략 ...
+
+    o Java 설정
+      . C:\ServerElastic\apache-tomcat-6.0.32\bin\catalina.bat 파일의 'set JAVA_HOME' 부분을 다음과 같이 편집한다.
+      set "JAVA_HOME=C:\ServerElastic\Java\jdk1.6.0_45"
+
+    o Port 번호 및 Web Application 설정
+      . C:\ServerElastic\apache-tomcat-6.0.32\conf\server.xml 파일의 'port'와 'Context docBase' 부분을 다음과 같이 편집한다.
+      <Connector connectionTimeout="20000" port="8080" protocol="HTTP/1.1" redirectPort="8443"/>
+
+      <Engine defaultHost="localhost" name="Catalina">
+          ... 생략 ...
+        <Host ... 생략 ...>
+          <Context docBase="C:\ServerElastic\workspace\server-elastic-1.5\WebContent" path="/elastic" reloadable="true" />
+        </Host>
+      </Engine>
+    
+  2.5. Eclipse 설치
+    o eclipse-jee-kepler-SR2-win32.zip 파일을 아래의 위치에 압축을 푼다.
+      . C:\ServerElastic\eclipse-jee-kepler-SR2-win32
+
+      . 하부 폴더의 구조는 다음과 같다.
+        configuration/
+        dropins/
+        features/
+        ... 생략 ...
+
+    o eclipse.ini 파일의 openFile 아래에 다음 두 줄을 삽입한다.
+      -vm
+      C:/ServerElastic/Java/jdk1.6.0_45/bin
+
+    o Eclipse 실행
+      . C:\ServerElastic\eclipse-jee-kepler-SR2-win32\eclipse.exe 실행.
+      . Workspace Launcher 창에서 Workspace를 C:\ServerElastic\workspace 선택(또는 입력) 후 'OK' 버튼 클릭.
+
+    o Text file encoding 설정
+      . Window > Preferences:
+        - General > Workspace: Text file encoding: Other: UTF-8 선택 후 'Apply' 버튼 클릭.
+
+    o server-elastic-1.5 Project 설정
+      . File > Import:
+        - General > Existing Projects into Workspace
+          -> Select root directory: C:\ServerElastic\workspace\server-elastic-1.5
+            * 주의: Options 중에서 Copy projects into workspace는 체크가 해제되어야 한다.
+
+          -> 'Finish' 버튼을 클릭하여 완료.
+
+      . Project Explorer 창에서 server-elastic-1.5 Project에서 마우스 오른쪽 버튼을 클릭하여 Properties 창을 연다.
+    
+      . Java Compiler 항목에서 Compiler compliance level을 1.6으로 설정
+    
+      . Java Builder Path > Source 에서 다음과 같이 설정되어야 한다.
+        - Source folders on build path: server-elastic-1.5/src/main/java
+        - Default output folder: server-elastic-1.5/WebContent/WEB-INF/classes
+
+      . Java Builder Path > Libraries 에서 다음과 같이 설정되어야 한다.
+        - JRE System Library [jdk1.6.0_45]
+        - Web App Libraries
+
+------------------------
+3. 실행
+------------------------
+  3.1. MySQL 시작
+    o 윈도우즈의 서비스에서 MySQL56을 시작한다.
+
+  3.2. Tomcat 시작
+    o C:\ServerElastic\apache-tomcat-6.0.32\bin\startup.bat 파일 실행한다.
+
+  3.3. Log 확인
+    o C:\ServerElastic_logs\server-elastic-YYYY-MM-DD_HH_MM_SS.log 파일을 열어서 확인한다. 다음과 같이 나오면 성공적으로 시작한 것이다. 
+    16:06:32,462 INFO  [elastic.util.beanmgr.BeanMgr:380] ### Initializing BeanMgr completed.
+
+  3.4. 접속
+    o URL: http://localhost:8080/elastic
+
+------------------------
+4. 설치 폴더를 변경할 경우
+------------------------
+  - 예를 들어 설치 폴더를 'C:\HOME'로 변경할 경우
+
+  4.1. ServerElastic 관련된 실행 중인 프로그램이 있을 경우 모두 닫는다.
+    o Tomcat 창을 닫는다.
+    o Eclipse를 닫는다.
+
+  4.2. C:\ServerElastic 폴더명을 C:\HOME으로 변경한다.
+
+  4.3. Tomcat 설정 변경
+    o Java 설정
+      . C:\HOME\apache-tomcat-6.0.32\bin\catalina.bat 파일의 'set JAVA_HOME' 부분을 다음과 같이 편집한다.
+      set "JAVA_HOME=C:\HOME\Java\jdk1.6.0_45"
+
+    o Web Application 설정
+      . C:\HOME\apache-tomcat-6.0.32\conf\server.xml 파일의 'Context docBase' 부분을 다음과 같이 편집한다.
+      <Engine defaultHost="localhost" name="Catalina">
+        ... 생략 ...
+        <Host ... 생략 ...>
+          <Context docBase="C:\HOME\workspace\server-elastic-1.5\WebContent" path="/elastic" reloadable="true" />
+        </Host>
+      </Engine>
+    
+  4.3. Eclipse 설정 변경
+    o eclipse.ini 파일의 openFile 아래에 다음 두 줄을 편집한다.
+      -vm
+      C:/HOME/Java/jdk1.6.0_45/bin
+
+    o Eclipse 실행
+      . C:\HOME\eclipse-jee-kepler-SR2-win32\eclipse.exe 실행.
+      . Workspace Launcher 창에서 Workspace를 C:\HOME\workspace 선택(또는 입력) 후 'OK' 버튼 클릭.
+
+    o Eclipse의 Java 설정
+      . ‘Window > Preferences’ 메뉴로 이동한다.
+
+      . JDK 1.6 등록 (이미 C:/HOME/Java/jdk1.6.0_45/bin/jre가 정상적으로 등록되어 있을 경우 이 과정은 생략한다)
+        - ‘Preferences’ 창에서 ‘Java > Installed JREs’를 선택한다.
+        - ‘Installed JREs’ 화면에서 오른쪽의 ‘Add’ 버튼 클릭한다.
+        - ‘Add JRE’ 창의 ‘JRE Type’ 화면에서 ‘Standard VM’ 항목을 선택 후 ‘Next’ 버튼 클릭한다.
+        - ‘JRE Definition’ 화면에서 ‘Directory’ 버튼을 클릭하여 C:\HOME\Java\jdk1.6.0_45를 선택한 후 ‘Finish’ 버튼을 클릭하면 ‘Preferences’ 창으로 돌아온다.
+        - ‘Preferences’ 창에서 JDK 1.6이 등록된 것을 확인할 수 있다.
+
+      . JDK 1.6를 기본 Compiler로 선택
+        - ‘Preferences’ 창에서 ‘Java > Installed JREs’를 선택한다.
+        - jdk1.6.0_45를 체크하고 아래쪽의 'OK' 버튼을 클릭하여 Java 설정을 완료한다.

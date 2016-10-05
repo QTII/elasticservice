@@ -22,9 +22,13 @@ object ReflectionUtil {
   }
 
   def newInstance(className: String, classArgs: List[AnyRef]): Any = {
-    val cl = Thread.currentThread().getContextClassLoader
-    val clazz = Class.forName(className, true, cl)
+    val clazz = loadClass(className)
     newInstance(clazz, classArgs)
+  }
+
+  def loadClass(className: String): Class[_] = {
+    val cl = Thread.currentThread().getContextClassLoader
+    Class.forName(className, true, cl)
   }
 
   def invokeMethod(instance: AnyRef, methodName: String)(args: Any*): Any = {
